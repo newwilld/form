@@ -229,7 +229,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <button onclick="location.reload()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-sm flex-1 sm:flex-none">
+                <button onclick="resetForm()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-sm flex-1 sm:flex-none">
                     Voltar ao início
                 </button>
                 <a href="https://api.whatsapp.com/send?phone=5579988645865&text=Oi" target="_blank" class="bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-200 dark:shadow-none flex items-center justify-center text-sm flex-1 sm:flex-none">
@@ -1105,11 +1105,11 @@
         }
 
         function renderAdminDashboard() {
-            // ESTATÍSTICAS RÁPIDAS (Calculadas sobre os dados filtrados)
-            let totalProjetos = filteredResponses.length;
+            // ESTATÍSTICAS RÁPIDAS (Calculadas sobre TODOS os dados globais, ignorando o filtro visual)
+            let totalProjetos = allResponses.length;
             let countEntregue = 0, countRealizando = 0, totalValor = 0;
 
-            filteredResponses.forEach(r => {
+            allResponses.forEach(r => {
                 const s = (r.status || '').toLowerCase().trim();
                 if (s === 'entregue') countEntregue++;
                 else if (s && s !== 'pendente') countRealizando++; 
@@ -1123,9 +1123,9 @@
 
             const grid = document.getElementById('responses-grid');
             const paginationContainer = document.getElementById('pagination-container');
-            const totalPages = Math.ceil(totalProjetos / ITEMS_PER_PAGE) || 1;
+            const totalPages = Math.ceil(filteredResponses.length / ITEMS_PER_PAGE) || 1;
             
-            if (totalProjetos === 0) {
+            if (filteredResponses.length === 0) {
                 grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i>Nenhuma resposta ou cliente encontrado.</div>`;
                 paginationContainer.classList.add('hidden');
                 updateBulkActionUI();
@@ -1543,6 +1543,18 @@
             outroTexto.classList.toggle('hidden', !e.target.checked);
             if (e.target.checked) outroTexto.focus();
         });
+
+        // Função para Resetar o Formulário sem recarregar a página
+        window.resetForm = () => {
+            document.getElementById('briefing-form').reset();
+            selectedImages = [];
+            updatePreview();
+            outroTexto.classList.add('hidden');
+            
+            document.getElementById('success-msg').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
         // ============ ENVIO DO FORMULÁRIO (CLIENTE) ============
         const form = document.getElementById('briefing-form');
