@@ -53,6 +53,14 @@
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
         }
+
+        .password-toggle {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .password-toggle:hover {
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -186,7 +194,7 @@
         <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in">
             <div class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700">
                 <h2 class="text-xl font-bold text-white flex items-center">
-                    <i class="fa-solid fa-lock mr-3"></i> Acesso Restrito
+                    <i class="fa-solid fa-lock mr-3"></i> Acesso Administrativo
                 </h2>
                 <button onclick="closeLoginModal()" class="text-white/80 hover:text-white p-2 transition-colors">
                     <i class="fa-solid fa-xmark text-2xl"></i>
@@ -195,7 +203,7 @@
             <div class="p-8">
                 <form id="login-form" class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email do Administrador</label>
                         <div class="relative">
                             <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
                             <input type="email" id="login-email" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="admin@exemplo.com">
@@ -205,7 +213,8 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
                         <div class="relative">
                             <i class="fa-solid fa-key absolute left-3 top-3.5 text-gray-400"></i>
-                            <input type="password" id="login-password" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="••••••••">
+                            <input type="password" id="login-password" required class="pl-10 pr-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="••••••••">
+                            <i class="fa-solid fa-eye absolute right-3 top-3.5 text-gray-400 password-toggle" onclick="togglePassword()"></i>
                         </div>
                     </div>
                     <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
@@ -213,12 +222,13 @@
                         <span id="login-error-msg"></span>
                     </div>
                     <button type="submit" id="btn-login" class="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-200 active:scale-[0.99]">
-                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel
                     </button>
                 </form>
                 <div class="mt-6 pt-6 border-t border-gray-200">
                     <p class="text-xs text-gray-500 text-center">
-                        Área exclusiva para administradores
+                        <i class="fa-solid fa-shield-halved mr-1"></i>
+                        Credenciais verificadas pelo Firebase
                     </p>
                 </div>
             </div>
@@ -230,14 +240,20 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
             <div>
                 <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Sair do Painel
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sair do Painel
                 </button>
                 <h1 class="text-3xl font-bold text-gray-800 flex items-center">
                     <i class="fa-solid fa-clipboard-list mr-3 text-blue-600"></i> Respostas Recebidas
                 </h1>
             </div>
-            <div id="total-badge" class="mt-4 sm:mt-0 bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-bold border border-blue-100 shadow-sm">
-                Carregando...
+            <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                <div class="text-sm text-gray-500">
+                    <i class="fa-solid fa-user-shield mr-1 text-blue-500"></i>
+                    <span id="admin-email-display"></span>
+                </div>
+                <div id="total-badge" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-bold border border-blue-100 shadow-sm">
+                    Carregando...
+                </div>
             </div>
         </div>
 
@@ -285,41 +301,48 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Configurações de Admin (ALTERE AQUI SUAS CREDENCIAIS!)
-        const ADMIN_CONFIG = {
-            email: "willdalves1@gmail.com",  // 👈 MUDE PARA SEU EMAIL
-            password: "123456"         // 👈 MUDE PARA SUA SENHA
-        };
-
         let currentUser = null;
         let isAdminLoggedIn = false;
         let allResponses = [];
         let unsubscribeAdmin = null;
 
-        // Iniciar Auth anônima para clientes
-        signInAnonymously(auth).catch(err => {
-            console.error("Erro Auth Inicial:", err);
-            alert("Erro de conexão. Recarregue a página.");
-        });
+        // Iniciar com autenticação anônima para clientes
+        async function initClientAuth() {
+            try {
+                await signInAnonymously(auth);
+                console.log("✅ Cliente conectado anonimamente");
+            } catch (err) {
+                console.error("Erro na autenticação anônima:", err);
+            }
+        }
 
+        initClientAuth();
+
+        // Monitorar estado de autenticação
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                // Verifica se é admin logado
-                isAdminLoggedIn = (user.email === ADMIN_CONFIG.email);
+                
+                // Verifica se é admin logado (Firebase valida as credenciais)
+                const isAdmin = user.email && user.emailVerified !== undefined;
+                isAdminLoggedIn = !!user.email; // Tem email = fez login com email/senha
                 
                 document.getElementById('initial-loader').classList.add('hidden');
                 
                 if (isAdminLoggedIn) {
-                    // Se já está logado como admin, vai direto
+                    // Usuário logado com email/senha - Painel Admin
                     document.getElementById('client-view').classList.add('hidden');
                     document.getElementById('admin-view').classList.remove('hidden');
+                    document.getElementById('admin-email-display').textContent = user.email;
                     loadAdminData();
                 } else {
-                    // Se é usuário anônimo ou outro
+                    // Usuário anônimo - Formulário do cliente
                     document.getElementById('client-view').classList.remove('hidden');
                     document.getElementById('admin-view').classList.add('hidden');
                 }
+            } else {
+                // Sem usuário - reconectar anonimamente
+                initClientAuth();
             }
         });
 
@@ -332,11 +355,24 @@
             if (e.target.checked) outroTexto.focus();
         });
 
-        // Login Admin
+        // Toggle password visibility
+        window.togglePassword = () => {
+            const passwordInput = document.getElementById('login-password');
+            const icon = document.querySelector('.password-toggle');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
         window.showAdminLogin = () => {
             document.getElementById('login-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            // Limpar campos
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
             document.getElementById('login-error').classList.add('hidden');
@@ -347,80 +383,81 @@
             document.body.style.overflow = 'auto';
         };
 
+        // Login Admin - VALIDAÇÃO EXCLUSIVA PELO FIREBASE
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const btnLogin = document.getElementById('btn-login');
             const loginError = document.getElementById('login-error');
             const loginErrorMsg = document.getElementById('login-error-msg');
-            const loginModal = document.getElementById('login-modal');
+            const modalBox = document.querySelector('#login-modal .bg-white');
             
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
 
-            // Validações
-            if (email !== ADMIN_CONFIG.email) {
+            if (!email || !password) {
                 loginError.classList.remove('hidden');
-                loginErrorMsg.textContent = 'Email não autorizado.';
-                loginModal.querySelector('.bg-white').classList.add('shake');
-                setTimeout(() => loginModal.querySelector('.bg-white').classList.remove('shake'), 500);
+                loginErrorMsg.textContent = 'Preencha todos os campos.';
+                modalBox.classList.add('shake');
+                setTimeout(() => modalBox.classList.remove('shake'), 500);
                 return;
             }
 
-            if (password !== ADMIN_CONFIG.password) {
-                loginError.classList.remove('hidden');
-                loginErrorMsg.textContent = 'Senha incorreta.';
-                loginModal.querySelector('.bg-white').classList.add('shake');
-                setTimeout(() => loginModal.querySelector('.bg-white').classList.remove('shake'), 500);
-                return;
-            }
-
-            // Loading
             btnLogin.disabled = true;
             btnLogin.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
             loginError.classList.add('hidden');
 
             try {
-                // Fazer login com email e senha
-                await signInWithEmailAndPassword(auth, email, password);
+                // 🔐 ÚNICA validação - Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
-                // Sucesso - fechar modal
+                // Sucesso - Firebase autenticou
+                console.log("✅ Admin autenticado:", userCredential.user.email);
                 closeLoginModal();
                 
-                // Mostrar painel admin
-                document.getElementById('client-view').classList.add('hidden');
-                document.getElementById('admin-view').classList.remove('hidden');
-                isAdminLoggedIn = true;
-                loadAdminData();
-                
             } catch (err) {
-                console.error("Erro login:", err);
+                console.error("❌ Erro login:", err.code);
                 loginError.classList.remove('hidden');
-                loginErrorMsg.textContent = 'Erro ao fazer login. Verifique suas credenciais.';
+                
+                // Mensagens de erro do Firebase (seguro - sem expor credenciais)
+                switch (err.code) {
+                    case 'auth/invalid-credential':
+                        loginErrorMsg.textContent = 'Email ou senha incorretos.';
+                        break;
+                    case 'auth/invalid-email':
+                        loginErrorMsg.textContent = 'Formato de email inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        loginErrorMsg.textContent = 'Esta conta foi desativada.';
+                        break;
+                    case 'auth/too-many-requests':
+                        loginErrorMsg.textContent = 'Muitas tentativas. Aguarde um momento.';
+                        break;
+                    default:
+                        loginErrorMsg.textContent = 'Erro na autenticação. Tente novamente.';
+                }
+                
+                modalBox.classList.add('shake');
+                setTimeout(() => modalBox.classList.remove('shake'), 500);
             } finally {
                 btnLogin.disabled = false;
-                btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar';
+                btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel';
             }
         });
 
         // Logout Admin
         window.logoutAdmin = async () => {
             try {
-                // Parar listener
                 if (unsubscribeAdmin) {
                     unsubscribeAdmin();
                     unsubscribeAdmin = null;
                 }
                 
-                // Fazer logout
                 await signOut(auth);
-                
-                // Voltar para visão cliente
-                document.getElementById('admin-view').classList.add('hidden');
-                document.getElementById('client-view').classList.remove('hidden');
+                allResponses = [];
                 isAdminLoggedIn = false;
                 
-                // Fazer login anônimo novamente
+                // Reconectar como anônimo
                 await signInAnonymously(auth);
                 
             } catch (err) {
@@ -433,7 +470,7 @@
             e.preventDefault();
             
             if (!currentUser) {
-                alert("Aguarde a conexão com o servidor ser estabelecida...");
+                alert("Aguarde a conexão com o servidor...");
                 return;
             }
 
@@ -475,19 +512,21 @@
 
             } catch (err) {
                 console.error("Erro ao salvar:", err);
-                alert("Erro ao enviar. Por favor, tente novamente.");
+                alert("Erro ao enviar. Tente novamente.");
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
         });
 
-        // Funções de Admin
         window.openDetails = (id) => {
             const resp = allResponses.find(r => r.id === id);
             if (!resp) return;
 
             const dataFormatada = resp.createdAt?.seconds 
-                ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR') 
+                ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                })
                 : 'Recém registrado';
 
             document.getElementById('modal-content').innerHTML = `
@@ -514,11 +553,12 @@
                     <div>
                         <p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais</p>
                         <div class="flex flex-wrap gap-2">
-                            ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('') || '<span class="text-gray-400">Nenhum elemento selecionado</span>'}
+                            ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('') || '<span class="text-gray-400">Nenhum elemento</span>'}
                         </div>
                     </div>
                     <div class="pt-4 border-t border-gray-100">
-                        <p class="text-xs text-gray-400">ID: ${resp.id} | Data: ${dataFormatada}</p>
+                        <p class="text-xs text-gray-400">ID: ${resp.id}</p>
+                        <p class="text-xs text-gray-400">Data: ${dataFormatada}</p>
                     </div>
                 </div>
             `;
@@ -531,7 +571,6 @@
             document.body.style.overflow = 'auto';
         };
 
-        // Fechar modais com ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeModal();
@@ -540,10 +579,7 @@
         });
 
         function loadAdminData() {
-            if (!currentUser || !isAdminLoggedIn) {
-                console.log("Usuário não autorizado");
-                return;
-            }
+            if (!currentUser || !isAdminLoggedIn) return;
             
             const grid = document.getElementById('responses-grid');
             const totalBadge = document.getElementById('total-badge');
@@ -554,9 +590,7 @@
             const colRef = collection(db, 'respostas');
             const q = query(colRef, orderBy('createdAt', 'desc'));
             
-            if (unsubscribeAdmin) {
-                unsubscribeAdmin();
-            }
+            if (unsubscribeAdmin) unsubscribeAdmin();
             
             unsubscribeAdmin = onSnapshot(q, (snapshot) => {
                 loader.classList.add('hidden');
@@ -570,7 +604,7 @@
                 if (allResponses.length === 0) {
                     grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">
                         <i class="fa-solid fa-inbox text-4xl mb-4 block"></i>
-                        Nenhuma resposta encontrada ainda.
+                        Nenhuma resposta ainda.
                     </div>`;
                     return;
                 }
@@ -578,11 +612,8 @@
                 grid.innerHTML = allResponses.map(resp => {
                     const dataHora = resp.createdAt?.seconds 
                         ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { 
-                            day: '2-digit', 
-                            month: '2-digit', 
-                            year: '2-digit',
-                            hour: '2-digit', 
-                            minute: '2-digit' 
+                            day: '2-digit', month: '2-digit', year: '2-digit',
+                            hour: '2-digit', minute: '2-digit' 
                           })
                         : 'Agora mesmo';
 
@@ -596,17 +627,17 @@
                             <p class="text-gray-500 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca || 'Sem marca'}</p>
                             <p class="text-gray-400 text-xs mt-1"><i class="fa-solid fa-envelope mr-1 opacity-50"></i> ${resp.email || 'Sem email'}</p>
                             <div class="mt-4 flex items-center text-xs text-blue-600 font-bold">
-                                VER BRIEFING COMPLETO
+                                <i class="fa-solid fa-magnifying-glass mr-1"></i> VER BRIEFING COMPLETO
                             </div>
                         </div>
                     `;
                 }).join('');
             }, (err) => {
-                console.error("Erro na escuta admin:", err);
+                console.error("Erro admin:", err);
                 loader.classList.add('hidden');
                 grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">
                     <i class="fa-solid fa-triangle-exclamation text-4xl mb-4 block"></i>
-                    Erro ao carregar dados: ${err.message}
+                    Erro: ${err.message}
                 </div>`;
             });
         }
