@@ -29,6 +29,14 @@
         .admin-trigger:active {
             color: #3b82f6;
         }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -183,10 +191,11 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Configuração corrigida do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
             authDomain: "form-61cb3.firebaseapp.com",
@@ -212,13 +221,22 @@
         const checkOutro = document.getElementById('check-outro');
         const outroTexto = document.getElementById('outro-texto');
 
+        // Inicialização de Auth robusta
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error("Falha na autenticação:", err);
+            }
+        };
+
+        initAuth();
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 initialLoader.classList.add('hidden');
                 clientView.classList.remove('hidden');
-            } else {
-                signInAnonymously(auth).catch(err => console.error("Erro Auth:", err));
             }
         });
 
@@ -229,14 +247,18 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
+            if (!currentUser) {
+                alert("Aguardando conexão segura...");
+                return;
+            }
 
             const btn = document.getElementById('btn-submit');
             const nomeValue = document.getElementById('nomeCliente').value;
             const nichoValue = document.getElementById('nicho').value;
             
+            // Feedback visual de carregamento
             btn.disabled = true;
-            btn.innerHTML = '<div class="loader" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+            btn.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
 
             try {
                 const objetosChecked = Array.from(document.querySelectorAll('input[name="objetos"]:checked')).map(el => el.value);
@@ -255,9 +277,11 @@
                     createdAt: serverTimestamp()
                 };
 
-                const path = collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'respostas');
+                // Salvando na coleção pública de dados do artefato seguindo as regras de segurança
+                const path = collection(db, 'artifacts', APP_ID, 'public', 'data', 'respostas');
                 await addDoc(path, payload);
 
+                // Preencher e trocar de tela
                 document.getElementById('display-nome').innerText = nomeValue;
                 document.getElementById('display-nicho').innerText = nichoValue;
 
@@ -266,8 +290,8 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
             } catch (err) {
-                console.error("Erro:", err);
-                alert("Erro ao enviar. Tente novamente.");
+                console.error("Erro ao salvar:", err);
+                alert("Ocorreu um erro ao enviar seu briefing. Por favor, tente novamente.");
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
@@ -290,14 +314,23 @@
             const grid = document.getElementById('responses-grid');
             const totalBadge = document.getElementById('total-badge');
             const loader = document.getElementById('admin-loader');
+            
             loader.classList.remove('hidden');
             grid.innerHTML = '';
 
-            const path = collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'respostas');
+            const path = collection(db, 'artifacts', APP_ID, 'public', 'data', 'respostas');
+            
             onSnapshot(path, (snapshot) => {
                 loader.classList.add('hidden');
                 const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                
+                // Ordenação manual para evitar necessidade de índices no Firestore
+                docs.sort((a, b) => {
+                    const dateA = a.createdAt?.seconds || 0;
+                    const dateB = b.createdAt?.seconds || 0;
+                    return dateB - dateA;
+                });
+
                 totalBadge.innerText = `Total: ${docs.length} Briefings`;
                 
                 if (docs.length === 0) {
@@ -316,6 +349,7 @@
                         <div class="text-sm text-gray-600 space-y-1 mb-4">
                             <p><strong>Nicho:</strong> ${resp.nicho}</p>
                             <p><strong>Email:</strong> ${resp.email}</p>
+                            <p><strong>Cores:</strong> ${resp.cores}</p>
                         </div>
                         <div class="pt-4 border-t border-gray-50">
                             <div class="flex flex-wrap gap-1.5">
@@ -324,6 +358,9 @@
                         </div>
                     </div>
                 `).join('');
+            }, (err) => {
+                console.error("Erro na escuta de dados:", err);
+                grid.innerHTML = `<div class="col-span-full text-red-500 p-4 text-center">Erro ao carregar dados. Verifique as permissões.</div>`;
             });
         }
     </script>
