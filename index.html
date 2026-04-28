@@ -295,8 +295,8 @@
             <div class="space-y-4 text-left bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8">
                 <p class="text-gray-700 leading-relaxed">
                     Com base em nossa experiência desde 2010 criando mais de 1 mil marcas + 
-                 <span class="text-blue-700">SEU NOME</span> + 
-                    <span class="text-blue-700">SEGMENTO</span> + 
+                    <span class="font-bold text-blue-600">SEU NOME</span> + 
+                    <span class="font-bold text-blue-600">SEGMENTO</span> + 
                     informações recebidas
                 </p>
                 <p class="text-gray-700 leading-relaxed font-medium">
@@ -743,9 +743,7 @@
                 const colRef = collection(db, 'respostas');
                 await addDoc(colRef, payload);
 
-                document.getElementById('display-nome').innerText = nomeValue;
-                document.getElementById('display-nicho').innerText = nichoValue;
-
+                // As linhas que inseriam os dados dinâmicos foram removidas.
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-msg').classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
