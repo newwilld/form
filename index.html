@@ -22,10 +22,13 @@
         input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         
         .admin-trigger {
-            cursor: default;
+            cursor: pointer;
             transition: color 0.2s;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 4px;
         }
-        .admin-trigger:active {
+        .admin-trigger:hover {
             color: #3b82f6;
         }
         
@@ -40,6 +43,15 @@
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
     </style>
 </head>
@@ -60,7 +72,7 @@
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Briefing de Marca</h1>
                 <p class="text-gray-500">
                     Ajude-nos a entender a sua visão para criarmos 
-                    <span onclick="toggleAdminView()" class="admin-trigger">algo incrível.</span>
+                    <span onclick="showAdminLogin()" class="admin-trigger">algo incrível.</span>
                 </p>
             </div>
 
@@ -105,7 +117,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
                             <input type="checkbox" name="objetos" value="Tipográfico (Letras)" class="w-4 h-4 text-blue-600 rounded">
-                            <span class="ml-3 text-sm text-gray-700">Junção de Letras</span>
+                            <span class="ml-3 text-sm text-gray-700">Tipográfico (Letras)</span>
                         </label>
                         <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
                             <input type="checkbox" name="objetos" value="Ícone Minimalista" class="w-4 h-4 text-blue-600 rounded">
@@ -169,12 +181,56 @@
         </div>
     </main>
 
+    <!-- Modal de Login Admin -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in">
+            <div class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fa-solid fa-lock mr-3"></i> Acesso Restrito
+                </h2>
+                <button onclick="closeLoginModal()" class="text-white/80 hover:text-white p-2 transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-8">
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                            <input type="email" id="login-email" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="admin@exemplo.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-key absolute left-3 top-3.5 text-gray-400"></i>
+                            <input type="password" id="login-password" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
+                        <i class="fa-solid fa-circle-exclamation mr-2"></i>
+                        <span id="login-error-msg"></span>
+                    </div>
+                    <button type="submit" id="btn-login" class="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-200 active:scale-[0.99]">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar
+                    </button>
+                </form>
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-xs text-gray-500 text-center">
+                        Área exclusiva para administradores
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Visão Administrativa -->
     <main id="admin-view" class="hidden max-w-6xl mx-auto p-4 py-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
             <div>
-                <button onclick="toggleAdminView()" class="text-gray-400 hover:text-gray-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Voltar ao Formulário
+                <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Sair do Painel
                 </button>
                 <h1 class="text-3xl font-bold text-gray-800 flex items-center">
                     <i class="fa-solid fa-clipboard-list mr-3 text-blue-600"></i> Respostas Recebidas
@@ -213,7 +269,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
@@ -229,12 +285,18 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // Configurações de Admin (ALTERE AQUI SUAS CREDENCIAIS!)
+        const ADMIN_CONFIG = {
+            email: "admin@seudominio.com",  // 👈 MUDE PARA SEU EMAIL
+            password: "SuaSenha123"         // 👈 MUDE PARA SUA SENHA
+        };
+
         let currentUser = null;
-        let isAdminView = false;
+        let isAdminLoggedIn = false;
         let allResponses = [];
         let unsubscribeAdmin = null;
 
-        // Iniciar Auth imediatamente
+        // Iniciar Auth anônima para clientes
         signInAnonymously(auth).catch(err => {
             console.error("Erro Auth Inicial:", err);
             alert("Erro de conexão. Recarregue a página.");
@@ -243,8 +305,21 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
+                // Verifica se é admin logado
+                isAdminLoggedIn = (user.email === ADMIN_CONFIG.email);
+                
                 document.getElementById('initial-loader').classList.add('hidden');
-                document.getElementById('client-view').classList.remove('hidden');
+                
+                if (isAdminLoggedIn) {
+                    // Se já está logado como admin, vai direto
+                    document.getElementById('client-view').classList.add('hidden');
+                    document.getElementById('admin-view').classList.remove('hidden');
+                    loadAdminData();
+                } else {
+                    // Se é usuário anônimo ou outro
+                    document.getElementById('client-view').classList.remove('hidden');
+                    document.getElementById('admin-view').classList.add('hidden');
+                }
             }
         });
 
@@ -257,6 +332,103 @@
             if (e.target.checked) outroTexto.focus();
         });
 
+        // Login Admin
+        window.showAdminLogin = () => {
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            // Limpar campos
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-error').classList.add('hidden');
+        };
+
+        window.closeLoginModal = () => {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btnLogin = document.getElementById('btn-login');
+            const loginError = document.getElementById('login-error');
+            const loginErrorMsg = document.getElementById('login-error-msg');
+            const loginModal = document.getElementById('login-modal');
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            // Validações
+            if (email !== ADMIN_CONFIG.email) {
+                loginError.classList.remove('hidden');
+                loginErrorMsg.textContent = 'Email não autorizado.';
+                loginModal.querySelector('.bg-white').classList.add('shake');
+                setTimeout(() => loginModal.querySelector('.bg-white').classList.remove('shake'), 500);
+                return;
+            }
+
+            if (password !== ADMIN_CONFIG.password) {
+                loginError.classList.remove('hidden');
+                loginErrorMsg.textContent = 'Senha incorreta.';
+                loginModal.querySelector('.bg-white').classList.add('shake');
+                setTimeout(() => loginModal.querySelector('.bg-white').classList.remove('shake'), 500);
+                return;
+            }
+
+            // Loading
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+            loginError.classList.add('hidden');
+
+            try {
+                // Fazer login com email e senha
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                // Sucesso - fechar modal
+                closeLoginModal();
+                
+                // Mostrar painel admin
+                document.getElementById('client-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                isAdminLoggedIn = true;
+                loadAdminData();
+                
+            } catch (err) {
+                console.error("Erro login:", err);
+                loginError.classList.remove('hidden');
+                loginErrorMsg.textContent = 'Erro ao fazer login. Verifique suas credenciais.';
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar';
+            }
+        });
+
+        // Logout Admin
+        window.logoutAdmin = async () => {
+            try {
+                // Parar listener
+                if (unsubscribeAdmin) {
+                    unsubscribeAdmin();
+                    unsubscribeAdmin = null;
+                }
+                
+                // Fazer logout
+                await signOut(auth);
+                
+                // Voltar para visão cliente
+                document.getElementById('admin-view').classList.add('hidden');
+                document.getElementById('client-view').classList.remove('hidden');
+                isAdminLoggedIn = false;
+                
+                // Fazer login anônimo novamente
+                await signInAnonymously(auth);
+                
+            } catch (err) {
+                console.error("Erro logout:", err);
+            }
+        };
+
+        // Envio do formulário
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -291,11 +463,9 @@
                     createdAt: serverTimestamp()
                 };
 
-                // SALVANDO NA COLEÇÃO PRINCIPAL DIRETAMENTE
                 const colRef = collection(db, 'respostas');
                 await addDoc(colRef, payload);
 
-                // Sucesso: Atualizar tela
                 document.getElementById('display-nome').innerText = nomeValue;
                 document.getElementById('display-nicho').innerText = nichoValue;
 
@@ -304,31 +474,14 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
             } catch (err) {
-                console.error("Erro completo ao salvar:", err);
-                alert("Erro ao enviar. Por favor, tente novamente ou verifique sua conexão. Detalhes: " + err.message);
+                console.error("Erro ao salvar:", err);
+                alert("Erro ao enviar. Por favor, tente novamente.");
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
         });
 
         // Funções de Admin
-        window.toggleAdminView = () => {
-            isAdminView = !isAdminView;
-            if (isAdminView) {
-                document.getElementById('client-view').classList.add('hidden');
-                document.getElementById('admin-view').classList.remove('hidden');
-                loadAdminData();
-            } else {
-                document.getElementById('admin-view').classList.add('hidden');
-                document.getElementById('client-view').classList.remove('hidden');
-                // Parar de escutar quando sair do admin
-                if (unsubscribeAdmin) {
-                    unsubscribeAdmin();
-                    unsubscribeAdmin = null;
-                }
-            }
-        };
-
         window.openDetails = (id) => {
             const resp = allResponses.find(r => r.id === id);
             if (!resp) return;
@@ -378,9 +531,17 @@
             document.body.style.overflow = 'auto';
         };
 
+        // Fechar modais com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeLoginModal();
+            }
+        });
+
         function loadAdminData() {
-            if (!currentUser) {
-                console.log("Usuário não autenticado ainda");
+            if (!currentUser || !isAdminLoggedIn) {
+                console.log("Usuário não autorizado");
                 return;
             }
             
@@ -390,11 +551,9 @@
             
             loader.classList.remove('hidden');
 
-            // USA A MESMA COLEÇÃO SIMPLES
             const colRef = collection(db, 'respostas');
             const q = query(colRef, orderBy('createdAt', 'desc'));
             
-            // Remove listener anterior se existir
             if (unsubscribeAdmin) {
                 unsubscribeAdmin();
             }
