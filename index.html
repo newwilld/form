@@ -264,7 +264,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Imagens de Referência (Opcional - Máximo 3)
-                        <span class="text-gray-400 font-normal text-xs ml-2"></span>
+                        <span class="text-gray-400 font-normal text-xs ml-2">Qualquer tamanho será comprimido automaticamente.</span>
                     </label>
                     
                     <div id="image-preview-grid" class="image-preview-container mb-3"></div>
@@ -305,6 +305,18 @@
                 <p class="text-gray-700 leading-relaxed">
                     de uma forma que fique além de bonita, profissional, legível com clareza e memorável 🧑🏼‍🎨🖼️
                 </p>
+                
+                <div class="pt-4 border-t border-gray-200 mt-2 space-y-2">
+                    <p class="text-gray-800 leading-relaxed font-medium">
+                        🚀🎯🧑🏼‍🎨🖼️ Assim que finalizar te enviamos atualizações aqui
+                    </p>
+                    <p class="text-gray-700 leading-relaxed">
+                        Desejo que a sua marca continue crescendo por muitos anos sem parar
+                    </p>
+                    <p class="text-blue-600 font-bold text-lg">
+                        Vamos para cima 🚀🎯✅
+                    </p>
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -405,6 +417,23 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-fade-in text-center p-6">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Excluir Briefing?</h2>
+            <p class="text-gray-500 text-sm mb-6">Esta ação não pode ser desfeita. O briefing será removido permanentemente.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors w-full">Cancelar</button>
+                <button id="btn-confirm-delete" class="px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors w-full flex items-center justify-center">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Viewer -->
     <div id="image-viewer" class="hidden image-viewer-overlay" onclick="closeImageViewer()">
         <img id="image-viewer-img" src="" alt="Visualização">
@@ -413,7 +442,7 @@
     <!-- Scripts da Aplicação Otimizados -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -438,6 +467,7 @@
         let isAdminLoggedIn = false;
         let allResponses = [];
         let unsubscribeAdmin = null;
+        let idToDelete = null;
 
         async function initClientAuth() {
             try {
@@ -477,7 +507,6 @@
         const imageCount = document.getElementById('image-count');
         const uploadIcon = document.getElementById('upload-icon');
 
-        // Função que converte imagens gigantes em miniaturas super leves para o Firestore
         function compressImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -487,7 +516,7 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_DIMENSION = 1200; // Limite de resolução agradável visualmente
+                        const MAX_DIMENSION = 1200; 
                         let width = img.width;
                         let height = img.height;
 
@@ -508,12 +537,11 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Converte para WebP (muito mais leve) em 70% de qualidade
                         const dataUrl = canvas.toDataURL('image/webp', 0.7); 
                         resolve({
                             name: file.name,
                             type: 'image/webp',
-                            size: Math.round((dataUrl.length * 3) / 4), // Tamanho em bytes aproximado
+                            size: Math.round((dataUrl.length * 3) / 4), 
                             base64: dataUrl
                         });
                     };
@@ -557,7 +585,6 @@
                 alert(`Você pode adicionar no máximo ${MAX_IMAGES} imagens.`);
             }
 
-            // Ativar Loader Visual
             uploadIcon.className = 'loader mb-3 mx-auto';
 
             try {
@@ -567,7 +594,6 @@
                         continue;
                     }
                     
-                    // Comprime toda imagem, independente do tamanho (10mb vira ~80kb)
                     const compressedFile = await compressImage(file);
                     selectedImages.push(compressedFile);
                 }
@@ -576,7 +602,6 @@
                 console.error("Erro na compressão:", error);
                 alert("Ocorreu um erro ao processar uma ou mais imagens.");
             } finally {
-                // Restaurar ícone
                 uploadIcon.className = 'fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3';
             }
         }
@@ -743,7 +768,6 @@
                 const colRef = collection(db, 'respostas');
                 await addDoc(colRef, payload);
 
-                // As linhas que inseriam os dados dinâmicos foram removidas.
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-msg').classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -756,7 +780,40 @@
             }
         });
 
-        // ============ VISUALIZAÇÃO ADMIN ============
+        // ============ VISUALIZAÇÃO E EXCLUSÃO ADMIN ============
+        window.confirmDelete = (event, id) => {
+            event.stopPropagation(); // Impede de abrir os detalhes ao clicar no X
+            idToDelete = id;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeDeleteModal = () => {
+            document.getElementById('delete-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            idToDelete = null;
+        };
+
+        document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+            if (!idToDelete) return;
+
+            const btn = document.getElementById('btn-confirm-delete');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loader" style="width: 20px; height: 20px; border-width: 2px; border-top-color: white;"></div>';
+            btn.disabled = true;
+
+            try {
+                await deleteDoc(doc(db, 'respostas', idToDelete));
+                closeDeleteModal();
+            } catch (err) {
+                console.error("Erro ao deletar:", err);
+                alert("Erro ao excluir o briefing. Tente novamente.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
         window.openDetails = (id) => {
             const resp = allResponses.find(r => r.id === id);
             if (!resp) return;
@@ -845,6 +902,7 @@
                 closeModal();
                 closeLoginModal();
                 closeImageViewer();
+                closeDeleteModal();
             }
         });
 
@@ -888,13 +946,16 @@
                         ? `<span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-image mr-1"></i>${resp.totalImagens}</span>`
                         : '';
 
+                    // Adicionado botão de 'X' (Excluir) na listagem admin
                     return `
-                        <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group animate-fade-in">
+                        <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group animate-fade-in relative">
                             <div class="flex justify-between items-start mb-3">
                                 <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
                                 <div class="flex gap-2 items-center">
                                     ${imageBadge}
-                                    <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                    <button onclick="confirmDelete(event, '${resp.id}')" class="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full w-6 h-6 flex items-center justify-center transition-colors ml-1" title="Excluir briefing">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
                                 </div>
                             </div>
                             <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente || 'Sem nome'}</h3>
