@@ -4,21 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Briefing de Marca - Formulário Profissional</title>
+    
+    <!-- Preconnect para fontes carregarem mais rápido -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Carregamento otimizado (assíncrono) do FontAwesome para não bloquear a renderização -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        
+        /* Aceleração de hardware para animações mais suaves */
+        .animate-fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            will-change: opacity, transform;
+        }
+
         .loader {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #3b82f6;
             border-radius: 50%;
             width: 24px;
             height: 24px;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         
         .admin-trigger {
@@ -30,26 +52,18 @@
         }
         .admin-trigger:hover { color: #3b82f6; }
         
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px);
+            will-change: backdrop-filter;
         }
 
-        .shake {
-            animation: shake 0.5s ease-in-out;
-        }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
         .image-preview-container {
@@ -64,6 +78,7 @@
             border-radius: 12px;
             overflow: hidden;
             border: 2px solid #e5e7eb;
+            background-color: #f3f4f6;
         }
         
         .image-preview-item img {
@@ -104,20 +119,16 @@
             background: #f9fafb;
         }
         
-        .upload-area:hover {
+        .upload-area:hover, .upload-area.dragover {
             border-color: #3b82f6;
             background: #eff6ff;
         }
         
-        .upload-area.dragover {
-            border-color: #3b82f6;
-            background: #dbeafe;
-            transform: scale(1.02);
-        }
+        .upload-area.dragover { transform: scale(1.02); }
 
         .admin-image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 10px;
             margin-top: 10px;
         }
@@ -128,12 +139,12 @@
             overflow: hidden;
             cursor: pointer;
             border: 2px solid #e5e7eb;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         
         .admin-image-item:hover {
             border-color: #3b82f6;
-            transform: scale(1.05);
+            transform: scale(1.03);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
@@ -159,6 +170,7 @@
             max-height: 90%;
             border-radius: 8px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            object-fit: contain;
         }
     </style>
 </head>
@@ -174,7 +186,7 @@
 
     <!-- Visão do Cliente -->
     <main id="client-view" class="hidden max-w-2xl mx-auto p-4 py-8 relative min-h-screen">
-        <div id="form-container" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-4 border border-gray-100">
+        <div id="form-container" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-4 border border-gray-100 animate-fade-in">
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Briefing de Marca</h1>
                 <p class="text-gray-500">
@@ -248,18 +260,18 @@
                     </div>
                 </div>
 
-                <!-- NOVO: Upload de Imagens -->
+                <!-- OTIMIZADO: Upload de Imagens com Compressão -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Imagens de Referência (Opcional - Máximo 5)
-                        <span class="text-gray-400 font-normal text-xs ml-2">Formatos: JPG, PNG, GIF, WEBP</span>
+                        Imagens de Referência (Opcional - Máximo 3)
+                        <span class="text-gray-400 font-normal text-xs ml-2">Qualquer tamanho será comprimido automaticamente.</span>
                     </label>
                     
                     <div id="image-preview-grid" class="image-preview-container mb-3"></div>
                     
                     <div id="upload-area" class="upload-area">
-                        <input type="file" id="image-input" accept="image/*" multiple class="hidden" max="5">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
+                        <input type="file" id="image-input" accept="image/*" multiple class="hidden" max="3">
+                        <i id="upload-icon" class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
                         <p class="text-sm text-gray-600 font-medium">Clique para selecionar imagens</p>
                         <p class="text-xs text-gray-400 mt-1">ou arraste e solte aqui</p>
                         <p id="image-count" class="text-xs text-blue-600 mt-2 font-medium hidden"></p>
@@ -308,7 +320,7 @@
 
     <!-- Modal de Login Admin -->
     <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700">
                 <h2 class="text-xl font-bold text-white flex items-center">
                     <i class="fa-solid fa-lock mr-3"></i> Acesso Administrativo
@@ -347,7 +359,7 @@
     </div>
 
     <!-- Visão Administrativa -->
-    <main id="admin-view" class="hidden max-w-6xl mx-auto p-4 py-8">
+    <main id="admin-view" class="hidden max-w-6xl mx-auto p-4 py-8 animate-fade-in">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
             <div>
                 <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
@@ -377,7 +389,7 @@
 
     <!-- Modal de Detalhes -->
     <div id="detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl animate-fade-in">
+        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl">
             <div class="p-6 border-b flex justify-between items-center bg-gray-50">
                 <h2 class="text-xl font-bold text-gray-800">Detalhes do Briefing</h2>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 p-2">
@@ -398,6 +410,7 @@
         <img id="image-viewer-img" src="" alt="Visualização">
     </div>
 
+    <!-- Scripts da Aplicação Otimizados -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
@@ -417,8 +430,8 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const MAX_IMAGES = 5;
-        const MAX_IMAGE_SIZE_MB = 2; // 2MB por imagem
+        // NOVA LÓGICA: 3 Imagens Máximo
+        const MAX_IMAGES = 3;
         let selectedImages = [];
 
         let currentUser = null;
@@ -426,11 +439,9 @@
         let allResponses = [];
         let unsubscribeAdmin = null;
 
-        // Iniciar com autenticação anônima
         async function initClientAuth() {
             try {
                 await signInAnonymously(auth);
-                console.log("✅ Cliente conectado anonimamente");
             } catch (err) {
                 console.error("Erro na autenticação anônima:", err);
             }
@@ -459,26 +470,70 @@
             }
         });
 
-        // ============ UPLOAD DE IMAGENS ============
+        // ============ SISTEMA INTELIGENTE DE COMPRESSÃO DE IMAGENS ============
         const uploadArea = document.getElementById('upload-area');
         const imageInput = document.getElementById('image-input');
         const previewGrid = document.getElementById('image-preview-grid');
         const imageCount = document.getElementById('image-count');
+        const uploadIcon = document.getElementById('upload-icon');
 
-        // Clique na área de upload
+        // Função que converte imagens gigantes em miniaturas super leves para o Firestore
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_DIMENSION = 1200; // Limite de resolução agradável visualmente
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_DIMENSION) {
+                                height *= MAX_DIMENSION / width;
+                                width = MAX_DIMENSION;
+                            }
+                        } else {
+                            if (height > MAX_DIMENSION) {
+                                width *= MAX_DIMENSION / height;
+                                height = MAX_DIMENSION;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Converte para WebP (muito mais leve) em 70% de qualidade
+                        const dataUrl = canvas.toDataURL('image/webp', 0.7); 
+                        resolve({
+                            name: file.name,
+                            type: 'image/webp',
+                            size: Math.round((dataUrl.length * 3) / 4), // Tamanho em bytes aproximado
+                            base64: dataUrl
+                        });
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
         uploadArea.addEventListener('click', () => {
             if (selectedImages.length < MAX_IMAGES) {
                 imageInput.click();
             }
         });
 
-        // Selecionar imagens
-        imageInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
+        imageInput.addEventListener('change', async (e) => {
+            await handleFiles(e.target.files);
             imageInput.value = '';
         });
 
-        // Drag and Drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
@@ -488,43 +543,42 @@
             uploadArea.classList.remove('dragover');
         });
 
-        uploadArea.addEventListener('drop', (e) => {
+        uploadArea.addEventListener('drop', async (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
+            await handleFiles(e.dataTransfer.files);
         });
 
-        function handleFiles(files) {
+        async function handleFiles(files) {
             const remaining = MAX_IMAGES - selectedImages.length;
             const filesToProcess = Array.from(files).slice(0, remaining);
 
             if (files.length > remaining) {
-                alert(`Você pode adicionar no máximo ${remaining} imagem(ns).`);
+                alert(`Você pode adicionar no máximo ${MAX_IMAGES} imagens.`);
             }
 
-            filesToProcess.forEach(file => {
-                if (!file.type.startsWith('image/')) {
-                    alert(`${file.name} não é uma imagem válida.`);
-                    return;
-                }
+            // Ativar Loader Visual
+            uploadIcon.className = 'loader mb-3 mx-auto';
 
-                if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
-                    alert(`${file.name} é muito grande. Máximo ${MAX_IMAGE_SIZE_MB}MB.`);
-                    return;
+            try {
+                for (const file of filesToProcess) {
+                    if (!file.type.startsWith('image/')) {
+                        alert(`${file.name} não é uma imagem válida.`);
+                        continue;
+                    }
+                    
+                    // Comprime toda imagem, independente do tamanho (10mb vira ~80kb)
+                    const compressedFile = await compressImage(file);
+                    selectedImages.push(compressedFile);
                 }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    selectedImages.push({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        base64: e.target.result
-                    });
-                    updatePreview();
-                };
-                reader.readAsDataURL(file);
-            });
+                updatePreview();
+            } catch (error) {
+                console.error("Erro na compressão:", error);
+                alert("Ocorreu um erro ao processar uma ou mais imagens.");
+            } finally {
+                // Restaurar ícone
+                uploadIcon.className = 'fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3';
+            }
         }
 
         function updatePreview() {
@@ -540,7 +594,7 @@
 
             selectedImages.forEach((img, index) => {
                 const div = document.createElement('div');
-                div.className = 'image-preview-item';
+                div.className = 'image-preview-item animate-fade-in';
                 div.innerHTML = `
                     <img src="${img.base64}" alt="${img.name}">
                     <div class="remove-btn" onclick="removeImage(${index})">
@@ -564,18 +618,15 @@
             if (e.target.checked) outroTexto.focus();
         });
 
-        // Toggle password
         window.togglePassword = () => {
             const passwordInput = document.getElementById('login-password');
             const icon = document.querySelector('.password-toggle');
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         };
 
@@ -589,10 +640,9 @@
 
         window.closeLoginModal = () => {
             document.getElementById('login-modal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = '';
         };
 
-        // Login Admin
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -605,10 +655,7 @@
             const password = document.getElementById('login-password').value.trim();
 
             if (!email || !password) {
-                loginError.classList.remove('hidden');
-                loginErrorMsg.textContent = 'Preencha todos os campos.';
-                modalBox.classList.add('shake');
-                setTimeout(() => modalBox.classList.remove('shake'), 500);
+                showLoginError('Preencha todos os campos.', modalBox, loginError, loginErrorMsg);
                 return;
             }
 
@@ -620,33 +667,24 @@
                 await signInWithEmailAndPassword(auth, email, password);
                 closeLoginModal();
             } catch (err) {
-                console.error("❌ Erro login:", err.code);
-                loginError.classList.remove('hidden');
+                let errorMsg = 'Erro na autenticação.';
+                if (err.code === 'auth/invalid-credential') errorMsg = 'Email ou senha incorretos.';
+                else if (err.code === 'auth/invalid-email') errorMsg = 'Formato de email inválido.';
+                else if (err.code === 'auth/too-many-requests') errorMsg = 'Muitas tentativas. Aguarde.';
                 
-                switch (err.code) {
-                    case 'auth/invalid-credential':
-                        loginErrorMsg.textContent = 'Email ou senha incorretos.';
-                        break;
-                    case 'auth/invalid-email':
-                        loginErrorMsg.textContent = 'Formato de email inválido.';
-                        break;
-                    case 'auth/user-disabled':
-                        loginErrorMsg.textContent = 'Esta conta foi desativada.';
-                        break;
-                    case 'auth/too-many-requests':
-                        loginErrorMsg.textContent = 'Muitas tentativas. Aguarde um momento.';
-                        break;
-                    default:
-                        loginErrorMsg.textContent = 'Erro na autenticação. Tente novamente.';
-                }
-                
-                modalBox.classList.add('shake');
-                setTimeout(() => modalBox.classList.remove('shake'), 500);
+                showLoginError(errorMsg, modalBox, loginError, loginErrorMsg);
             } finally {
                 btnLogin.disabled = false;
                 btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel';
             }
         });
+
+        function showLoginError(msg, modalBox, errorContainer, msgContainer) {
+            errorContainer.classList.remove('hidden');
+            msgContainer.textContent = msg;
+            modalBox.classList.add('shake');
+            setTimeout(() => modalBox.classList.remove('shake'), 500);
+        }
 
         window.logoutAdmin = async () => {
             try {
@@ -689,14 +727,6 @@
                     objetosChecked.push(`Personalizado: ${outroTexto.value.trim()}`);
                 }
 
-                // Converter imagens para array de base64
-                const imagesData = selectedImages.map(img => ({
-                    name: img.name,
-                    type: img.type,
-                    size: img.size,
-                    base64: img.base64
-                }));
-
                 const payload = {
                     nomeCliente: nomeValue,
                     nomeMarca: document.getElementById('nomeMarca').value.trim(),
@@ -704,8 +734,8 @@
                     nicho: nichoValue,
                     cores: document.getElementById('cores').value.trim(),
                     objetos: objetosChecked,
-                    imagens: imagesData, // Array de imagens em base64
-                    totalImagens: imagesData.length,
+                    imagens: selectedImages.map(img => ({ name: img.name, type: img.type, size: img.size, base64: img.base64 })),
+                    totalImagens: selectedImages.length,
                     userId: currentUser.uid,
                     createdAt: serverTimestamp()
                 };
@@ -740,7 +770,6 @@
                 })
                 : 'Recém registrado';
 
-            // Gerar grid de imagens
             let imagesHTML = '';
             if (resp.imagens && resp.imagens.length > 0) {
                 imagesHTML = `
@@ -788,9 +817,7 @@
                     </div>
                     ${imagesHTML}
                     <div class="pt-4 border-t border-gray-100">
-                        <p class="text-xs text-gray-400">ID: ${resp.id}</p>
                         <p class="text-xs text-gray-400">Data: ${dataFormatada}</p>
-                        ${resp.totalImagens ? `<p class="text-xs text-gray-400">Imagens: ${resp.totalImagens}</p>` : ''}
                     </div>
                 </div>
             `;
@@ -804,17 +831,15 @@
             const img = document.getElementById('image-viewer-img');
             img.src = base64;
             viewer.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
         };
 
         window.closeImageViewer = () => {
             document.getElementById('image-viewer').classList.add('hidden');
-            document.body.style.overflow = 'auto';
         };
 
         window.closeModal = () => {
             document.getElementById('detail-modal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = '';
         };
 
         document.addEventListener('keydown', (e) => {
@@ -841,10 +866,7 @@
             
             unsubscribeAdmin = onSnapshot(q, (snapshot) => {
                 loader.classList.add('hidden');
-                allResponses = snapshot.docs.map(doc => ({ 
-                    id: doc.id, 
-                    ...doc.data() 
-                }));
+                allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 totalBadge.innerText = `Total: ${allResponses.length} Briefings`;
                 
@@ -880,9 +902,6 @@
                             <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente || 'Sem nome'}</h3>
                             <p class="text-gray-500 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca || 'Sem marca'}</p>
                             <p class="text-gray-400 text-xs mt-1"><i class="fa-solid fa-envelope mr-1 opacity-50"></i> ${resp.email || 'Sem email'}</p>
-                            <div class="mt-4 flex items-center text-xs text-blue-600 font-bold">
-                                <i class="fa-solid fa-magnifying-glass mr-1"></i> VER BRIEFING COMPLETO
-                            </div>
                         </div>
                     `;
                 }).join('');
