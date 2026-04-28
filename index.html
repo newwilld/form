@@ -37,7 +37,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Estilo para o Modal de Detalhes */
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
@@ -136,13 +135,13 @@
             </form>
         </div>
 
-        <!-- Nova Página de Informação/Sucesso Personalizada -->
+        <!-- Mensagem de Sucesso -->
         <div id="success-msg" class="hidden bg-white p-8 sm:p-12 rounded-3xl shadow-2xl text-center mt-10 border border-blue-50 animate-fade-in">
             <div class="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200">
                 <i class="fa-solid fa-rocket text-3xl"></i>
             </div>
             
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Entendido Relembrando 🚀🎯</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Entendido! 🚀🎯</h2>
             
             <div class="space-y-4 text-left bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8">
                 <p class="text-gray-700 leading-relaxed">
@@ -151,11 +150,9 @@
                     <span id="display-nicho" class="font-bold text-blue-600"></span> + 
                     informações recebidas
                 </p>
-                
                 <p class="text-gray-700 leading-relaxed font-medium">
                     Vamos realizar a melhor versão da sua nova marca profissional <span class="text-blue-700">Vetor Corel Draw Alta Qualidade 🚀🎯</span>
                 </p>
-                
                 <p class="text-gray-700 leading-relaxed">
                     de uma forma que fique além de bonita, profissional, legível com clareza e memorável 🧑🏼‍🎨🖼️
                 </p>
@@ -184,7 +181,7 @@
                 </h1>
             </div>
             <div id="total-badge" class="mt-4 sm:mt-0 bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-bold border border-blue-100 shadow-sm">
-                A carregar...
+                Carregando...
             </div>
         </div>
 
@@ -214,9 +211,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
@@ -231,38 +228,29 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const APP_ID = 'form-61cb3';
 
         let currentUser = null;
         let isAdminView = false;
         let allResponses = [];
+        let unsubscribeAdmin = null;
 
-        const initialLoader = document.getElementById('initial-loader');
-        const clientView = document.getElementById('client-view');
-        const adminView = document.getElementById('admin-view');
-        const form = document.getElementById('briefing-form');
-        const checkOutro = document.getElementById('check-outro');
-        const outroTexto = document.getElementById('outro-texto');
-        const modal = document.getElementById('detail-modal');
-        const modalContent = document.getElementById('modal-content');
-
-        const initAuth = async () => {
-            try {
-                await signInAnonymously(auth);
-            } catch (err) {
-                console.error("Falha na autenticação:", err);
-            }
-        };
-
-        initAuth();
+        // Iniciar Auth imediatamente
+        signInAnonymously(auth).catch(err => {
+            console.error("Erro Auth Inicial:", err);
+            alert("Erro de conexão. Recarregue a página.");
+        });
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                initialLoader.classList.add('hidden');
-                clientView.classList.remove('hidden');
+                document.getElementById('initial-loader').classList.add('hidden');
+                document.getElementById('client-view').classList.remove('hidden');
             }
         });
+
+        const checkOutro = document.getElementById('check-outro');
+        const outroTexto = document.getElementById('outro-texto');
+        const form = document.getElementById('briefing-form');
 
         checkOutro.addEventListener('change', (e) => {
             outroTexto.classList.toggle('hidden', !e.target.checked);
@@ -271,35 +259,43 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
+            
+            if (!currentUser) {
+                alert("Aguarde a conexão com o servidor ser estabelecida...");
+                return;
+            }
 
             const btn = document.getElementById('btn-submit');
-            const nomeValue = document.getElementById('nomeCliente').value;
-            const nichoValue = document.getElementById('nicho').value;
+            const nomeValue = document.getElementById('nomeCliente').value.trim();
+            const nichoValue = document.getElementById('nicho').value.trim();
             
+            if (!nomeValue || !nichoValue) return;
+
             btn.disabled = true;
             btn.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
 
             try {
                 const objetosChecked = Array.from(document.querySelectorAll('input[name="objetos"]:checked')).map(el => el.value);
                 if (checkOutro.checked && outroTexto.value.trim()) {
-                    objetosChecked.push(`Personalizado: ${outroTexto.value}`);
+                    objetosChecked.push(`Personalizado: ${outroTexto.value.trim()}`);
                 }
 
                 const payload = {
                     nomeCliente: nomeValue,
-                    nomeMarca: document.getElementById('nomeMarca').value,
-                    email: document.getElementById('email').value,
+                    nomeMarca: document.getElementById('nomeMarca').value.trim(),
+                    email: document.getElementById('email').value.trim(),
                     nicho: nichoValue,
-                    cores: document.getElementById('cores').value,
+                    cores: document.getElementById('cores').value.trim(),
                     objetos: objetosChecked,
                     userId: currentUser.uid,
                     createdAt: serverTimestamp()
                 };
 
-                const path = collection(db, 'artifacts', APP_ID, 'public', 'data', 'respostas');
-                await addDoc(path, payload);
+                // SALVANDO NA COLEÇÃO PRINCIPAL DIRETAMENTE
+                const colRef = collection(db, 'respostas');
+                await addDoc(colRef, payload);
 
+                // Sucesso: Atualizar tela
                 document.getElementById('display-nome').innerText = nomeValue;
                 document.getElementById('display-nicho').innerText = nichoValue;
 
@@ -308,22 +304,28 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
             } catch (err) {
-                console.error("Erro ao salvar:", err);
-                alert("Erro ao enviar. Tente novamente.");
+                console.error("Erro completo ao salvar:", err);
+                alert("Erro ao enviar. Por favor, tente novamente ou verifique sua conexão. Detalhes: " + err.message);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
         });
 
+        // Funções de Admin
         window.toggleAdminView = () => {
             isAdminView = !isAdminView;
             if (isAdminView) {
-                clientView.classList.add('hidden');
-                adminView.classList.remove('hidden');
+                document.getElementById('client-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
                 loadAdminData();
             } else {
-                adminView.classList.add('hidden');
-                clientView.classList.remove('hidden');
+                document.getElementById('admin-view').classList.add('hidden');
+                document.getElementById('client-view').classList.remove('hidden');
+                // Parar de escutar quando sair do admin
+                if (unsubscribeAdmin) {
+                    unsubscribeAdmin();
+                    unsubscribeAdmin = null;
+                }
             }
         };
 
@@ -333,85 +335,107 @@
 
             const dataFormatada = resp.createdAt?.seconds 
                 ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR') 
-                : 'Data não disponível';
+                : 'Recém registrado';
 
-            modalContent.innerHTML = `
+            document.getElementById('modal-content').innerHTML = `
                 <div class="grid grid-cols-1 gap-6">
                     <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
                         <p class="text-xs text-blue-500 font-bold uppercase mb-1">Informações do Cliente</p>
-                        <h3 class="text-xl font-bold text-gray-800">${resp.nomeCliente}</h3>
-                        <p class="text-gray-600">${resp.email}</p>
+                        <h3 class="text-xl font-bold text-gray-800">${resp.nomeCliente || 'Não informado'}</h3>
+                        <p class="text-gray-600">${resp.email || 'Não informado'}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-xs text-gray-400 font-bold uppercase">Nome da Marca</p>
-                            <p class="font-semibold text-gray-800">${resp.nomeMarca}</p>
+                            <p class="font-semibold text-gray-800">${resp.nomeMarca || 'Não informado'}</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-400 font-bold uppercase">Nicho/Segmento</p>
-                            <p class="font-semibold text-gray-800">${resp.nicho}</p>
+                            <p class="font-semibold text-gray-800">${resp.nicho || 'Não informado'}</p>
                         </div>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 font-bold uppercase mb-2">Cores de Preferência</p>
-                        <p class="bg-gray-100 p-3 rounded-xl text-gray-700 border border-gray-200">${resp.cores}</p>
+                        <p class="bg-gray-100 p-3 rounded-xl text-gray-700 border border-gray-200">${resp.cores || 'Não informado'}</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais</p>
                         <div class="flex flex-wrap gap-2">
-                            ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('')}
+                            ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('') || '<span class="text-gray-400">Nenhum elemento selecionado</span>'}
                         </div>
                     </div>
                     <div class="pt-4 border-t border-gray-100">
-                        <p class="text-xs text-gray-400">Registrado em: ${dataFormatada}</p>
+                        <p class="text-xs text-gray-400">ID: ${resp.id} | Data: ${dataFormatada}</p>
                     </div>
                 </div>
             `;
-            modal.classList.remove('hidden');
+            document.getElementById('detail-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         };
 
         window.closeModal = () => {
-            modal.classList.add('hidden');
+            document.getElementById('detail-modal').classList.add('hidden');
             document.body.style.overflow = 'auto';
         };
 
         function loadAdminData() {
-            if (!currentUser) return;
+            if (!currentUser) {
+                console.log("Usuário não autenticado ainda");
+                return;
+            }
+            
             const grid = document.getElementById('responses-grid');
             const totalBadge = document.getElementById('total-badge');
             const loader = document.getElementById('admin-loader');
             
             loader.classList.remove('hidden');
 
-            const path = collection(db, 'artifacts', APP_ID, 'public', 'data', 'respostas');
+            // USA A MESMA COLEÇÃO SIMPLES
+            const colRef = collection(db, 'respostas');
+            const q = query(colRef, orderBy('createdAt', 'desc'));
             
-            onSnapshot(path, (snapshot) => {
+            // Remove listener anterior se existir
+            if (unsubscribeAdmin) {
+                unsubscribeAdmin();
+            }
+            
+            unsubscribeAdmin = onSnapshot(q, (snapshot) => {
                 loader.classList.add('hidden');
-                allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                allResponses.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                allResponses = snapshot.docs.map(doc => ({ 
+                    id: doc.id, 
+                    ...doc.data() 
+                }));
 
                 totalBadge.innerText = `Total: ${allResponses.length} Briefings`;
                 
                 if (allResponses.length === 0) {
-                    grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">Nenhuma resposta encontrada.</div>`;
+                    grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">
+                        <i class="fa-solid fa-inbox text-4xl mb-4 block"></i>
+                        Nenhuma resposta encontrada ainda.
+                    </div>`;
                     return;
                 }
 
                 grid.innerHTML = allResponses.map(resp => {
                     const dataHora = resp.createdAt?.seconds 
-                        ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-                        : 'Recém enviado';
+                        ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: '2-digit',
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })
+                        : 'Agora mesmo';
 
                     return `
-                        <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group">
+                        <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group animate-fade-in">
                             <div class="flex justify-between items-start mb-3">
-                                <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
+                                <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
                                 <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente}</h3>
-                            <p class="text-gray-500 text-sm font-medium"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca}</p>
+                            <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente || 'Sem nome'}</h3>
+                            <p class="text-gray-500 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca || 'Sem marca'}</p>
+                            <p class="text-gray-400 text-xs mt-1"><i class="fa-solid fa-envelope mr-1 opacity-50"></i> ${resp.email || 'Sem email'}</p>
                             <div class="mt-4 flex items-center text-xs text-blue-600 font-bold">
                                 VER BRIEFING COMPLETO
                             </div>
@@ -419,7 +443,12 @@
                     `;
                 }).join('');
             }, (err) => {
-                console.error("Erro na escuta de dados:", err);
+                console.error("Erro na escuta admin:", err);
+                loader.classList.add('hidden');
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">
+                    <i class="fa-solid fa-triangle-exclamation text-4xl mb-4 block"></i>
+                    Erro ao carregar dados: ${err.message}
+                </div>`;
             });
         }
     </script>
