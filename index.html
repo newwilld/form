@@ -20,7 +20,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        
+
         .admin-trigger {
             cursor: pointer;
             transition: color 0.2s;
@@ -29,7 +29,7 @@
             text-underline-offset: 4px;
         }
         .admin-trigger:hover { color: #3b82f6; }
-        
+
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
@@ -57,7 +57,7 @@
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
         }
-        
+
         .image-preview-item {
             position: relative;
             aspect-ratio: 1;
@@ -65,13 +65,13 @@
             overflow: hidden;
             border: 2px solid #e5e7eb;
         }
-        
+
         .image-preview-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         .image-preview-item .remove-btn {
             position: absolute;
             top: 5px;
@@ -88,7 +88,7 @@
             font-size: 12px;
             transition: all 0.2s;
         }
-        
+
         .image-preview-item .remove-btn:hover {
             background: rgba(220, 38, 38, 1);
             transform: scale(1.1);
@@ -115,12 +115,12 @@
             transition: all 0.3s;
             background: #f9fafb;
         }
-        
+
         .upload-area:hover {
             border-color: #3b82f6;
             background: #eff6ff;
         }
-        
+
         .upload-area.dragover {
             border-color: #3b82f6;
             background: #dbeafe;
@@ -139,7 +139,7 @@
             gap: 10px;
             margin-top: 10px;
         }
-        
+
         .admin-image-item {
             aspect-ratio: 1;
             border-radius: 8px;
@@ -149,13 +149,13 @@
             transition: all 0.3s;
             position: relative;
         }
-        
+
         .admin-image-item:hover {
             border-color: #3b82f6;
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
-        
+
         .admin-image-item img {
             width: 100%;
             height: 100%;
@@ -183,7 +183,7 @@
             justify-content: center;
             cursor: pointer;
         }
-        
+
         .image-viewer-overlay img {
             max-width: 90%;
             max-height: 90%;
@@ -244,6 +244,7 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email para Arquivos</label>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email de Contacto</label>
                     <div class="relative">
                         <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400 text-sm"></i>
@@ -266,6 +267,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
                             <input type="checkbox" name="objetos" value="Tipográfico (Letras)" class="w-4 h-4 text-blue-600 rounded">
+                            <span class="ml-3 text-sm text-gray-700">Junção de Letras</span>
                             <span class="ml-3 text-sm text-gray-700">Tipográfico (Letras)</span>
                         </label>
                         <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
@@ -290,21 +292,24 @@
                     </div>
                 </div>
 
+                <!-- NOVO: Upload de Imagens -->
                 <!-- UPLOAD DE IMAGENS OTIMIZADO -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Imagens de Referência (Opcional - Máximo 5)
+                        <span class="text-gray-400 font-normal text-xs ml-2">Formatos: JPG, PNG, GIF, WEBP</span>
                         <span class="text-gray-400 font-normal text-xs ml-2">JPG, PNG, GIF, WEBP</span>
                     </label>
-                    
+
                     <div class="compression-info mb-3">
                         <i class="fa-solid fa-compress-arrows-alt text-amber-500"></i>
                         <span>As imagens serão comprimidas automaticamente para melhor desempenho. Máximo 500KB por imagem.</span>
                     </div>
                     
                     <div id="image-preview-grid" class="image-preview-container mb-3"></div>
-                    
+
                     <div id="upload-area" class="upload-area">
+                        <input type="file" id="image-input" accept="image/*" multiple class="hidden" max="5">
                         <input type="file" id="image-input" accept="image/*" multiple class="hidden">
                         <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
                         <p class="text-sm text-gray-600 font-medium">Clique para selecionar imagens</p>
@@ -324,12 +329,14 @@
             <div class="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-200">
                 <i class="fa-solid fa-rocket text-3xl"></i>
             </div>
-            
+
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Entendido! 🚀🎯</h2>
-            
+
             <div class="space-y-4 text-left bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8">
                 <p class="text-gray-700 leading-relaxed">
                     Com base em nossa experiência desde 2010 criando mais de 1 mil marcas + 
+                    <span id="display-nome" class="font-bold text-blue-600"></span> + 
+                    <span id="display-nicho" class="font-bold text-blue-600"></span> + 
                   <span class="text-blue-700">SEU NOME</span>+
                 <span class="text-blue-700">SEGMENTO</span> + 
                     informações recebidas
@@ -354,3 +361,594 @@
     </main>
 
     <!-- Modal de Login Admin -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-fade-in">
+            <div class="p-6 border-b flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700">
+                <h2 class="text-xl font-bold text-white flex items-center">
+                    <i class="fa-solid fa-lock mr-3"></i> Acesso Administrativo
+                </h2>
+                <button onclick="closeLoginModal()" class="text-white/80 hover:text-white p-2 transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-8">
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email do Administrador</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                            <input type="email" id="login-email" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="admin@exemplo.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-key absolute left-3 top-3.5 text-gray-400"></i>
+                            <input type="password" id="login-password" required class="pl-10 pr-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="••••••••">
+                            <i class="fa-solid fa-eye absolute right-3 top-3.5 text-gray-400 password-toggle cursor-pointer hover:text-blue-600" onclick="togglePassword()"></i>
+                        </div>
+                    </div>
+                    <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
+                        <i class="fa-solid fa-circle-exclamation mr-2"></i>
+                        <span id="login-error-msg"></span>
+                    </div>
+                    <button type="submit" id="btn-login" class="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-200 active:scale-[0.99]">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visão Administrativa -->
+    <main id="admin-view" class="hidden max-w-6xl mx-auto p-4 py-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+            <div>
+                <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sair do Painel
+                </button>
+                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                    <i class="fa-solid fa-clipboard-list mr-3 text-blue-600"></i> Respostas Recebidas
+                </h1>
+            </div>
+            <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                <div class="text-sm text-gray-500">
+                    <i class="fa-solid fa-user-shield mr-1 text-blue-500"></i>
+                    <span id="admin-email-display"></span>
+                </div>
+                <div id="total-badge" class="bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-bold border border-blue-100 shadow-sm">
+                    Carregando...
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-loader" class="flex justify-center py-20">
+            <div class="loader"></div>
+        </div>
+
+        <div id="responses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <!-- Modal de Detalhes -->
+    <div id="detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl animate-fade-in">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h2 class="text-xl font-bold text-gray-800">Detalhes do Briefing</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 p-2">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="p-8 overflow-y-auto max-h-[70vh] space-y-6">
+                <!-- Preenchido via JS -->
+            </div>
+            <div class="p-6 border-t bg-gray-50 text-right">
+                <button onclick="closeModal()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-blue-700 transition-colors">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Viewer -->
+    <div id="image-viewer" class="hidden image-viewer-overlay" onclick="closeImageViewer()">
+        <img id="image-viewer-img" src="" alt="Visualização">
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
+            authDomain: "form-61cb3.firebaseapp.com",
+            projectId: "form-61cb3",
+            storageBucket: "form-61cb3.firebasestorage.app",
+            messagingSenderId: "856018845836",
+            appId: "1:856018845836:web:aca36b5d63287a45afbba9",
+            measurementId: "G-EKPPTKSHH7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const MAX_IMAGES = 5;
+        const MAX_IMAGE_SIZE_MB = 2; // 2MB por imagem
+        let selectedImages = [];
+
+        let currentUser = null;
+        let isAdminLoggedIn = false;
+        let allResponses = [];
+        let unsubscribeAdmin = null;
+
+        // Iniciar com autenticação anônima
+        async function initClientAuth() {
+            try {
+                await signInAnonymously(auth);
+                console.log("✅ Cliente conectado anonimamente");
+            } catch (err) {
+                console.error("Erro na autenticação anônima:", err);
+            }
+        }
+
+        initClientAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                isAdminLoggedIn = !!user.email;
+                
+                document.getElementById('initial-loader').classList.add('hidden');
+                
+                if (isAdminLoggedIn) {
+                    document.getElementById('client-view').classList.add('hidden');
+                    document.getElementById('admin-view').classList.remove('hidden');
+                    document.getElementById('admin-email-display').textContent = user.email;
+                    loadAdminData();
+                } else {
+                    document.getElementById('client-view').classList.remove('hidden');
+                    document.getElementById('admin-view').classList.add('hidden');
+                }
+            } else {
+                initClientAuth();
+            }
+        });
+
+        // ============ UPLOAD DE IMAGENS ============
+        const uploadArea = document.getElementById('upload-area');
+        const imageInput = document.getElementById('image-input');
+        const previewGrid = document.getElementById('image-preview-grid');
+        const imageCount = document.getElementById('image-count');
+
+        // Clique na área de upload
+        uploadArea.addEventListener('click', () => {
+            if (selectedImages.length < MAX_IMAGES) {
+                imageInput.click();
+            }
+        });
+
+        // Selecionar imagens
+        imageInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            imageInput.value = '';
+        });
+
+        // Drag and Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFiles(files) {
+            const remaining = MAX_IMAGES - selectedImages.length;
+            const filesToProcess = Array.from(files).slice(0, remaining);
+
+            if (files.length > remaining) {
+                alert(`Você pode adicionar no máximo ${remaining} imagem(ns).`);
+            }
+
+            filesToProcess.forEach(file => {
+                if (!file.type.startsWith('image/')) {
+                    alert(`${file.name} não é uma imagem válida.`);
+                    return;
+                }
+
+                if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+                    alert(`${file.name} é muito grande. Máximo ${MAX_IMAGE_SIZE_MB}MB.`);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    selectedImages.push({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        base64: e.target.result
+                    });
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updatePreview() {
+            previewGrid.innerHTML = '';
+            
+            if (selectedImages.length === 0) {
+                imageCount.classList.add('hidden');
+                return;
+            }
+
+            imageCount.classList.remove('hidden');
+            imageCount.textContent = `${selectedImages.length} de ${MAX_IMAGES} imagens selecionadas`;
+
+            selectedImages.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `
+                    <img src="${img.base64}" alt="${img.name}">
+                    <div class="remove-btn" onclick="removeImage(${index})">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                `;
+                previewGrid.appendChild(div);
+            });
+        }
+
+        window.removeImage = (index) => {
+            selectedImages.splice(index, 1);
+            updatePreview();
+        };
+
+        const checkOutro = document.getElementById('check-outro');
+        const outroTexto = document.getElementById('outro-texto');
+
+        checkOutro.addEventListener('change', (e) => {
+            outroTexto.classList.toggle('hidden', !e.target.checked);
+            if (e.target.checked) outroTexto.focus();
+        });
+
+        // Toggle password
+        window.togglePassword = () => {
+            const passwordInput = document.getElementById('login-password');
+            const icon = document.querySelector('.password-toggle');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
+        window.showAdminLogin = () => {
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-error').classList.add('hidden');
+        };
+
+        window.closeLoginModal = () => {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        // Login Admin
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btnLogin = document.getElementById('btn-login');
+            const loginError = document.getElementById('login-error');
+            const loginErrorMsg = document.getElementById('login-error-msg');
+            const modalBox = document.querySelector('#login-modal .bg-white');
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (!email || !password) {
+                loginError.classList.remove('hidden');
+                loginErrorMsg.textContent = 'Preencha todos os campos.';
+                modalBox.classList.add('shake');
+                setTimeout(() => modalBox.classList.remove('shake'), 500);
+                return;
+            }
+
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+            loginError.classList.add('hidden');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                closeLoginModal();
+            } catch (err) {
+                console.error("❌ Erro login:", err.code);
+                loginError.classList.remove('hidden');
+                
+                switch (err.code) {
+                    case 'auth/invalid-credential':
+                        loginErrorMsg.textContent = 'Email ou senha incorretos.';
+                        break;
+                    case 'auth/invalid-email':
+                        loginErrorMsg.textContent = 'Formato de email inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        loginErrorMsg.textContent = 'Esta conta foi desativada.';
+                        break;
+                    case 'auth/too-many-requests':
+                        loginErrorMsg.textContent = 'Muitas tentativas. Aguarde um momento.';
+                        break;
+                    default:
+                        loginErrorMsg.textContent = 'Erro na autenticação. Tente novamente.';
+                }
+                
+                modalBox.classList.add('shake');
+                setTimeout(() => modalBox.classList.remove('shake'), 500);
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel';
+            }
+        });
+
+        window.logoutAdmin = async () => {
+            try {
+                if (unsubscribeAdmin) {
+                    unsubscribeAdmin();
+                    unsubscribeAdmin = null;
+                }
+                await signOut(auth);
+                allResponses = [];
+                isAdminLoggedIn = false;
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error("Erro logout:", err);
+            }
+        };
+
+        // ============ ENVIO DO FORMULÁRIO ============
+        const form = document.getElementById('briefing-form');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert("Aguarde a conexão com o servidor...");
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit');
+            const nomeValue = document.getElementById('nomeCliente').value.trim();
+            const nichoValue = document.getElementById('nicho').value.trim();
+            
+            if (!nomeValue || !nichoValue) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+
+            try {
+                const objetosChecked = Array.from(document.querySelectorAll('input[name="objetos"]:checked')).map(el => el.value);
+                if (checkOutro.checked && outroTexto.value.trim()) {
+                    objetosChecked.push(`Personalizado: ${outroTexto.value.trim()}`);
+                }
+
+                // Converter imagens para array de base64
+                const imagesData = selectedImages.map(img => ({
+                    name: img.name,
+                    type: img.type,
+                    size: img.size,
+                    base64: img.base64
+                }));
+
+                const payload = {
+                    nomeCliente: nomeValue,
+                    nomeMarca: document.getElementById('nomeMarca').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    nicho: nichoValue,
+                    cores: document.getElementById('cores').value.trim(),
+                    objetos: objetosChecked,
+                    imagens: imagesData, // Array de imagens em base64
+                    totalImagens: imagesData.length,
+                    userId: currentUser.uid,
+                    createdAt: serverTimestamp()
+                };
+
+                const colRef = collection(db, 'respostas');
+                await addDoc(colRef, payload);
+
+                document.getElementById('display-nome').innerText = nomeValue;
+                document.getElementById('display-nicho').innerText = nichoValue;
+
+                document.getElementById('form-container').classList.add('hidden');
+                document.getElementById('success-msg').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (err) {
+                console.error("Erro ao salvar:", err);
+                alert("Erro ao enviar. Tente novamente.");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
+            }
+        });
+
+        // ============ VISUALIZAÇÃO ADMIN ============
+        window.openDetails = (id) => {
+            const resp = allResponses.find(r => r.id === id);
+            if (!resp) return;
+
+            const dataFormatada = resp.createdAt?.seconds 
+                ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                })
+                : 'Recém registrado';
+
+            // Gerar grid de imagens
+            let imagesHTML = '';
+            if (resp.imagens && resp.imagens.length > 0) {
+                imagesHTML = `
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-3">
+                            📸 Imagens de Referência (${resp.imagens.length})
+                        </p>
+                        <div class="admin-image-grid">
+                            ${resp.imagens.map((img, index) => `
+                                <div class="admin-image-item" onclick="viewImage(event, '${img.base64.replace(/'/g, "\\'")}')" title="${img.name}">
+                                    <img src="${img.base64}" alt="${img.name}" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal-content').innerHTML = `
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                        <p class="text-xs text-blue-500 font-bold uppercase mb-1">Informações do Cliente</p>
+                        <h3 class="text-xl font-bold text-gray-800">${resp.nomeCliente || 'Não informado'}</h3>
+                        <p class="text-gray-600">${resp.email || 'Não informado'}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-400 font-bold uppercase">Nome da Marca</p>
+                            <p class="font-semibold text-gray-800">${resp.nomeMarca || 'Não informado'}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-bold uppercase">Nicho/Segmento</p>
+                            <p class="font-semibold text-gray-800">${resp.nicho || 'Não informado'}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-2">Cores de Preferência</p>
+                        <p class="bg-gray-100 p-3 rounded-xl text-gray-700 border border-gray-200">${resp.cores || 'Não informado'}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('') || '<span class="text-gray-400">Nenhum elemento</span>'}
+                        </div>
+                    </div>
+                    ${imagesHTML}
+                    <div class="pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-400">ID: ${resp.id}</p>
+                        <p class="text-xs text-gray-400">Data: ${dataFormatada}</p>
+                        ${resp.totalImagens ? `<p class="text-xs text-gray-400">Imagens: ${resp.totalImagens}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            document.getElementById('detail-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.viewImage = (event, base64) => {
+            event.stopPropagation();
+            const viewer = document.getElementById('image-viewer');
+            const img = document.getElementById('image-viewer-img');
+            img.src = base64;
+            viewer.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeImageViewer = () => {
+            document.getElementById('image-viewer').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        window.closeModal = () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeLoginModal();
+                closeImageViewer();
+            }
+        });
+
+        function loadAdminData() {
+            if (!currentUser || !isAdminLoggedIn) return;
+            
+            const grid = document.getElementById('responses-grid');
+            const totalBadge = document.getElementById('total-badge');
+            const loader = document.getElementById('admin-loader');
+            
+            loader.classList.remove('hidden');
+
+            const colRef = collection(db, 'respostas');
+            const q = query(colRef, orderBy('createdAt', 'desc'));
+            
+            if (unsubscribeAdmin) unsubscribeAdmin();
+            
+            unsubscribeAdmin = onSnapshot(q, (snapshot) => {
+                loader.classList.add('hidden');
+                allResponses = snapshot.docs.map(doc => ({ 
+                    id: doc.id, 
+                    ...doc.data() 
+                }));
+
+                totalBadge.innerText = `Total: ${allResponses.length} Briefings`;
+                
+                if (allResponses.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">
+                        <i class="fa-solid fa-inbox text-4xl mb-4 block"></i>
+                        Nenhuma resposta ainda.
+                    </div>`;
+                    return;
+                }
+
+                grid.innerHTML = allResponses.map(resp => {
+                    const dataHora = resp.createdAt?.seconds 
+                        ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { 
+                            day: '2-digit', month: '2-digit', year: '2-digit',
+                            hour: '2-digit', minute: '2-digit' 
+                          })
+                        : 'Agora mesmo';
+
+                    const imageBadge = resp.totalImagens && resp.totalImagens > 0 
+                        ? `<span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-image mr-1"></i>${resp.totalImagens}</span>`
+                        : '';
+
+                    return `
+                        <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group animate-fade-in">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
+                                <div class="flex gap-2 items-center">
+                                    ${imageBadge}
+                                    <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente || 'Sem nome'}</h3>
+                            <p class="text-gray-500 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca || 'Sem marca'}</p>
+                            <p class="text-gray-400 text-xs mt-1"><i class="fa-solid fa-envelope mr-1 opacity-50"></i> ${resp.email || 'Sem email'}</p>
+                            <div class="mt-4 flex items-center text-xs text-blue-600 font-bold">
+                                <i class="fa-solid fa-magnifying-glass mr-1"></i> VER BRIEFING COMPLETO
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }, (err) => {
+                console.error("Erro admin:", err);
+                loader.classList.add('hidden');
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">
+                    <i class="fa-solid fa-triangle-exclamation text-4xl mb-4 block"></i>
+                    Erro: ${err.message}
+                </div>`;
+            });
+        }
+    </script>
+</body>
+</html>
