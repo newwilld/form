@@ -20,6 +20,15 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        /* Estilo para o gatilho discreto */
+        .admin-trigger {
+            cursor: default;
+            transition: color 0.2s;
+        }
+        .admin-trigger:active {
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
@@ -37,7 +46,10 @@
         <div id="form-container" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-4 border border-gray-100">
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Briefing de Marca</h1>
-                <p class="text-gray-500">Ajude-nos a entender a sua visão para criarmos algo incrível.</p>
+                <p class="text-gray-500">
+                    Ajude-nos a entender a sua visão para criarmos 
+                    <span onclick="toggleAdminView()" class="admin-trigger">algo incrível.</span>
+                </p>
             </div>
 
             <form id="briefing-form" class="space-y-6">
@@ -145,11 +157,6 @@
                 </a>
             </div>
         </div>
-
-        <!-- Botão Admin Oculto -->
-        <button onclick="toggleAdminView()" class="fixed bottom-4 right-4 text-gray-200 hover:text-gray-400 p-2 transition-colors focus:outline-none" title="Painel Admin">
-            <i class="fa-solid fa-lock"></i>
-        </button>
     </main>
 
     <!-- Visão Administrativa -->
@@ -251,11 +258,9 @@
                 const path = collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'respostas');
                 await addDoc(path, payload);
 
-                // Preencher a nova página com as informações do cliente
                 document.getElementById('display-nome').innerText = nomeValue;
                 document.getElementById('display-nicho').innerText = nichoValue;
 
-                // Redirecionar para a página de informação personalizada
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-msg').classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
