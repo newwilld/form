@@ -19,7 +19,7 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         
         .admin-trigger {
             cursor: pointer;
@@ -28,9 +28,7 @@
             text-decoration-style: dotted;
             text-underline-offset: 4px;
         }
-        .admin-trigger:hover {
-            color: #3b82f6;
-        }
+        .admin-trigger:hover { color: #3b82f6; }
         
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
@@ -54,12 +52,113 @@
             75% { transform: translateX(10px); }
         }
 
-        .password-toggle {
-            cursor: pointer;
-            transition: color 0.2s;
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
         }
-        .password-toggle:hover {
-            color: #3b82f6;
+        
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .image-preview-item .remove-btn:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.1);
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f9fafb;
+        }
+        
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background: #dbeafe;
+            transform: scale(1.02);
+        }
+
+        .admin-image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .admin-image-item {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+        
+        .admin-image-item:hover {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .admin-image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-viewer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .image-viewer-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -125,7 +224,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
                             <input type="checkbox" name="objetos" value="Tipográfico (Letras)" class="w-4 h-4 text-blue-600 rounded">
-                            <span class="ml-3 text-sm text-gray-700">Junção de Letras</span>
+                            <span class="ml-3 text-sm text-gray-700">Tipográfico (Letras)</span>
                         </label>
                         <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
                             <input type="checkbox" name="objetos" value="Ícone Minimalista" class="w-4 h-4 text-blue-600 rounded">
@@ -146,6 +245,24 @@
                             </label>
                             <input type="text" id="outro-texto" class="hidden mt-2 ml-7 border-b border-gray-300 outline-none text-sm py-1 bg-transparent" placeholder="Descreva aqui...">
                         </div>
+                    </div>
+                </div>
+
+                <!-- NOVO: Upload de Imagens -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Imagens de Referência (Opcional - Máximo 5)
+                        <span class="text-gray-400 font-normal text-xs ml-2">Formatos: JPG, PNG, GIF, WEBP</span>
+                    </label>
+                    
+                    <div id="image-preview-grid" class="image-preview-container mb-3"></div>
+                    
+                    <div id="upload-area" class="upload-area">
+                        <input type="file" id="image-input" accept="image/*" multiple class="hidden" max="5">
+                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
+                        <p class="text-sm text-gray-600 font-medium">Clique para selecionar imagens</p>
+                        <p class="text-xs text-gray-400 mt-1">ou arraste e solte aqui</p>
+                        <p id="image-count" class="text-xs text-blue-600 mt-2 font-medium hidden"></p>
                     </div>
                 </div>
 
@@ -214,7 +331,7 @@
                         <div class="relative">
                             <i class="fa-solid fa-key absolute left-3 top-3.5 text-gray-400"></i>
                             <input type="password" id="login-password" required class="pl-10 pr-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="••••••••">
-                            <i class="fa-solid fa-eye absolute right-3 top-3.5 text-gray-400 password-toggle" onclick="togglePassword()"></i>
+                            <i class="fa-solid fa-eye absolute right-3 top-3.5 text-gray-400 password-toggle cursor-pointer hover:text-blue-600" onclick="togglePassword()"></i>
                         </div>
                     </div>
                     <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
@@ -225,12 +342,6 @@
                         <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel
                     </button>
                 </form>
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-xs text-gray-500 text-center">
-                        <i class="fa-solid fa-shield-halved mr-1"></i>
-                        Credenciais verificadas pelo Firebase
-                    </p>
-                </div>
             </div>
         </div>
     </div>
@@ -266,7 +377,7 @@
 
     <!-- Modal de Detalhes -->
     <div id="detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl animate-fade-in">
+        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl animate-fade-in">
             <div class="p-6 border-b flex justify-between items-center bg-gray-50">
                 <h2 class="text-xl font-bold text-gray-800">Detalhes do Briefing</h2>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 p-2">
@@ -280,6 +391,11 @@
                 <button onclick="closeModal()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-blue-700 transition-colors">Fechar</button>
             </div>
         </div>
+    </div>
+
+    <!-- Image Viewer -->
+    <div id="image-viewer" class="hidden image-viewer-overlay" onclick="closeImageViewer()">
+        <img id="image-viewer-img" src="" alt="Visualização">
     </div>
 
     <script type="module">
@@ -301,12 +417,16 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        const MAX_IMAGES = 5;
+        const MAX_IMAGE_SIZE_MB = 2; // 2MB por imagem
+        let selectedImages = [];
+
         let currentUser = null;
         let isAdminLoggedIn = false;
         let allResponses = [];
         let unsubscribeAdmin = null;
 
-        // Iniciar com autenticação anônima para clientes
+        // Iniciar com autenticação anônima
         async function initClientAuth() {
             try {
                 await signInAnonymously(auth);
@@ -318,44 +438,133 @@
 
         initClientAuth();
 
-        // Monitorar estado de autenticação
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                
-                // Verifica se é admin logado (Firebase valida as credenciais)
-                const isAdmin = user.email && user.emailVerified !== undefined;
-                isAdminLoggedIn = !!user.email; // Tem email = fez login com email/senha
+                isAdminLoggedIn = !!user.email;
                 
                 document.getElementById('initial-loader').classList.add('hidden');
                 
                 if (isAdminLoggedIn) {
-                    // Usuário logado com email/senha - Painel Admin
                     document.getElementById('client-view').classList.add('hidden');
                     document.getElementById('admin-view').classList.remove('hidden');
                     document.getElementById('admin-email-display').textContent = user.email;
                     loadAdminData();
                 } else {
-                    // Usuário anônimo - Formulário do cliente
                     document.getElementById('client-view').classList.remove('hidden');
                     document.getElementById('admin-view').classList.add('hidden');
                 }
             } else {
-                // Sem usuário - reconectar anonimamente
                 initClientAuth();
             }
         });
 
+        // ============ UPLOAD DE IMAGENS ============
+        const uploadArea = document.getElementById('upload-area');
+        const imageInput = document.getElementById('image-input');
+        const previewGrid = document.getElementById('image-preview-grid');
+        const imageCount = document.getElementById('image-count');
+
+        // Clique na área de upload
+        uploadArea.addEventListener('click', () => {
+            if (selectedImages.length < MAX_IMAGES) {
+                imageInput.click();
+            }
+        });
+
+        // Selecionar imagens
+        imageInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            imageInput.value = '';
+        });
+
+        // Drag and Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFiles(files) {
+            const remaining = MAX_IMAGES - selectedImages.length;
+            const filesToProcess = Array.from(files).slice(0, remaining);
+
+            if (files.length > remaining) {
+                alert(`Você pode adicionar no máximo ${remaining} imagem(ns).`);
+            }
+
+            filesToProcess.forEach(file => {
+                if (!file.type.startsWith('image/')) {
+                    alert(`${file.name} não é uma imagem válida.`);
+                    return;
+                }
+
+                if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+                    alert(`${file.name} é muito grande. Máximo ${MAX_IMAGE_SIZE_MB}MB.`);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    selectedImages.push({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        base64: e.target.result
+                    });
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updatePreview() {
+            previewGrid.innerHTML = '';
+            
+            if (selectedImages.length === 0) {
+                imageCount.classList.add('hidden');
+                return;
+            }
+
+            imageCount.classList.remove('hidden');
+            imageCount.textContent = `${selectedImages.length} de ${MAX_IMAGES} imagens selecionadas`;
+
+            selectedImages.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+                div.innerHTML = `
+                    <img src="${img.base64}" alt="${img.name}">
+                    <div class="remove-btn" onclick="removeImage(${index})">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                `;
+                previewGrid.appendChild(div);
+            });
+        }
+
+        window.removeImage = (index) => {
+            selectedImages.splice(index, 1);
+            updatePreview();
+        };
+
         const checkOutro = document.getElementById('check-outro');
         const outroTexto = document.getElementById('outro-texto');
-        const form = document.getElementById('briefing-form');
 
         checkOutro.addEventListener('change', (e) => {
             outroTexto.classList.toggle('hidden', !e.target.checked);
             if (e.target.checked) outroTexto.focus();
         });
 
-        // Toggle password visibility
+        // Toggle password
         window.togglePassword = () => {
             const passwordInput = document.getElementById('login-password');
             const icon = document.querySelector('.password-toggle');
@@ -383,7 +592,7 @@
             document.body.style.overflow = 'auto';
         };
 
-        // Login Admin - VALIDAÇÃO EXCLUSIVA PELO FIREBASE
+        // Login Admin
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -408,18 +617,12 @@
             loginError.classList.add('hidden');
 
             try {
-                // 🔐 ÚNICA validação - Firebase Authentication
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                
-                // Sucesso - Firebase autenticou
-                console.log("✅ Admin autenticado:", userCredential.user.email);
+                await signInWithEmailAndPassword(auth, email, password);
                 closeLoginModal();
-                
             } catch (err) {
                 console.error("❌ Erro login:", err.code);
                 loginError.classList.remove('hidden');
                 
-                // Mensagens de erro do Firebase (seguro - sem expor credenciais)
                 switch (err.code) {
                     case 'auth/invalid-credential':
                         loginErrorMsg.textContent = 'Email ou senha incorretos.';
@@ -445,27 +648,24 @@
             }
         });
 
-        // Logout Admin
         window.logoutAdmin = async () => {
             try {
                 if (unsubscribeAdmin) {
                     unsubscribeAdmin();
                     unsubscribeAdmin = null;
                 }
-                
                 await signOut(auth);
                 allResponses = [];
                 isAdminLoggedIn = false;
-                
-                // Reconectar como anônimo
                 await signInAnonymously(auth);
-                
             } catch (err) {
                 console.error("Erro logout:", err);
             }
         };
 
-        // Envio do formulário
+        // ============ ENVIO DO FORMULÁRIO ============
+        const form = document.getElementById('briefing-form');
+        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -489,6 +689,14 @@
                     objetosChecked.push(`Personalizado: ${outroTexto.value.trim()}`);
                 }
 
+                // Converter imagens para array de base64
+                const imagesData = selectedImages.map(img => ({
+                    name: img.name,
+                    type: img.type,
+                    size: img.size,
+                    base64: img.base64
+                }));
+
                 const payload = {
                     nomeCliente: nomeValue,
                     nomeMarca: document.getElementById('nomeMarca').value.trim(),
@@ -496,6 +704,8 @@
                     nicho: nichoValue,
                     cores: document.getElementById('cores').value.trim(),
                     objetos: objetosChecked,
+                    imagens: imagesData, // Array de imagens em base64
+                    totalImagens: imagesData.length,
                     userId: currentUser.uid,
                     createdAt: serverTimestamp()
                 };
@@ -518,6 +728,7 @@
             }
         });
 
+        // ============ VISUALIZAÇÃO ADMIN ============
         window.openDetails = (id) => {
             const resp = allResponses.find(r => r.id === id);
             if (!resp) return;
@@ -528,6 +739,25 @@
                     hour: '2-digit', minute: '2-digit'
                 })
                 : 'Recém registrado';
+
+            // Gerar grid de imagens
+            let imagesHTML = '';
+            if (resp.imagens && resp.imagens.length > 0) {
+                imagesHTML = `
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-3">
+                            📸 Imagens de Referência (${resp.imagens.length})
+                        </p>
+                        <div class="admin-image-grid">
+                            ${resp.imagens.map((img, index) => `
+                                <div class="admin-image-item" onclick="viewImage(event, '${img.base64.replace(/'/g, "\\'")}')" title="${img.name}">
+                                    <img src="${img.base64}" alt="${img.name}" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
 
             document.getElementById('modal-content').innerHTML = `
                 <div class="grid grid-cols-1 gap-6">
@@ -556,14 +786,30 @@
                             ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('') || '<span class="text-gray-400">Nenhum elemento</span>'}
                         </div>
                     </div>
+                    ${imagesHTML}
                     <div class="pt-4 border-t border-gray-100">
                         <p class="text-xs text-gray-400">ID: ${resp.id}</p>
                         <p class="text-xs text-gray-400">Data: ${dataFormatada}</p>
+                        ${resp.totalImagens ? `<p class="text-xs text-gray-400">Imagens: ${resp.totalImagens}</p>` : ''}
                     </div>
                 </div>
             `;
             document.getElementById('detail-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+        };
+
+        window.viewImage = (event, base64) => {
+            event.stopPropagation();
+            const viewer = document.getElementById('image-viewer');
+            const img = document.getElementById('image-viewer-img');
+            img.src = base64;
+            viewer.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeImageViewer = () => {
+            document.getElementById('image-viewer').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         };
 
         window.closeModal = () => {
@@ -575,6 +821,7 @@
             if (e.key === 'Escape') {
                 closeModal();
                 closeLoginModal();
+                closeImageViewer();
             }
         });
 
@@ -617,11 +864,18 @@
                           })
                         : 'Agora mesmo';
 
+                    const imageBadge = resp.totalImagens && resp.totalImagens > 0 
+                        ? `<span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-image mr-1"></i>${resp.totalImagens}</span>`
+                        : '';
+
                     return `
                         <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group animate-fade-in">
                             <div class="flex justify-between items-start mb-3">
                                 <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
-                                <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                <div class="flex gap-2 items-center">
+                                    ${imageBadge}
+                                    <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                </div>
                             </div>
                             <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente || 'Sem nome'}</h3>
                             <p class="text-gray-500 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca || 'Sem marca'}</p>
