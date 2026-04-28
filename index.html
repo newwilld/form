@@ -1,485 +1,349 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, onSnapshot } from 'firebase/firestore';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { User, Shield, Check, Send, ArrowLeft, Loader2, Inbox, Briefcase, Palette, Sparkles, AtSign } from 'lucide-react';
-
-// Configuração do Firebase fornecida por você
-const firebaseConfig = {
-  apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
-  authDomain: "form-61cb3.firebaseapp.com",
-  projectId: "form-61cb3",
-  storageBucket: "form-61cb3.firebasestorage.app",
-  messagingSenderId: "856018845836",
-  appId: "1:856018845836:web:aca36b5d63287a45afbba9",
-  measurementId: "G-EKPPTKSHH7"
-};
-
-// Inicialização do Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Caminho da coleção seguindo as melhores práticas estruturadas de segurança e isolamento
-const APP_ID = 'form-61cb3';
-const COLLECTION_PATH = ['artifacts', APP_ID, 'public', 'data', 'respostas'];
-
-export default function App() {
-  const [view, setView] = useState('client'); // Começa direto no cliente
-  const [user, setUser] = useState(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
-
-  // Autenticação anônima necessária para interagir com o Firestore de forma segura
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        await signInAnonymously(auth);
-      } catch (error) {
-        console.error("Erro na autenticação:", error);
-      }
-    };
-    initAuth();
-
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoadingAuth(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans relative">
-      {view === 'client' && <ClientForm user={user} onAdminAccess={() => setView('admin')} />}
-      {view === 'admin' && <AdminPanel user={user} onBack={() => setView('client')} />}
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------
-// FORMULÁRIO DO CLIENTE
-// ----------------------------------------------------------------------
-function ClientForm({ user, onAdminAccess }) {
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    nomeCliente: '',
-    nomeMarca: '',
-    email: '',
-    nicho: '',
-    cores: '',
-    objetos: [],
-    outroObjeto: ''
-  });
-
-  const opcoesObjetos = [
-    "Conjunto de letras",
-    "Coroa de rei",
-    "Coroa de rainha",
-    "Coração",
-    "Diamante"
-  ];
-
-  const handleToggleObjeto = (objeto) => {
-    setFormData(prev => {
-      const objetos = prev.objetos.includes(objeto)
-        ? prev.objetos.filter(o => o !== objeto)
-        : [...prev.objetos, objeto];
-      return { ...prev, objetos };
-    });
-  };
-
-  const handleToggleOutro = () => {
-    setFormData(prev => {
-      const hasOutro = prev.objetos.includes("Outro");
-      const objetos = hasOutro 
-        ? prev.objetos.filter(o => o !== "Outro")
-        : [...prev.objetos, "Outro"];
-      return { ...prev, objetos, outroObjeto: hasOutro ? '' : prev.outroObjeto };
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      // Filtrando o campo "Outro" para não salvar vazio
-      const objetosFinais = formData.objetos.filter(o => o !== "Outro");
-      if (formData.objetos.includes("Outro") && formData.outroObjeto.trim() !== '') {
-        objetosFinais.push(`Outro: ${formData.outroObjeto}`);
-      }
-
-      const dadosParaSalvar = {
-        nomeCliente: formData.nomeCliente,
-        nomeMarca: formData.nomeMarca,
-        email: formData.email,
-        nicho: formData.nicho,
-        cores: formData.cores,
-        objetos: objetosFinais,
-        createdAt: Date.now()
-      };
-
-      const pathRef = collection(db, ...COLLECTION_PATH);
-      await addDoc(pathRef, dadosParaSalvar);
-      
-      setSuccess(true);
-    } catch (error) {
-      console.error("Erro ao enviar formulário:", error);
-      alert("Ocorreu um erro ao enviar. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (success) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 relative">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center">
-          <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Formulário Enviado!</h2>
-          <p className="text-gray-600 mb-8">Muito obrigado pelas informações. Em breve entraremos em contato.</p>
-          <button
-            onClick={() => {
-              setSuccess(false);
-              setFormData({ nomeCliente: '', nomeMarca: '', email: '', nicho: '', cores: '', objetos: [], outroObjeto: '' });
-            }}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            Enviar nova resposta
-          </button>
-        </div>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briefing de Marca - Formulário Profissional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hidden { display: none; }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        {/* Botão Admin Oculto */}
-        <div className="absolute bottom-4 right-4">
-          <button onClick={onAdminAccess} className="text-gray-200 hover:text-gray-400 transition-colors p-2" title="Área Restrita">
-            <Shield className="w-4 h-4" />
-          </button>
+        /* Estilização suave para inputs */
+        input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Loader de Inicialização -->
+    <div id="initial-loader" class="min-h-screen flex items-center justify-center">
+        <div class="flex flex-col items-center space-y-4">
+            <div class="loader" style="width: 40px; height: 40px;"></div>
+            <p class="text-gray-500 text-sm animate-pulse">Sincronizando com o servidor...</p>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-2xl mx-auto p-4 py-8 relative min-h-screen">
-      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-4">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Bem-vindo!</h1>
-          <p className="text-gray-500">Preencha as informações abaixo para criarmos a melhor solução para sua marca.</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nome do Cliente */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nome do Cliente</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={formData.nomeCliente}
-                  onChange={e => setFormData({...formData, nomeCliente: e.target.value})}
-                  className="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                  placeholder="Seu nome completo"
-                />
-              </div>
-            </div>
-
-            {/* Nome da Marca */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nome da Marca</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Briefcase className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={formData.nomeMarca}
-                  onChange={e => setFormData({...formData, nomeMarca: e.target.value})}
-                  className="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                  placeholder="Ex: Studio Alpha"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email para liberação dos arquivos</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <AtSign className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={e => setFormData({...formData, email: e.target.value})}
-                className="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                placeholder="seuemail@exemplo.com"
-              />
-            </div>
-          </div>
-
-          {/* Nicho / Segmento */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Segmento / Nicho de Atuação</label>
-            <input
-              type="text"
-              required
-              value={formData.nicho}
-              onChange={e => setFormData({...formData, nicho: e.target.value})}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-              placeholder="Ex: Moda, Advocacia, Tecnologia..."
-            />
-          </div>
-
-          {/* Cores */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-              <Palette className="w-4 h-4 mr-2 text-gray-500"/> Cores Preferenciais
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.cores}
-              onChange={e => setFormData({...formData, cores: e.target.value})}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-              placeholder="Ex: Azul marinho e dourado"
-            />
-          </div>
-
-          {/* Objetos */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
-              <Sparkles className="w-4 h-4 mr-2 text-gray-500"/> 
-              Símbolos/Objetos que você gosta
-            </label>
-            <p className="text-xs text-gray-500 mb-4">Selecione os elementos que combinam com a sua visão:</p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {opcoesObjetos.map((obj) => (
-                <label 
-                  key={obj} 
-                  className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                    formData.objetos.includes(obj) ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={formData.objetos.includes(obj)}
-                    onChange={() => handleToggleObjeto(obj)}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">{obj}</span>
-                </label>
-              ))}
-
-              {/* Outro */}
-              <label 
-                className={`flex flex-col p-3 border rounded-lg cursor-pointer transition-colors ${
-                  formData.objetos.includes("Outro") ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50 border-gray-200'
-                }`}
-              >
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    checked={formData.objetos.includes("Outro")}
-                    onChange={handleToggleOutro}
-                  />
-                  <span className="ml-3 text-sm text-gray-700">Outro</span>
-                </div>
-                
-                {formData.objetos.includes("Outro") && (
-                  <input
-                    type="text"
-                    value={formData.outroObjeto}
-                    onChange={(e) => setFormData({...formData, outroObjeto: e.target.value})}
-                    placeholder="Digite qual..."
-                    className="mt-3 ml-7 w-[calc(100%-1.75rem)] border-b border-blue-300 bg-transparent px-1 py-1 text-sm focus:outline-none focus:border-blue-600"
-                    onClick={(e) => e.preventDefault()} // impede de desmarcar ao clicar no input
-                  />
-                )}
-              </label>
-            </div>
-          </div>
-
-          {/* Submit */}
-          <div className="pt-4 border-t border-gray-100">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg hover:shadow-xl disabled:opacity-70"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  <span>Enviar Informações</span>
-                </>
-              )}
-            </button>
-          </div>
-
-        </form>
-      </div>
-
-      {/* Botão Admin Oculto na tela do formulário */}
-      <div className="absolute bottom-4 right-4 flex justify-end">
-        <button 
-          onClick={onAdminAccess} 
-          className="text-gray-200 hover:text-gray-300 transition-colors p-2"
-        >
-          <Shield className="w-4 h-4" />
-        </button>
-      </div>
     </div>
-  );
-}
 
-// ----------------------------------------------------------------------
-// PAINEL ADMINISTRATIVO
-// ----------------------------------------------------------------------
-function AdminPanel({ user, onBack }) {
-  const [responses, setResponses] = useState([]);
-  const [loading, setLoading] = useState(true);
+    <!-- Visão do Cliente -->
+    <main id="client-view" class="hidden max-w-2xl mx-auto p-4 py-8 relative min-h-screen">
+        <div id="form-container" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-4 border border-gray-100">
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Briefing de Marca</h1>
+                <p class="text-gray-500">Ajude-nos a entender a sua visão para criarmos algo incrível.</p>
+            </div>
 
-  useEffect(() => {
-    if (!user) return;
+            <form id="briefing-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Cliente</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3 top-3.5 text-gray-400 text-sm"></i>
+                            <input type="text" id="nomeCliente" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="Seu nome completo">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Marca</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-briefcase absolute left-3 top-3.5 text-gray-400 text-sm"></i>
+                            <input type="text" id="nomeMarca" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="Ex: Studio Alpha">
+                        </div>
+                    </div>
+                </div>
 
-    const pathRef = collection(db, ...COLLECTION_PATH);
-    
-    // Escutando as mudanças no banco de dados em tempo real
-    const unsubscribe = onSnapshot(pathRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Ordenar localmente por data de criação (mais recente primeiro)
-      data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      
-      setResponses(data);
-      setLoading(false);
-    }, (error) => {
-      console.error("Erro ao buscar respostas:", error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
-
-  return (
-    <div className="max-w-6xl mx-auto p-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
-        <div className="mb-4 sm:mb-0">
-          <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-2 transition-colors text-sm font-medium">
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Voltar ao Início
-          </button>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-            <Inbox className="w-8 h-8 mr-3 text-blue-600" />
-            Respostas dos Clientes
-          </h1>
-        </div>
-        <div className="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 font-medium text-gray-600">
-          Total: {responses.length}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-        </div>
-      ) : responses.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-100">
-          <Inbox className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-gray-700">Nenhuma resposta ainda</h3>
-          <p className="text-gray-500 mt-2">Assim que seus clientes preencherem o formulário, elas aparecerão aqui.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {responses.map((resp) => (
-            <div key={resp.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              
-              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">{resp.nomeMarca}</h3>
-                  <p className="text-gray-500 text-sm flex items-center mt-1">
-                    <User className="w-4 h-4 mr-1" /> {resp.nomeCliente}
-                  </p>
-                </div>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md font-medium">
-                  {resp.createdAt ? new Date(resp.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit' }) : 'Data desconhecida'}
-                </span>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex items-start">
-                  <AtSign className="w-4 h-4 text-gray-400 mt-1 mr-2 flex-shrink-0" />
-                  <div>
-                    <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</span>
-                    <span className="text-gray-800">{resp.email}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <Briefcase className="w-4 h-4 text-gray-400 mt-1 mr-2 flex-shrink-0" />
-                  <div>
-                    <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Nicho</span>
-                    <span className="text-gray-800">{resp.nicho}</span>
-                  </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email de Contacto</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400 text-sm"></i>
+                        <input type="email" id="email" required class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="seuemail@exemplo.com">
+                    </div>
                 </div>
 
-                <div className="flex items-start">
-                  <Palette className="w-4 h-4 text-gray-400 mt-1 mr-2 flex-shrink-0" />
-                  <div>
-                    <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Cores</span>
-                    <span className="text-gray-800">{resp.cores}</span>
-                  </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Segmento / Área de Atuação</label>
+                    <input type="text" id="nicho" required class="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="Ex: Moda, Gastronomia, Tecnologia...">
                 </div>
-              </div>
 
-              <div className="border-t border-gray-100 pt-4">
-                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
-                  <Sparkles className="w-4 h-4 mr-1" /> Símbolos Escolhidos
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {resp.objetos && resp.objetos.length > 0 ? (
-                    resp.objetos.map((obj, i) => (
-                      <span key={i} className="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-full text-sm font-medium">
-                        {obj}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 text-sm italic">Nenhum objeto selecionado</span>
-                  )}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cores de Preferência</label>
+                    <input type="text" id="cores" required class="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition-all" placeholder="Ex: Tons pastéis, preto e dourado...">
                 </div>
-              </div>
 
-            </div>
-          ))}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Elementos Visuais Desejados</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
+                            <input type="checkbox" name="objetos" value="Tipográfico (Letras)" class="w-4 h-4 text-blue-600 rounded">
+                            <span class="ml-3 text-sm text-gray-700">Tipográfico (Letras)</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
+                            <input type="checkbox" name="objetos" value="Ícone Minimalista" class="w-4 h-4 text-blue-600 rounded">
+                            <span class="ml-3 text-sm text-gray-700">Ícone Minimalista</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
+                            <input type="checkbox" name="objetos" value="Símbolo Geométrico" class="w-4 h-4 text-blue-600 rounded">
+                            <span class="ml-3 text-sm text-gray-700">Símbolo Geométrico</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 border-gray-200">
+                            <input type="checkbox" name="objetos" value="Ilustração Orgânica" class="w-4 h-4 text-blue-600 rounded">
+                            <span class="ml-3 text-sm text-gray-700">Ilustração Orgânica</span>
+                        </label>
+                        <div class="flex flex-col p-3 border rounded-lg border-gray-200" id="outro-container">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="check-outro" class="w-4 h-4 text-blue-600 rounded">
+                                <span class="ml-3 text-sm text-gray-700">Outro elemento...</span>
+                            </label>
+                            <input type="text" id="outro-texto" class="hidden mt-2 ml-7 border-b border-gray-300 outline-none text-sm py-1 bg-transparent" placeholder="Descreva aqui...">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit" class="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-200 active:scale-[0.99]">
+                    <i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing
+                </button>
+            </form>
         </div>
-      )}
-    </div>
-  );
-}
+
+        <!-- Mensagem de Sucesso -->
+        <div id="success-msg" class="hidden bg-white p-10 rounded-2xl shadow-xl text-center mt-20 border border-green-50">
+            <div class="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-check text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Enviado com Sucesso!</h2>
+            <p class="text-gray-600 mb-8 leading-relaxed">As suas informações foram registadas. Entraremos em contacto brevemente para dar seguimento ao seu projeto.</p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all">Enviar outra resposta</button>
+        </div>
+
+        <!-- Botão Admin Oculto -->
+        <button onclick="toggleAdminView()" class="fixed bottom-4 right-4 text-gray-200 hover:text-gray-400 p-2 transition-colors focus:outline-none" title="Painel Admin">
+            <i class="fa-solid fa-lock"></i>
+        </button>
+    </main>
+
+    <!-- Visão Administrativa -->
+    <main id="admin-view" class="hidden max-w-6xl mx-auto p-4 py-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+            <div>
+                <button onclick="toggleAdminView()" class="text-gray-400 hover:text-gray-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Voltar ao Formulário
+                </button>
+                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                    <i class="fa-solid fa-clipboard-list mr-3 text-blue-600"></i> Respostas Recebidas
+                </h1>
+            </div>
+            <div id="total-badge" class="mt-4 sm:mt-0 bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-bold border border-blue-100 shadow-sm">
+                A carregar...
+            </div>
+        </div>
+
+        <div id="admin-loader" class="flex justify-center py-20">
+            <div class="loader"></div>
+        </div>
+
+        <div id="responses-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- As respostas aparecerão aqui -->
+        </div>
+    </main>
+
+    <!-- Scripts do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Configuração do seu Projeto
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
+            authDomain: "form-61cb3.firebaseapp.com",
+            projectId: "form-61cb3",
+            storageBucket: "form-61cb3.firebasestorage.app",
+            messagingSenderId: "856018845836",
+            appId: "1:856018845836:web:aca36b5d63287a45afbba9",
+            measurementId: "G-EKPPTKSHH7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const APP_ID = 'form-61cb3';
+
+        let currentUser = null;
+        let isAdminView = false;
+
+        const initialLoader = document.getElementById('initial-loader');
+        const clientView = document.getElementById('client-view');
+        const adminView = document.getElementById('admin-view');
+        const form = document.getElementById('briefing-form');
+        const checkOutro = document.getElementById('check-outro');
+        const outroTexto = document.getElementById('outro-texto');
+
+        // Monitorar estado de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                initialLoader.classList.add('hidden');
+                clientView.classList.remove('hidden');
+                console.log("Sessão ativa:", user.uid);
+            } else {
+                // Tenta entrar anonimamente se não houver user
+                signInAnonymously(auth).catch(err => {
+                    console.error("Erro crítico de autenticação:", err);
+                    alert("Erro ao conectar com o servidor. Por favor, tente novamente mais tarde.");
+                });
+            }
+        });
+
+        // Lógica do Checkbox de texto extra
+        checkOutro.addEventListener('change', (e) => {
+            outroTexto.classList.toggle('hidden', !e.target.checked);
+            if (e.target.checked) outroTexto.focus();
+        });
+
+        // Submissão do Formulário
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+
+            try {
+                const objetosChecked = Array.from(document.querySelectorAll('input[name="objetos"]:checked')).map(el => el.value);
+                if (checkOutro.checked && outroTexto.value.trim()) {
+                    objetosChecked.push(`Personalizado: ${outroTexto.value}`);
+                }
+
+                const payload = {
+                    nomeCliente: document.getElementById('nomeCliente').value,
+                    nomeMarca: document.getElementById('nomeMarca').value,
+                    email: document.getElementById('email').value,
+                    nicho: document.getElementById('nicho').value,
+                    cores: document.getElementById('cores').value,
+                    objetos: objetosChecked,
+                    userId: currentUser.uid,
+                    createdAt: serverTimestamp()
+                };
+
+                // Guardar no caminho oficial
+                const path = collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'respostas');
+                await addDoc(path, payload);
+
+                document.getElementById('form-container').classList.add('hidden');
+                document.getElementById('success-msg').classList.remove('hidden');
+            } catch (err) {
+                console.error("Erro ao guardar dados:", err);
+                alert("Erro ao enviar o briefing. Por favor, verifique a sua ligação.");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
+            }
+        });
+
+        // Navegação para o Admin
+        window.toggleAdminView = () => {
+            isAdminView = !isAdminView;
+            if (isAdminView) {
+                clientView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                loadAdminData();
+            } else {
+                adminView.classList.add('hidden');
+                clientView.classList.remove('hidden');
+            }
+        };
+
+        // Carregamento de Respostas em Tempo Real
+        function loadAdminData() {
+            if (!currentUser) return;
+            
+            const grid = document.getElementById('responses-grid');
+            const totalBadge = document.getElementById('total-badge');
+            const loader = document.getElementById('admin-loader');
+            
+            loader.classList.remove('hidden');
+            grid.innerHTML = '';
+
+            const path = collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'respostas');
+            
+            // Ouvinte em tempo real
+            onSnapshot(path, (snapshot) => {
+                loader.classList.add('hidden');
+                const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Ordenação manual (mais recentes primeiro)
+                docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                
+                totalBadge.innerText = `Total: ${docs.length} Briefings`;
+                
+                if (docs.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400 font-medium">Ainda não recebeu nenhuma resposta.</div>`;
+                    return;
+                }
+
+                grid.innerHTML = docs.map(resp => {
+                    const dataFormatada = resp.createdAt?.seconds 
+                        ? new Date(resp.createdAt.seconds * 1000).toLocaleDateString('pt-PT') 
+                        : 'Agora';
+
+                    return `
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800 leading-tight">${resp.nomeMarca || 'Marca Indefinida'}</h3>
+                                    <p class="text-gray-500 text-sm mt-1 flex items-center">
+                                        <i class="fa-solid fa-user-circle mr-1.5"></i> ${resp.nomeCliente || 'Desconhecido'}
+                                    </p>
+                                </div>
+                                <span class="bg-gray-50 text-gray-400 text-[10px] uppercase font-bold px-2 py-1 rounded border border-gray-100">
+                                    ${dataFormatada}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-5 text-sm">
+                                <div class="bg-gray-50 p-2 rounded">
+                                    <span class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Nicho</span>
+                                    <span class="text-gray-700 font-medium truncate block">${resp.nicho}</span>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded">
+                                    <span class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Email</span>
+                                    <span class="text-gray-700 font-medium truncate block" title="${resp.email}">${resp.email}</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <span class="block text-[10px] text-gray-400 font-bold uppercase mb-2">Preferências de Cores</span>
+                                <p class="text-sm text-gray-600 bg-blue-50/30 p-2 rounded border border-blue-50/50 italic">"${resp.cores}"</p>
+                            </div>
+
+                            <div class="pt-4 border-t border-gray-50">
+                                <span class="block text-[10px] text-gray-400 font-bold uppercase mb-2">Elementos</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${resp.objetos && resp.objetos.length > 0 
+                                        ? resp.objetos.map(obj => `<span class="bg-white border border-gray-200 text-gray-600 px-2 py-0.5 rounded text-[11px] font-medium shadow-sm">${obj}</span>`).join('')
+                                        : '<span class="text-xs text-gray-300 italic">Sem preferências</span>'
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }, (error) => {
+                console.error("Erro na escuta de dados:", error);
+                loader.classList.add('hidden');
+                grid.innerHTML = `<div class="col-span-full p-4 bg-red-50 text-red-600 rounded-lg text-sm text-center">Erro de permissão. Certifique-se de que as regras do Firestore permitem a leitura para o seu UID.</div>`;
+            });
+        }
+    </script>
+</body>
+</html>
