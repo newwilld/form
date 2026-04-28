@@ -21,7 +21,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         
-        /* Estilo para o gatilho discreto */
         .admin-trigger {
             cursor: default;
             transition: color 0.2s;
@@ -36,6 +35,12 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilo para o Modal de Detalhes */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
@@ -187,15 +192,32 @@
             <div class="loader"></div>
         </div>
 
-        <div id="responses-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div id="responses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </main>
+
+    <!-- Modal de Detalhes -->
+    <div id="detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl animate-fade-in">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h2 class="text-xl font-bold text-gray-800">Detalhes do Briefing</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 p-2">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="p-8 overflow-y-auto max-h-[70vh] space-y-6">
+                <!-- Preenchido via JS -->
+            </div>
+            <div class="p-6 border-t bg-gray-50 text-right">
+                <button onclick="closeModal()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-blue-700 transition-colors">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Configuração corrigida do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC3lMDr8wv2sbyKrQ_g_QbwF-La-iBcj2s",
             authDomain: "form-61cb3.firebaseapp.com",
@@ -213,6 +235,7 @@
 
         let currentUser = null;
         let isAdminView = false;
+        let allResponses = [];
 
         const initialLoader = document.getElementById('initial-loader');
         const clientView = document.getElementById('client-view');
@@ -220,8 +243,9 @@
         const form = document.getElementById('briefing-form');
         const checkOutro = document.getElementById('check-outro');
         const outroTexto = document.getElementById('outro-texto');
+        const modal = document.getElementById('detail-modal');
+        const modalContent = document.getElementById('modal-content');
 
-        // Inicialização de Auth robusta
         const initAuth = async () => {
             try {
                 await signInAnonymously(auth);
@@ -247,16 +271,12 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) {
-                alert("Aguardando conexão segura...");
-                return;
-            }
+            if (!currentUser) return;
 
             const btn = document.getElementById('btn-submit');
             const nomeValue = document.getElementById('nomeCliente').value;
             const nichoValue = document.getElementById('nicho').value;
             
-            // Feedback visual de carregamento
             btn.disabled = true;
             btn.innerHTML = '<div class="loader mx-auto" style="width: 20px; height: 20px; border-width: 2px;"></div>';
 
@@ -277,11 +297,9 @@
                     createdAt: serverTimestamp()
                 };
 
-                // Salvando na coleção pública de dados do artefato seguindo as regras de segurança
                 const path = collection(db, 'artifacts', APP_ID, 'public', 'data', 'respostas');
                 await addDoc(path, payload);
 
-                // Preencher e trocar de tela
                 document.getElementById('display-nome').innerText = nomeValue;
                 document.getElementById('display-nicho').innerText = nichoValue;
 
@@ -291,7 +309,7 @@
 
             } catch (err) {
                 console.error("Erro ao salvar:", err);
-                alert("Ocorreu um erro ao enviar seu briefing. Por favor, tente novamente.");
+                alert("Erro ao enviar. Tente novamente.");
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
@@ -309,6 +327,55 @@
             }
         };
 
+        window.openDetails = (id) => {
+            const resp = allResponses.find(r => r.id === id);
+            if (!resp) return;
+
+            const dataFormatada = resp.createdAt?.seconds 
+                ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR') 
+                : 'Data não disponível';
+
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                        <p class="text-xs text-blue-500 font-bold uppercase mb-1">Informações do Cliente</p>
+                        <h3 class="text-xl font-bold text-gray-800">${resp.nomeCliente}</h3>
+                        <p class="text-gray-600">${resp.email}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-400 font-bold uppercase">Nome da Marca</p>
+                            <p class="font-semibold text-gray-800">${resp.nomeMarca}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-bold uppercase">Nicho/Segmento</p>
+                            <p class="font-semibold text-gray-800">${resp.nicho}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-2">Cores de Preferência</p>
+                        <p class="bg-gray-100 p-3 rounded-xl text-gray-700 border border-gray-200">${resp.cores}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${resp.objetos?.map(obj => `<span class="bg-white border border-gray-300 px-3 py-1 rounded-full text-sm text-gray-700">${obj}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-400">Registrado em: ${dataFormatada}</p>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeModal = () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+
         function loadAdminData() {
             if (!currentUser) return;
             const grid = document.getElementById('responses-grid');
@@ -316,51 +383,43 @@
             const loader = document.getElementById('admin-loader');
             
             loader.classList.remove('hidden');
-            grid.innerHTML = '';
 
             const path = collection(db, 'artifacts', APP_ID, 'public', 'data', 'respostas');
             
             onSnapshot(path, (snapshot) => {
                 loader.classList.add('hidden');
-                const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
-                // Ordenação manual para evitar necessidade de índices no Firestore
-                docs.sort((a, b) => {
-                    const dateA = a.createdAt?.seconds || 0;
-                    const dateB = b.createdAt?.seconds || 0;
-                    return dateB - dateA;
-                });
+                allResponses.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
-                totalBadge.innerText = `Total: ${docs.length} Briefings`;
+                totalBadge.innerText = `Total: ${allResponses.length} Briefings`;
                 
-                if (docs.length === 0) {
+                if (allResponses.length === 0) {
                     grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-gray-400">Nenhuma resposta encontrada.</div>`;
                     return;
                 }
 
-                grid.innerHTML = docs.map(resp => `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800 leading-tight">${resp.nomeMarca || 'Marca Indefinida'}</h3>
-                                <p class="text-gray-500 text-sm mt-1"><i class="fa-solid fa-user-circle mr-1"></i> ${resp.nomeCliente}</p>
+                grid.innerHTML = allResponses.map(resp => {
+                    const dataHora = resp.createdAt?.seconds 
+                        ? new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                        : 'Recém enviado';
+
+                    return `
+                        <div onclick="openDetails('${resp.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50 transition-all group">
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
+                                <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">${resp.nomeCliente}</h3>
+                            <p class="text-gray-500 text-sm font-medium"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${resp.nomeMarca}</p>
+                            <div class="mt-4 flex items-center text-xs text-blue-600 font-bold">
+                                VER BRIEFING COMPLETO
                             </div>
                         </div>
-                        <div class="text-sm text-gray-600 space-y-1 mb-4">
-                            <p><strong>Nicho:</strong> ${resp.nicho}</p>
-                            <p><strong>Email:</strong> ${resp.email}</p>
-                            <p><strong>Cores:</strong> ${resp.cores}</p>
-                        </div>
-                        <div class="pt-4 border-t border-gray-50">
-                            <div class="flex flex-wrap gap-1.5">
-                                ${resp.objetos?.map(obj => `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-medium border border-blue-100">${obj}</span>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }, (err) => {
                 console.error("Erro na escuta de dados:", err);
-                grid.innerHTML = `<div class="col-span-full text-red-500 p-4 text-center">Erro ao carregar dados. Verifique as permissões.</div>`;
             });
         }
     </script>
