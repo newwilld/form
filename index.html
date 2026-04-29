@@ -823,7 +823,8 @@
             const newData = {
                 nomeCliente: document.getElementById('edit-nome').value.trim(),
                 nomeMarca: document.getElementById('edit-marca').value.trim(),
-                email: document.getElementById('edit-contato').value.trim(),
+                email: document.getElementById('edit-email').value.trim(),
+                contato: document.getElementById('edit-telefone').value.trim(),
                 nicho: document.getElementById('edit-nicho').value.trim(),
                 valor: parseFloat(document.getElementById('edit-valor').value) || 0,
                 status: document.getElementById('edit-status').value,
@@ -856,7 +857,8 @@
             } else if (resp.data) { dataFormatada = resp.data.split('-').reverse().join('/'); }
 
             const displayNome = resp.nomeCliente || resp.nome || '';
-            const displayEmail = resp.email || resp.contato || '';
+            const displayEmail = resp.email || '';
+            const displayTelefone = resp.contato || '';
             const displayMarca = resp.nomeMarca || resp.empresa || '';
             const displayNicho = resp.nicho || resp.tipo || '';
 
@@ -872,8 +874,12 @@
                             <input type="text" id="edit-marca" value="${displayMarca}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Contato / E-mail / Telefone</label>
-                            <input type="text" id="edit-contato" value="${displayEmail}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">E-mail</label>
+                            <input type="email" id="edit-email" value="${displayEmail}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Número (WhatsApp/Tel)</label>
+                            <input type="text" id="edit-telefone" value="${displayTelefone}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Nicho / Tipo de Serviço</label>
@@ -942,7 +948,10 @@
                         <div class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-2xl border border-blue-100 dark:border-blue-900/50">
                             <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase mb-1">Informações do Cliente</p>
                             <h3 class="text-2xl font-black text-gray-800 dark:text-white">${displayNome || 'Não informado'}</h3>
-                            <p class="text-gray-600 dark:text-gray-300 font-medium">${displayEmail || 'Não informado'}</p>
+                            <div class="mt-2 space-y-1">
+                                <p class="text-gray-600 dark:text-gray-300 font-medium flex items-center"><i class="fa-solid fa-envelope w-5 opacity-70"></i>${displayEmail || 'Sem e-mail'}</p>
+                                <p class="text-gray-600 dark:text-gray-300 font-medium flex items-center"><i class="fa-brands fa-whatsapp w-5 opacity-70"></i>${displayTelefone || 'Sem número cadastrado'}</p>
+                            </div>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
@@ -1020,7 +1029,7 @@
             const dateEnd = document.getElementById('filter-date-end').value;
 
             filteredResponses = allResponses.filter(r => {
-                // Filtro de Busca (Texto)
+                // Filtro de Busca (Texto) - Agora busca por email e contato separadamente
                 const textStr = [r.nomeCliente, r.nome, r.nomeMarca, r.empresa, r.email, r.contato, r.obs, r.nicho, r.tipo].join(' ').toLowerCase();
                 if (searchTerm && !textStr.includes(searchTerm)) return false;
 
@@ -1147,7 +1156,10 @@
 
                 const displayNome = resp.nomeCliente || resp.nome || 'Sem nome';
                 const displayMarca = resp.nomeMarca || resp.empresa || 'Sem marca/empresa';
-                const displayContato = resp.email || resp.contato || 'Sem contato';
+                
+                // Agora os cards mostram E-mail e Telefone separados se existirem
+                const displayEmail = resp.email || 'Sem e-mail';
+                const displayTelefone = resp.contato || 'Sem telefone';
                 
                 // Colorir borda se selecionado
                 const cardClass = isSelected ? 'ring-2 ring-blue-500 bg-blue-50/20 dark:bg-blue-900/20' : 'hover:border-blue-300 dark:hover:border-blue-500';
@@ -1169,7 +1181,11 @@
                         </div>
                         <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors pr-6">${displayNome}</h3>
                         <p class="text-gray-500 dark:text-gray-400 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${displayMarca}</p>
-                        <p class="text-gray-400 dark:text-gray-500 text-xs mt-1 mb-2"><i class="fa-solid fa-envelope mr-1 opacity-50"></i> ${displayContato}</p>
+                        
+                        <div class="mt-2 mb-3">
+                            <p class="text-gray-400 dark:text-gray-500 text-xs truncate"><i class="fa-solid fa-envelope mr-1 opacity-50 w-4"></i> ${displayEmail}</p>
+                            <p class="text-gray-400 dark:text-gray-500 text-xs mt-1 truncate"><i class="fa-brands fa-whatsapp mr-1 opacity-50 w-4"></i> ${displayTelefone}</p>
+                        </div>
                         
                         ${resp.status ? `<div class="mt-auto pt-3 border-t border-gray-50 dark:border-gray-700"><span class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">Status:</span> <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">${resp.status}</span></div>` : ''}
                         
