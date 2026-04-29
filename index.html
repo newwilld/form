@@ -23,7 +23,14 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: {} }
+            theme: { 
+                extend: {
+                    colors: {
+                        darkBg: '#000000',
+                        darkSurface: '#09090b'
+                    }
+                } 
+            }
         }
     </script>
     
@@ -40,7 +47,7 @@
         
         .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; will-change: opacity, transform; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; }
-        .loader-dark { border: 3px solid #374151; border-top: 3px solid #60a5fa; }
+        .loader-dark { border: 3px solid #27272a; border-top: 3px solid #60a5fa; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -50,7 +57,7 @@
         .admin-trigger { cursor: pointer; transition: color 0.2s; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; }
         .admin-trigger:hover { color: #3b82f6; }
         
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); will-change: backdrop-filter; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); will-change: backdrop-filter; }
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
@@ -58,34 +65,34 @@
         /* ✨ EFEITO LIQUID GLASS (GLASSMORPHISM) ✨ */
         /* ========================================= */
         .glass-card {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
         }
         .dark .glass-card {
-            background: rgba(31, 41, 55, 0.65);
-            border: 1px solid rgba(75, 85, 99, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            background: rgba(24, 24, 27, 0.75);
+            border: 1px solid rgba(63, 63, 70, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
         }
 
         .image-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         .image-preview-item { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 2px solid #e5e7eb; background-color: #f3f4f6; }
-        .dark .image-preview-item { border-color: #4b5563; background-color: #374151; }
+        .dark .image-preview-item { border-color: #3f3f46; background-color: #18181b; }
         .image-preview-item img { width: 100%; height: 100%; object-fit: cover; }
         .image-preview-item .remove-btn { position: absolute; top: 5px; right: 5px; background: rgba(239, 68, 68, 0.9); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: all 0.2s; }
         .image-preview-item .remove-btn:hover { background: rgba(220, 38, 38, 1); transform: scale(1.1); }
 
         .upload-area { border: 2px dashed #d1d5db; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(255,255,255,0.4); }
-        .dark .upload-area { border-color: #4b5563; background: rgba(31,41,55,0.4); }
+        .dark .upload-area { border-color: #3f3f46; background: rgba(24,24,27,0.4); }
         .upload-area:hover, .upload-area.dragover { border-color: #3b82f6; background: rgba(239,246,255,0.6); }
-        .dark .upload-area:hover, .dark .upload-area.dragover { border-color: #60a5fa; background: rgba(55,65,81,0.6); }
+        .dark .upload-area:hover, .dark .upload-area.dragover { border-color: #60a5fa; background: rgba(39,39,42,0.6); }
         .upload-area.dragover { transform: scale(1.02); }
 
         .admin-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
         .admin-image-item { aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid #e5e7eb; transition: all 0.2s; }
-        .dark .admin-image-item { border-color: #4b5563; }
+        .dark .admin-image-item { border-color: #3f3f46; }
         .admin-image-item:hover { border-color: #3b82f6; transform: scale(1.03); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
         .admin-image-item img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -99,7 +106,7 @@
         .dark .sortable-ghost { background-color: rgba(30,58,138,0.8) !important; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-slate-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen">
+<body class="bg-gradient-to-br from-slate-50 to-slate-200 dark:from-black dark:to-zinc-900 text-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen">
 
     <!-- Botão Dark Mode Global -->
     <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-[70] glass-card text-gray-800 dark:text-gray-200 p-3 w-12 h-12 rounded-full transition-all hover:scale-110 flex items-center justify-center">
@@ -118,7 +125,7 @@
     <main id="client-view" class="hidden max-w-2xl mx-auto p-4 py-8 relative min-h-screen">
         <div id="form-container" class="glass-card rounded-3xl p-6 sm:p-8 mt-4 animate-fade-in">
             <div class="mb-8 text-center">
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Briefing de Marca</h1>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2 tracking-tight">Briefing de Marca</h1>
                 <p class="text-gray-500 dark:text-gray-400">
                     Ajude-nos a entender a sua visão para criarmos 
                     <span onclick="showAdminLogin()" class="admin-trigger dark:text-blue-400">algo incrível.</span>
@@ -131,14 +138,14 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Cliente</label>
                         <div class="relative">
                             <i class="fa-solid fa-user absolute left-3 top-3.5 text-gray-400 text-sm"></i>
-                            <input type="text" id="nomeCliente" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Seu nome completo">
+                            <input type="text" id="nomeCliente" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-zinc-800" placeholder="Seu nome completo">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome da Marca</label>
                         <div class="relative">
                             <i class="fa-solid fa-briefcase absolute left-3 top-3.5 text-gray-400 text-sm"></i>
-                            <input type="text" id="nomeMarca" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Ex: Studio Alpha">
+                            <input type="text" id="nomeMarca" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-zinc-800" placeholder="Ex: Studio Alpha">
                         </div>
                     </div>
                 </div>
@@ -147,45 +154,45 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email para Receber Arquivos</label>
                     <div class="relative">
                         <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400 text-sm"></i>
-                        <input type="email" id="email" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="seuemail@exemplo.com">
+                        <input type="email" id="email" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-zinc-800" placeholder="seuemail@exemplo.com">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Segmento / Área de Atuação</label>
-                    <input type="text" id="nicho" required class="w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Ex: Moda, Gastronomia, Tecnologia...">
+                    <input type="text" id="nicho" required class="w-full rounded-xl border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-zinc-800" placeholder="Ex: Moda, Gastronomia, Tecnologia...">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cores de Preferência</label>
-                    <input type="text" id="cores" required class="w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Ex: Azul e Branco, Vermelho e Branco...">
+                    <input type="text" id="cores" required class="w-full rounded-xl border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-zinc-800" placeholder="Ex: Azul e Branco, Vermelho e Branco...">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Elementos Visuais Desejados</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/80 border border-white/50 dark:border-zinc-700/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Tipográfico (Letras)" class="w-4 h-4 text-blue-600 rounded">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Junção de Letras</span>
+                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-200">Junção de Letras</span>
                         </label>
-                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/80 border border-white/50 dark:border-zinc-700/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Ícone Minimalista" class="w-4 h-4 text-blue-600 rounded">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Ícone Minimalista</span>
+                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-200">Ícone Minimalista</span>
                         </label>
-                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/80 border border-white/50 dark:border-zinc-700/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Símbolo Geométrico" class="w-4 h-4 text-blue-600 rounded">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Símbolo Geométrico</span>
+                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-200">Símbolo Geométrico</span>
                         </label>
-                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-zinc-800/40 dark:hover:bg-zinc-800/80 border border-white/50 dark:border-zinc-700/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Ilustração Orgânica" class="w-4 h-4 text-blue-600 rounded">
-                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Ilustração Orgânica</span>
+                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-200">Ilustração Orgânica</span>
                         </label>
-                        <div class="flex flex-col p-3 rounded-xl bg-white/40 dark:bg-gray-700/40 border border-white/50 dark:border-gray-600/50 shadow-sm" id="outro-container">
+                        <div class="flex flex-col p-3 rounded-xl bg-white/40 dark:bg-zinc-800/40 border border-white/50 dark:border-zinc-700/50 shadow-sm" id="outro-container">
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" id="check-outro" class="w-4 h-4 text-blue-600 rounded">
-                                <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Outro elemento...</span>
+                                <span class="ml-3 text-sm text-gray-700 dark:text-gray-200">Outro elemento...</span>
                             </label>
-                            <input type="text" id="outro-texto" class="hidden mt-2 ml-7 border-b border-gray-400 dark:border-gray-500 outline-none text-sm py-1 bg-transparent dark:text-white" placeholder="Descreva aqui...">
+                            <input type="text" id="outro-texto" class="hidden mt-2 ml-7 border-b border-gray-400 dark:border-zinc-600 outline-none text-sm py-1 bg-transparent dark:text-white" placeholder="Descreva aqui...">
                         </div>
                     </div>
                 </div>
@@ -217,7 +224,7 @@
             
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Entendido! 🚀🎯</h2>
             
-            <div class="space-y-4 text-left bg-white/40 dark:bg-gray-800/40 p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 mb-8 shadow-sm">
+            <div class="space-y-4 text-left bg-white/40 dark:bg-zinc-800/40 p-6 rounded-2xl border border-white/50 dark:border-zinc-700/50 mb-8 shadow-sm">
                 <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
                     Com base em nossa experiência desde 2010 criando mais de 1 mil marcas + 
                     <span class="font-bold text-blue-600 dark:text-blue-400">SEU NOME</span> + 
@@ -231,7 +238,7 @@
                     de uma forma que fique além de bonita, profissional, legível com clareza e memorável 🧑🏼‍🎨🖼️
                 </p>
                 
-                <div class="pt-4 border-t border-gray-300/50 dark:border-gray-600/50 mt-2 space-y-2">
+                <div class="pt-4 border-t border-gray-300/50 dark:border-zinc-600/50 mt-2 space-y-2">
                     <p class="text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
                         🚀🎯🧑🏼‍🎨🖼️ Assim que finalizar te enviamos atualizações.
                     </p>
@@ -245,7 +252,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <button onclick="resetForm()" class="bg-white/60 dark:bg-gray-700/60 border border-white/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-white dark:hover:bg-gray-600 transition-all text-sm flex-1 sm:flex-none shadow-sm">
+                <button onclick="resetForm()" class="bg-white/60 dark:bg-zinc-700/60 border border-white/50 dark:border-zinc-600/50 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-white dark:hover:bg-zinc-600 transition-all text-sm flex-1 sm:flex-none shadow-sm">
                     Voltar ao início
                 </button>
                 <a href="https://api.whatsapp.com/send?phone=5579988645865&text=Oi" target="_blank" class="bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-200/50 dark:shadow-none flex items-center justify-center text-sm flex-1 sm:flex-none">
@@ -257,8 +264,8 @@
 
     <!-- Modal de Login Admin -->
     <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border dark:border-gray-700">
-            <div class="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700">
+        <div class="glass-card rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border dark:border-zinc-700">
+            <div class="p-6 border-b dark:border-zinc-700 flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700">
                 <h2 class="text-xl font-bold text-white flex items-center"><i class="fa-solid fa-lock mr-3"></i> Acesso Administrativo</h2>
                 <button onclick="closeLoginModal()" class="text-white/80 hover:text-white p-2 transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
             </div>
@@ -268,14 +275,14 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                         <div class="relative">
                             <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
-                            <input type="email" id="login-email" required class="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none" placeholder="admin@exemplo.com">
+                            <input type="email" id="login-email" required class="pl-10 w-full rounded-lg border border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-4 py-3 outline-none" placeholder="admin@exemplo.com">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Senha</label>
                         <div class="relative">
                             <i class="fa-solid fa-key absolute left-3 top-3.5 text-gray-400"></i>
-                            <input type="password" id="login-password" required class="pl-10 pr-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none" placeholder="••••••••">
+                            <input type="password" id="login-password" required class="pl-10 pr-10 w-full rounded-lg border border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-4 py-3 outline-none" placeholder="••••••••">
                             <i class="fa-solid fa-eye absolute right-3 top-3.5 text-gray-400 password-toggle cursor-pointer" onclick="togglePassword()"></i>
                         </div>
                     </div>
@@ -292,12 +299,12 @@
 
     <!-- Visão Administrativa -->
     <main id="admin-view" class="hidden max-w-7xl mx-auto p-4 py-8 animate-fade-in">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 border-b border-gray-300/30 dark:border-gray-700/50 pb-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 border-b border-gray-300/30 dark:border-zinc-700/50 pb-4">
             <div>
                 <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
                     <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sair do Painel
                 </button>
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white flex items-center">
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white flex items-center tracking-tight">
                     <i class="fa-solid fa-clipboard-list mr-3 text-blue-600"></i> CRM & Projetos
                 </h1>
             </div>
@@ -315,10 +322,10 @@
                 <!-- Botões Importar e Exportar -->
                 <div class="flex gap-2">
                     <input type="file" id="import-json-input" accept=".json" class="hidden">
-                    <button onclick="triggerImportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
+                    <button onclick="triggerImportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
                         <i class="fa-solid fa-file-import mr-2 text-blue-500"></i> Importar
                     </button>
-                    <button onclick="exportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
+                    <button onclick="exportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
                         <i class="fa-solid fa-file-export mr-2 text-green-500"></i> Exportar
                     </button>
                 </div>
@@ -351,12 +358,12 @@
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Buscar Cliente</label>
                 <div class="relative">
                     <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="filter-search" oninput="applyFilters()" class="pl-10 w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm" placeholder="Nome, empresa, e-mail...">
+                    <input type="text" id="filter-search" oninput="applyFilters()" class="pl-10 w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm" placeholder="Nome, empresa, e-mail...">
                 </div>
             </div>
             <div class="w-full md:w-1/6">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Status do Pedido</label>
-                <select id="filter-status" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
+                <select id="filter-status" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
                     <option value="todos">Todos</option>
                     <option value="realizando">Realizando</option>
                     <option value="pendente">Pendente</option>
@@ -365,14 +372,14 @@
             </div>
             <div class="w-full md:w-1/5">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data de Início</label>
-                <input type="date" id="filter-date-start" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
+                <input type="date" id="filter-date-start" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
             </div>
             <div class="w-full md:w-1/5">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data Final</label>
-                <input type="date" id="filter-date-end" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
+                <input type="date" id="filter-date-end" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
             </div>
             <div class="w-full md:w-auto flex items-end">
-                <button onclick="clearFilters()" class="w-full md:w-auto bg-white/60 dark:bg-gray-700/60 hover:bg-white/90 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium transition-colors border border-white/50 dark:border-gray-600/50 h-[42px] whitespace-nowrap flex items-center justify-center shadow-sm">
+                <button onclick="clearFilters()" class="w-full md:w-auto bg-white/60 dark:bg-zinc-800/60 hover:bg-white/90 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium transition-colors border border-white/50 dark:border-zinc-700/50 h-[42px] whitespace-nowrap flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-eraser mr-2"></i> Limpar
                 </button>
             </div>
@@ -400,16 +407,16 @@
         <div id="responses-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 min-h-[200px]"></div>
 
         <!-- Paginação -->
-        <div id="pagination-container" class="hidden flex items-center justify-between border-t border-gray-300/30 dark:border-gray-700/50 pt-6 mt-4">
-            <button id="btn-prev-page" onclick="changePage(-1)" class="flex items-center px-4 py-2 glass-card text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        <div id="pagination-container" class="hidden flex items-center justify-between border-t border-gray-300/30 dark:border-zinc-700/50 pt-6 mt-4">
+            <button id="btn-prev-page" onclick="changePage(-1)" class="flex items-center px-4 py-2 glass-card text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-zinc-800/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-chevron-left mr-2"></i> Anterior
             </button>
             <div class="flex items-center gap-2 glass-card px-3 py-1.5 rounded-lg">
                 <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 hidden sm:inline">Página</span>
-                <input type="number" id="page-input" class="w-16 px-2 py-1 text-center border border-white/50 dark:border-gray-600/50 bg-white/50 dark:bg-gray-700/50 dark:text-white rounded-md text-sm font-semibold outline-none focus:border-blue-500 transition-all shadow-sm" min="1" value="1" onchange="goToPage(this.value)">
+                <input type="number" id="page-input" class="w-16 px-2 py-1 text-center border border-white/50 dark:border-zinc-700/50 bg-white/50 dark:bg-zinc-800/50 dark:text-white rounded-md text-sm font-semibold outline-none focus:border-blue-500 transition-all shadow-sm" min="1" value="1" onchange="goToPage(this.value)">
                 <span class="text-sm font-semibold text-gray-600 dark:text-gray-400" id="total-pages-info">de 1</span>
             </div>
-            <button id="btn-next-page" onclick="changePage(1)" class="flex items-center px-4 py-2 glass-card text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <button id="btn-next-page" onclick="changePage(1)" class="flex items-center px-4 py-2 glass-card text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-zinc-800/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 Próxima <i class="fa-solid fa-chevron-right ml-2"></i>
             </button>
         </div>
@@ -417,27 +424,27 @@
 
     <!-- Modal de Visão Geral Avançada -->
     <div id="overview-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border dark:border-gray-700">
-            <div class="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800 shrink-0">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border dark:border-zinc-700">
+            <div class="p-6 border-b dark:border-zinc-700 flex justify-between items-center bg-gray-50 dark:bg-zinc-800 shrink-0">
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center"><i class="fa-solid fa-chart-line mr-3 text-purple-600"></i> Painel de Controle e Desempenho</h2>
                 <button onclick="closeOverviewModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2"><i class="fa-solid fa-xmark text-2xl"></i></button>
             </div>
             
-            <div class="p-6 overflow-y-auto space-y-8 grow bg-gray-50/50 dark:bg-gray-900/50">
+            <div class="p-6 overflow-y-auto space-y-8 grow bg-gray-50/50 dark:bg-zinc-900/50">
                 
                 <!-- KPIs Principais Financeiros -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+                    <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 relative overflow-hidden">
                         <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -mr-4 -mt-4 z-0"></div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase relative z-10">Faturamento Bruto</p>
                         <p class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-2 relative z-10" id="ov-faturamento">R$ 0,00</p>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+                    <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 relative overflow-hidden">
                         <div class="absolute right-0 top-0 w-24 h-24 bg-green-50 dark:bg-green-900/20 rounded-bl-full -mr-4 -mt-4 z-0"></div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase relative z-10">Lucro Líquido</p>
                         <p class="text-3xl font-black text-green-600 dark:text-green-400 mt-2 relative z-10" id="ov-lucro">R$ 0,00</p>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+                    <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 relative overflow-hidden">
                         <div class="absolute right-0 top-0 w-24 h-24 bg-purple-50 dark:bg-purple-900/20 rounded-bl-full -mr-4 -mt-4 z-0"></div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase relative z-10">Ticket Médio</p>
                         <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-2 relative z-10" id="ov-ticket">R$ 0,00</p>
@@ -454,7 +461,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Gráfico -->
-                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="lg:col-span-2 bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
                         <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Evolução de Vendas</h3>
                         <div class="h-64 relative w-full">
                             <canvas id="salesChart"></canvas>
@@ -463,7 +470,7 @@
                     
                     <!-- Top Serviços & Desempenho Meses -->
                     <div class="space-y-6">
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Desempenho</h3>
                             <div class="space-y-4">
                                 <div>
@@ -477,7 +484,7 @@
                             </div>
                         </div>
                         
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">Top Serviços (Segmento/Tipo)</h3>
                             <div id="ov-top-services" class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                 <!-- Preenchido JS -->
@@ -487,21 +494,21 @@
                 </div>
 
                 <!-- Configuração de Custos -->
-                <div class="bg-red-50 dark:bg-gray-800 border border-red-100 dark:border-red-900/50 p-6 rounded-2xl shadow-sm">
+                <div class="bg-red-50 dark:bg-zinc-800 border border-red-100 dark:border-red-900/50 p-6 rounded-2xl shadow-sm">
                     <h3 class="text-lg font-bold text-red-800 dark:text-red-400 mb-4 flex items-center"><i class="fa-solid fa-calculator mr-2"></i> Gestão de Custos (Abatidos do Lucro Líquido)</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Investimento em Anúncios (Total Gasto)</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-3 text-gray-500 font-bold">R$</span>
-                                <input type="number" id="config-ads" step="0.01" class="pl-10 w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-red-400 outline-none">
+                                <input type="number" id="config-ads" step="0.01" class="pl-10 w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-3 dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-red-400 outline-none">
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Outras Despesas Totais</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-3 text-gray-500 font-bold">R$</span>
-                                <input type="number" id="config-expenses" step="0.01" class="pl-10 w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-red-400 outline-none">
+                                <input type="number" id="config-expenses" step="0.01" class="pl-10 w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-3 dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-red-400 outline-none">
                             </div>
                         </div>
                     </div>
@@ -516,8 +523,8 @@
 
     <!-- Modal de Detalhes / Edição de Registro -->
     <div id="detail-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border dark:border-gray-700">
-            <div class="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800 shrink-0">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border dark:border-zinc-700">
+            <div class="p-6 border-b dark:border-zinc-700 flex justify-between items-center bg-gray-50 dark:bg-zinc-800 shrink-0">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-white" id="detail-modal-title">Detalhes do Registro</h2>
                 <div class="flex gap-3">
                     <button id="btn-toggle-edit" class="text-blue-600 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center">
@@ -536,14 +543,14 @@
 
     <!-- Modal de Confirmação de Exclusão -->
     <div id="delete-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-fade-in text-center p-6 border dark:border-gray-700">
+        <div class="bg-white dark:bg-zinc-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-fade-in text-center p-6 border dark:border-zinc-700">
             <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
             </div>
             <h2 id="delete-modal-title" class="text-xl font-bold text-gray-800 dark:text-white mb-2">Excluir Registro?</h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Esta ação não pode ser desfeita. O registro será removido permanentemente.</p>
             <div class="flex gap-3 justify-center">
-                <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors w-full">Cancelar</button>
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-zinc-600 transition-colors w-full">Cancelar</button>
                 <button id="btn-confirm-delete" class="px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors w-full flex items-center justify-center">
                     Excluir
                 </button>
@@ -620,7 +627,6 @@
                     if (user) {
                         currentUser = user;
                         
-                        // !user.isAnonymous é a forma mais segura de confirmar que é um Admin autênticado por Email/Senha
                         isAdminLoggedIn = !user.isAnonymous; 
                         
                         document.getElementById('initial-loader').classList.add('hidden');
@@ -635,7 +641,6 @@
                             document.getElementById('admin-view').classList.add('hidden');
                         }
                     } else {
-                        // Apenas cria anônimo se não houver NENHUM dado de usuário salvo
                         signInAnonymously(auth).catch(err => console.error("Erro na autenticação anônima:", err));
                     }
                 });
@@ -651,7 +656,6 @@
                 document.body.style.overflow = 'hidden';
             }
             
-            // Buscar Configurações Financeiras (Despesas e Ads)
             let expenses = { ads: 0, total: 0 };
             try {
                 const docRef = doc(db, 'settings', 'finance');
@@ -732,7 +736,7 @@
 
             const container = document.getElementById('overview-periods');
             container.innerHTML = periods.map(p => `
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center flex flex-col justify-center">
+                <div class="glass-card p-4 rounded-xl text-center flex flex-col justify-center">
                     <p class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 truncate">${p.label}</p>
                     <p class="text-xl font-black text-gray-800 dark:text-white">${p.data.count}</p>
                     <p class="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">${formatMoney(p.data.valor)}</p>
@@ -749,7 +753,6 @@
             document.getElementById('ov-lucro').innerText = formatMoney(lucro);
             document.getElementById('ov-ticket').innerText = formatMoney(ticketMedio);
 
-            // Gráfico & Mensal
             const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
             const monthlySales = {};
             allResponses.forEach(r => {
@@ -775,7 +778,6 @@
             document.getElementById('ov-melhor-mes').innerText = `${melhorMes.name} (${formatMoney(melhorMes.valor)})`;
             document.getElementById('ov-pior-mes').innerText = `${piorMes.name} (${formatMoney(piorMes.valor)})`;
 
-            // Top Serviços
             const serviceCounts = {};
             allResponses.forEach(r => {
                 const s = r.tipo || r.nicho || r.segmento || 'Não especificado';
@@ -783,15 +785,14 @@
             });
             const topServices = Object.keys(serviceCounts).sort((a,b) => serviceCounts[b] - serviceCounts[a]).slice(0, 5);
             document.getElementById('ov-top-services').innerHTML = topServices.length ? topServices.map((s, i) => `
-                <div class="flex justify-between border-b dark:border-gray-700 pb-1 mb-1">
+                <div class="flex justify-between border-b dark:border-zinc-700 pb-1 mb-1">
                     <span class="font-medium truncate pr-2"><span class="text-blue-500 mr-2">#${i+1}</span>${s}</span>
                     <span class="font-bold text-gray-500 dark:text-gray-400">${serviceCounts[s]}</span>
                 </div>
             `).join('') : '<p>Dados insuficientes</p>';
 
-            // Render Chart
             const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#9ca3af' : '#4b5563';
+            const textColor = isDark ? '#f4f4f5' : '#4b5563';
             
             if(window.salesChartInstance) window.salesChartInstance.destroy();
             const ctx = document.getElementById('salesChart').getContext('2d');
@@ -802,7 +803,7 @@
                     datasets: [{
                         label: 'Faturamento Mensal (R$)',
                         data: sortedMonths.map(m => monthlySales[m].valor),
-                        backgroundColor: '#8b5cf6', // purple-500
+                        backgroundColor: '#8b5cf6',
                         borderRadius: 6
                     }]
                 },
@@ -811,15 +812,13 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { labels: { color: textColor } } },
                     scales: {
-                        x: { ticks: { color: textColor }, grid: { color: isDark ? '#374151' : '#e5e7eb' } },
-                        y: { ticks: { color: textColor }, grid: { color: isDark ? '#374151' : '#e5e7eb' } }
+                        x: { ticks: { color: textColor }, grid: { color: isDark ? '#27272a' : '#e5e7eb' } },
+                        y: { ticks: { color: textColor }, grid: { color: isDark ? '#27272a' : '#e5e7eb' } }
                     }
                 }
             });
         }
 
-
-        // ============ LÓGICA DE DETALHES E EDIÇÃO ============
         window.openDetails = (id) => {
             currentlyViewingId = id;
             isEditMode = false;
@@ -850,7 +849,6 @@
             try {
                 await window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'respostas', id), newData);
                 isEditMode = false;
-                // a re-renderização ocorrerá via onSnapshot
                 setTimeout(() => { if(currentlyViewingId === id) renderDetailModal(); }, 300);
             } catch(e) { alert("Erro ao atualizar."); btn.innerHTML = 'Tentar Novamente'; }
         }
@@ -883,31 +881,31 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Nome / Cliente</label>
-                            <input type="text" id="edit-nome" value="${displayNome}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <input type="text" id="edit-nome" value="${displayNome}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Empresa / Marca</label>
-                            <input type="text" id="edit-marca" value="${displayMarca}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <input type="text" id="edit-marca" value="${displayMarca}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">E-mail</label>
-                            <input type="email" id="edit-email" value="${displayEmail}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <input type="email" id="edit-email" value="${displayEmail}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Número (WhatsApp/Tel)</label>
-                            <input type="text" id="edit-telefone" value="${displayTelefone}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <input type="text" id="edit-telefone" value="${displayTelefone}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Nicho / Tipo de Serviço</label>
-                            <input type="text" id="edit-nicho" value="${displayNicho}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <input type="text" id="edit-nicho" value="${displayNicho}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Valor Fechado (R$)</label>
-                            <input type="number" step="0.01" id="edit-valor" value="${resp.valor || 0}" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none font-bold text-green-600 dark:text-green-400">
+                            <input type="number" step="0.01" id="edit-valor" value="${resp.valor || 0}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none font-bold text-green-600 dark:text-green-400">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Status</label>
-                            <select id="edit-status" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <select id="edit-status" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                                 <option value="pendente" ${resp.status==='pendente'?'selected':''}>Pendente</option>
                                 <option value="realizando" ${resp.status==='realizando'?'selected':''}>Realizando</option>
                                 <option value="entregue" ${resp.status==='entregue'?'selected':''}>Entregue</option>
@@ -915,7 +913,7 @@
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Prioridade</label>
-                            <select id="edit-prioridade" class="w-full border p-3 rounded-xl mt-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none">
+                            <select id="edit-prioridade" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                                 <option value="" ${!resp.prioridade?'selected':''}>Nenhuma / Normal</option>
                                 <option value="baixa" ${resp.prioridade==='baixa'?'selected':''}>Baixa</option>
                                 <option value="média" ${resp.prioridade==='média'?'selected':''}>Média</option>
@@ -923,18 +921,17 @@
                             </select>
                         </div>
                     </div>
-                    <div class="mt-6 border-t dark:border-gray-700 pt-6 flex justify-end">
+                    <div class="mt-6 border-t dark:border-zinc-700 pt-6 flex justify-end">
                         <button id="btn-save-updates" onclick="saveClientUpdates('${resp.id}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-200 dark:shadow-none transition-all flex items-center">
                             <i class="fa-solid fa-check mr-2"></i> Salvar Alterações
                         </button>
                     </div>
                 `;
             } else {
-                // Modo Visualização Read Only
                 let crmFields = '';
                 if (resp.prioridade || resp.status || resp.valor !== undefined) {
                     crmFields = `
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700">
                             ${resp.prioridade ? `<div><p class="text-[10px] text-gray-500 font-bold uppercase">Prioridade</p><p class="font-semibold text-gray-800 dark:text-white capitalize">${resp.prioridade}</p></div>` : ''}
                             ${resp.status ? `<div><p class="text-[10px] text-gray-500 font-bold uppercase">Status</p><p class="font-semibold text-gray-800 dark:text-white capitalize">${resp.status}</p></div>` : ''}
                             ${resp.tipo || resp.nicho ? `<div><p class="text-[10px] text-gray-500 font-bold uppercase">Tipo de Serviço</p><p class="font-semibold text-gray-800 dark:text-white capitalize">${displayNicho}</p></div>` : ''}
@@ -981,14 +978,14 @@
                             </div>
                         </div>
 
-                        ${resp.cores ? `<div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Cores de Preferência</p><p class="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">${resp.cores}</p></div>` : ''}
+                        ${resp.cores ? `<div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Cores de Preferência</p><p class="bg-gray-100 dark:bg-zinc-800 p-3 rounded-xl text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-zinc-700">${resp.cores}</p></div>` : ''}
                         ${resp.obs ? `<div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Observações / Detalhes</p><p class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-xl text-yellow-900 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-900/50">${resp.obs}</p></div>` : ''}
-                        ${resp.objetos && resp.objetos.length > 0 ? `<div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais Solicitados</p><div class="flex flex-wrap gap-2">${resp.objetos.map(obj => `<span class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-1 rounded-full text-sm text-gray-700 dark:text-gray-300 shadow-sm">${obj}</span>`).join('')}</div></div>` : ''}
+                        ${resp.objetos && resp.objetos.length > 0 ? `<div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais Solicitados</p><div class="flex flex-wrap gap-2">${resp.objetos.map(obj => `<span class="bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 px-3 py-1 rounded-full text-sm text-gray-700 dark:text-gray-300 shadow-sm">${obj}</span>`).join('')}</div></div>` : ''}
 
                         ${crmFields}
                         ${imagensHTML}
 
-                        <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <div class="pt-4 border-t border-gray-100 dark:border-zinc-700">
                             <p class="text-xs text-gray-400">Data do Registro: ${dataFormatada}</p>
                         </div>
                     </div>
@@ -996,7 +993,6 @@
             }
         }
 
-        // ============ LÓGICA GERAL DE MODAIS ============
         window.viewImage = (event, base64) => {
             event.stopPropagation();
             document.getElementById('image-viewer-img').src = base64;
@@ -1019,7 +1015,6 @@
             }
         });
 
-        // ============ RENDERIZAÇÃO E SORTABLEJS ============
         window.changePage = (direction) => {
             currentPage += direction;
             renderAdminDashboard();
@@ -1045,11 +1040,9 @@
             const dateEnd = document.getElementById('filter-date-end').value;
 
             filteredResponses = allResponses.filter(r => {
-                // Filtro de Busca (Texto) - Agora busca por email e contato separadamente
                 const textStr = [r.nomeCliente, r.nome, r.nomeMarca, r.empresa, r.email, r.contato, r.obs, r.nicho, r.tipo].join(' ').toLowerCase();
                 if (searchTerm && !textStr.includes(searchTerm)) return false;
 
-                // Filtro de Status
                 const rStatus = (r.status || 'pendente').toLowerCase().trim();
                 if (statusFilter !== 'todos') {
                     if (statusFilter === 'realizando' && rStatus !== 'realizando') return false;
@@ -1057,7 +1050,6 @@
                     if (statusFilter === 'pendente' && rStatus !== 'pendente') return false;
                 }
 
-                // Filtro de Data
                 let rDate = null;
                 if (r.createdAt?.seconds) {
                     rDate = new Date(r.createdAt.seconds * 1000);
@@ -1077,7 +1069,7 @@
                 return true;
             });
 
-            currentPage = 1; // Reseta para a primeira página ao filtrar
+            currentPage = 1;
             renderAdminDashboard();
         };
 
@@ -1102,16 +1094,12 @@
             unsubscribeAdmin = onSnapshot(q, (snapshot) => {
                 allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
-                // Aplicar um Default SortOrder para registros antigos que não possuem (baseado no tempo)
                 allResponses.forEach(r => {
                     if(r.sortOrder === undefined) {
                         r.sortOrder = r.createdAt?.seconds ? r.createdAt.seconds * 1000 : (r.data ? new Date(r.data + "T12:00:00").getTime() : 0);
                     }
                 });
 
-                // ORDENAÇÃO:
-                // 1º: Separa "Entregue" para o final.
-                // 2º: Ordena pela ordem manual (sortOrder gerada pelo arrastar/soltar ou fallback data)
                 allResponses.sort((a, b) => {
                     const statusA = (a.status || '').toLowerCase().trim();
                     const statusB = (b.status || '').toLowerCase().trim();
@@ -1121,16 +1109,15 @@
                     if (isAEntregue && !isBEntregue) return 1;
                     if (!isAEntregue && isBEntregue) return -1;
 
-                    return b.sortOrder - a.sortOrder; // Maior (mais recente / arrastado p cima) primeiro
+                    return b.sortOrder - a.sortOrder;
                 });
 
-                applyFilters(); // Aplica os filtros e chama renderAdminDashboard()
+                applyFilters();
                 loader.classList.add('hidden');
             });
         }
 
         function renderAdminDashboard() {
-            // ESTATÍSTICAS RÁPIDAS (Calculadas sobre TODOS os dados globais, ignorando o filtro visual)
             let totalProjetos = allResponses.length;
             let countEntregue = 0, countRealizando = 0, totalValor = 0;
 
@@ -1151,7 +1138,7 @@
             const totalPages = Math.ceil(filteredResponses.length / ITEMS_PER_PAGE) || 1;
             
             if (filteredResponses.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-20 text-center glass-card rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i>Nenhuma resposta ou cliente encontrado.</div>`;
+                grid.innerHTML = `<div class="col-span-full py-20 text-center glass-card rounded-2xl border border-dashed border-gray-300 dark:border-zinc-700 text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i>Nenhuma resposta ou cliente encontrado.</div>`;
                 paginationContainer.classList.add('hidden');
                 updateBulkActionUI();
                 return;
@@ -1166,21 +1153,28 @@
                     dataHora = new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
                 } else if (resp.data) { dataHora = resp.data.split('-').reverse().join('/'); }
 
+                const isAlta = resp.prioridade?.toLowerCase() === 'alta';
                 const imageBadge = resp.totalImagens && resp.totalImagens > 0 ? `<span class="text-[10px] bg-green-50/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 px-2 py-0.5 rounded font-bold"><i class="fa-solid fa-image mr-1"></i>${resp.totalImagens}</span>` : '';
-                const prioridadeBadge = resp.prioridade ? `<span class="text-[10px] ${resp.prioridade.toLowerCase() === 'alta' ? 'bg-red-50/80 dark:bg-red-900/40 text-red-600 dark:text-red-400' : 'bg-gray-100/80 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded font-bold uppercase">${resp.prioridade}</span>` : '';
+                const prioridadeBadge = resp.prioridade ? `<span class="text-[10px] ${isAlta ? 'bg-red-50/80 dark:bg-red-900/40 text-red-600 dark:text-red-400' : 'bg-gray-100/80 dark:bg-zinc-700/60 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded font-bold uppercase">${resp.prioridade}</span>` : '';
                 const isSelected = selectedIds.has(resp.id) ? 'checked' : '';
 
                 const displayNome = resp.nomeCliente || resp.nome || 'Sem nome';
                 const displayMarca = resp.nomeMarca || resp.empresa || 'Sem marca/empresa';
-                
                 const displayEmail = resp.email || 'Sem e-mail';
                 const displayTelefone = resp.contato || 'Sem telefone';
                 
-                // Colorir borda se selecionado
-                const cardClass = isSelected ? 'ring-2 ring-blue-500 !bg-blue-50/60 dark:!bg-blue-900/40' : 'hover:border-white dark:hover:border-gray-500/50';
+                // --- LÓGICA DE DESTAQUE ALTA PRIORIDADE ---
+                const priorityBorder = isAlta ? 'border-red-600 dark:border-red-600 ring-1 ring-red-500/20' : 'border-white/50 dark:border-zinc-700/50';
+                const cardClass = isSelected 
+                    ? 'ring-2 ring-blue-500 !bg-blue-50/60 dark:!bg-blue-900/40 shadow-xl z-10 scale-[1.02]' 
+                    : `hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 ${priorityBorder}`;
+
+                const accentBar = isAlta ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-red-600 rounded-l-2xl z-10 shadow-[2px_0_10px_rgba(220,38,38,0.3)]"></div>' : '';
 
                 return `
-                    <div data-id="${resp.id}" onclick="openDetails('${resp.id}')" class="glass-card rounded-2xl p-3 sm:p-5 cursor-move transition-all duration-300 group animate-fade-in relative flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 ${cardClass}">
+                    <div data-id="${resp.id}" onclick="openDetails('${resp.id}')" class="glass-card rounded-2xl p-3 sm:p-5 cursor-move transition-all duration-300 group animate-fade-in relative flex flex-col h-full ${cardClass}">
+                        ${accentBar}
+                        
                         <div class="flex justify-between items-center mb-2 sm:mb-3">
                             <div class="flex items-center gap-2" onclick="event.stopPropagation()">
                                 <input type="checkbox" class="admin-checkbox w-4 h-4 sm:w-5 sm:h-5 bg-white/50" ${isSelected} onclick="toggleSelection(event, '${resp.id}')">
@@ -1200,15 +1194,14 @@
                             <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium truncate mb-2 sm:mb-0"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${displayMarca}</p>
                         </div>
                         
-                        <!-- EMAIL E CONTATO (OCULTOS NO CELULAR) -->
                         <div class="hidden sm:block mt-2 mb-3">
                             <p class="text-gray-400 dark:text-gray-500 text-xs truncate"><i class="fa-solid fa-envelope mr-1 opacity-50 w-4"></i> ${displayEmail}</p>
                             <p class="text-gray-400 dark:text-gray-500 text-xs mt-1 truncate"><i class="fa-brands fa-whatsapp mr-1 opacity-50 w-4"></i> ${displayTelefone}</p>
                         </div>
                         
-                        ${resp.status ? `<div class="mt-2 sm:mt-auto pt-2 sm:pt-3 border-t border-gray-200/50 dark:border-gray-700/50 flex justify-between items-center"><span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Status</span> <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 capitalize bg-white/60 dark:bg-gray-800/60 px-2 py-0.5 rounded-md shadow-sm border border-white/50 dark:border-gray-600/50">${resp.status}</span></div>` : ''}
+                        ${resp.status ? `<div class="mt-2 sm:mt-auto pt-2 sm:pt-3 border-t border-gray-200/50 dark:border-zinc-800/50 flex justify-between items-center"><span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Status</span> <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-zinc-200 capitalize bg-white/60 dark:bg-zinc-800/60 px-2 py-0.5 rounded-md shadow-sm border border-white/50 dark:border-zinc-700/50">${resp.status}</span></div>` : ''}
                         
-                        <div class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 dark:text-gray-500">
+                        <div class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 dark:text-zinc-500">
                             <i class="fa-solid fa-grip-vertical text-lg sm:text-xl"></i>
                         </div>
                     </div>
@@ -1224,11 +1217,10 @@
 
             updateBulkActionUI();
             
-            // Inicializar/Atualizar Drag & Drop
             if(sortableInstance) sortableInstance.destroy();
             sortableInstance = Sortable.create(document.getElementById('responses-grid'), {
                 animation: 150,
-                delay: 100, // Previne arrastar acidental ao tentar clicar para ver detalhes
+                delay: 100,
                 delayOnTouchOnly: true,
                 onEnd: async function (evt) {
                     if(evt.newIndex === evt.oldIndex) return;
@@ -1242,11 +1234,11 @@
                     if (prevEl && nextEl) {
                         const prevOrder = allResponses.find(r => r.id === prevEl.getAttribute('data-id')).sortOrder;
                         const nextOrder = allResponses.find(r => r.id === nextEl.getAttribute('data-id')).sortOrder;
-                        newSortOrder = (prevOrder + nextOrder) / 2; // Fica exatamente no meio dos dois
-                    } else if (prevEl) { // Foi para o final da página
+                        newSortOrder = (prevOrder + nextOrder) / 2;
+                    } else if (prevEl) {
                         const prevOrder = allResponses.find(r => r.id === prevEl.getAttribute('data-id')).sortOrder;
                         newSortOrder = prevOrder - 100000;
-                    } else if (nextEl) { // Foi para o topo da página
+                    } else if (nextEl) {
                         const nextOrder = allResponses.find(r => r.id === nextEl.getAttribute('data-id')).sortOrder;
                         newSortOrder = nextOrder + 100000;
                     }
@@ -1254,7 +1246,7 @@
                     if(newSortOrder) {
                         try {
                             const r = allResponses.find(x => x.id === itemId);
-                            if(r) r.sortOrder = newSortOrder; // update otimista pra UI nao piscar errado
+                            if(r) r.sortOrder = newSortOrder;
                             await window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'respostas', itemId), { sortOrder: newSortOrder });
                         } catch(e) { console.error('Erro ao salvar nova ordem', e); }
                     }
@@ -1262,12 +1254,10 @@
             });
         }
 
-        // ============ SELEÇÃO EM MASSA ============
         window.toggleSelection = (event, id) => {
             event.stopPropagation();
             if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
             updateBulkActionUI();
-            // Re-render para atualizar a cor do card
             renderAdminDashboard();
         };
 
@@ -1298,7 +1288,6 @@
             document.getElementById('select-all').checked = allSelected;
         }
 
-        // ============ LÓGICA IMPORTAÇÃO E EXPORTAÇÃO JSON ============
         window.exportJSON = () => {
             if (!allResponses || allResponses.length === 0) return alert("Nenhum dado para exportar.");
             const dataToExport = { clientes: allResponses };
@@ -1329,11 +1318,6 @@
                     
                     for (const cliente of json.clientes) {
                         const { id, ...data } = cliente; 
-                        
-                        // O sistema agora salva puramente os dados vindos do JSON (nome, empresa, contato, data, valor, status, obs, prioridade).
-                        // Não injetamos mais a data/hora do servidor na importação, garantindo que o 
-                        // campo "data" ("2026-02-12") assuma a linha do tempo corretamente na visualização.
-                        
                         if (id) await setDoc(doc(db, 'respostas', id), data);
                         else await addDoc(colRef, data);
                         count++;
@@ -1345,7 +1329,6 @@
             reader.readAsText(file);
         });
 
-        // ============ EXCLUSÃO EM MASSA / ÚNICA ============
         window.confirmDelete = (event, id) => {
             event.stopPropagation();
             idsToDelete = [id];
@@ -1390,7 +1373,6 @@
             }
         });
 
-        // ============ AUTENTICAÇÃO PADRÃO ============
         window.togglePassword = () => {
             const passwordInput = document.getElementById('login-password');
             const icon = document.querySelector('.password-toggle');
@@ -1412,7 +1394,7 @@
             e.preventDefault();
             const btnLogin = document.getElementById('btn-login');
             const loginError = document.getElementById('login-error');
-            const modalBox = document.querySelector('#login-modal .bg-white');
+            const modalBox = document.querySelector('#login-modal .glass-card');
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
 
@@ -1440,7 +1422,6 @@
             await signInAnonymously(auth);
         };
         
-        // ============ SISTEMA DE COMPRESSÃO DE IMAGENS ============
         const uploadArea = document.getElementById('upload-area');
         const imageInput = document.getElementById('image-input');
         const previewGrid = document.getElementById('image-preview-grid');
@@ -1456,7 +1437,6 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        // REDUZIDO PARA 800 (Era 1200) PARA GARANTIR QUE NUNCA EXCEDA 1MB DO FIRESTORE
                         const MAX_DIMENSION = 800; 
                         let width = img.width;
                         let height = img.height;
@@ -1478,7 +1458,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // AUMENTADO O NÍVEL DE COMPRESSÃO PARA 0.5 (Era 0.7) PARA ARQUIVOS AINDA MAIS LEVES
                         const dataUrl = canvas.toDataURL('image/webp', 0.5); 
                         resolve({
                             name: file.name,
@@ -1570,7 +1549,6 @@
             updatePreview();
         };
 
-        // Checkbox "Outros"
         const checkOutro = document.getElementById('check-outro');
         const outroTexto = document.getElementById('outro-texto');
 
@@ -1579,7 +1557,6 @@
             if (e.target.checked) outroTexto.focus();
         });
 
-        // Função para Resetar o Formulário sem recarregar a página
         window.resetForm = () => {
             document.getElementById('briefing-form').reset();
             selectedImages = [];
@@ -1591,7 +1568,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // ============ ENVIO DO FORMULÁRIO (CLIENTE) ============
         const form = document.getElementById('briefing-form');
         
         form.addEventListener('submit', async (e) => {
@@ -1628,8 +1604,8 @@
                     totalImagens: selectedImages.length,
                     userId: currentUser.uid,
                     createdAt: serverTimestamp(),
-                    status: 'realizando', // status inicial atualizado
-                    valor: 99.90 // valor padrão para todos os novos clientes
+                    status: 'realizando',
+                    valor: 99.90
                 };
 
                 const colRef = collection(db, 'respostas');
@@ -1641,20 +1617,15 @@
 
             } catch (err) {
                 console.error("Erro ao salvar:", err);
-                
-                // === SISTEMA DE ALERTA INTELIGENTE ===
                 let msgErro = "Ocorreu um erro desconhecido ao enviar. Tente novamente.";
-                
                 if (err.code === 'permission-denied' || (err.message && err.message.includes('permission'))) {
-                    msgErro = "⚠️ ERRO DE PERMISSÃO: Você esqueceu de atualizar as Regras do Firestore no painel do Firebase. Vá em Firestore Database > Rules e adicione 'allow create: if true;'.";
+                    msgErro = "⚠️ ERRO DE PERMISSÃO: Adicione 'allow create: if true;' nas regras do Firestore.";
                 } else if (err.message && (err.message.includes('payload') || err.message.includes('large'))) {
-                    msgErro = "⚠️ ERRO DE TAMANHO: As imagens anexadas estão muito grandes. Remova algumas imagens ou tente enviar arquivos menores.";
+                    msgErro = "⚠️ ERRO DE TAMANHO: Imagens muito grandes.";
                 } else {
                     msgErro = `⚠️ Erro ao enviar: ${err.message}`;
                 }
-                
                 alert(msgErro);
-                
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
