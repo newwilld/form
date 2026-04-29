@@ -54,6 +54,22 @@
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
+        /* ========================================= */
+        /* ✨ EFEITO LIQUID GLASS (GLASSMORPHISM) ✨ */
+        /* ========================================= */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        .dark .glass-card {
+            background: rgba(31, 41, 55, 0.65);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
         .image-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         .image-preview-item { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 2px solid #e5e7eb; background-color: #f3f4f6; }
         .dark .image-preview-item { border-color: #4b5563; background-color: #374151; }
@@ -61,10 +77,10 @@
         .image-preview-item .remove-btn { position: absolute; top: 5px; right: 5px; background: rgba(239, 68, 68, 0.9); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transition: all 0.2s; }
         .image-preview-item .remove-btn:hover { background: rgba(220, 38, 38, 1); transform: scale(1.1); }
 
-        .upload-area { border: 2px dashed #d1d5db; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: #f9fafb; }
-        .dark .upload-area { border-color: #4b5563; background: #1f2937; }
-        .upload-area:hover, .upload-area.dragover { border-color: #3b82f6; background: #eff6ff; }
-        .dark .upload-area:hover, .dark .upload-area.dragover { border-color: #60a5fa; background: #374151; }
+        .upload-area { border: 2px dashed #d1d5db; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(255,255,255,0.4); }
+        .dark .upload-area { border-color: #4b5563; background: rgba(31,41,55,0.4); }
+        .upload-area:hover, .upload-area.dragover { border-color: #3b82f6; background: rgba(239,246,255,0.6); }
+        .dark .upload-area:hover, .dark .upload-area.dragover { border-color: #60a5fa; background: rgba(55,65,81,0.6); }
         .upload-area.dragover { transform: scale(1.02); }
 
         .admin-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -79,14 +95,14 @@
         .admin-checkbox { width: 20px; height: 20px; cursor: pointer; border-radius: 4px; accent-color: #3b82f6; }
         
         /* Ajuste do Drag and Drop */
-        .sortable-ghost { opacity: 0.4; background-color: #eff6ff !important; border: 2px dashed #3b82f6 !important; }
-        .dark .sortable-ghost { background-color: #1e3a8a !important; }
+        .sortable-ghost { opacity: 0.4; background-color: rgba(239,246,255,0.8) !important; border: 2px dashed #3b82f6 !important; }
+        .dark .sortable-ghost { background-color: rgba(30,58,138,0.8) !important; }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+<body class="bg-gradient-to-br from-slate-50 to-slate-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen">
 
     <!-- Botão Dark Mode Global -->
-    <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-[70] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-3 w-12 h-12 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 transition-all hover:scale-110 flex items-center justify-center">
+    <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-[70] glass-card text-gray-800 dark:text-gray-200 p-3 w-12 h-12 rounded-full transition-all hover:scale-110 flex items-center justify-center">
         <i id="theme-icon" class="fa-solid fa-moon"></i>
     </button>
 
@@ -100,7 +116,7 @@
 
     <!-- Visão do Cliente -->
     <main id="client-view" class="hidden max-w-2xl mx-auto p-4 py-8 relative min-h-screen">
-        <div id="form-container" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sm:p-8 mt-4 border border-gray-100 dark:border-gray-700 animate-fade-in">
+        <div id="form-container" class="glass-card rounded-3xl p-6 sm:p-8 mt-4 animate-fade-in">
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Briefing de Marca</h1>
                 <p class="text-gray-500 dark:text-gray-400">
@@ -115,14 +131,14 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Cliente</label>
                         <div class="relative">
                             <i class="fa-solid fa-user absolute left-3 top-3.5 text-gray-400 text-sm"></i>
-                            <input type="text" id="nomeCliente" required class="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none transition-all" placeholder="Seu nome completo">
+                            <input type="text" id="nomeCliente" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Seu nome completo">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome da Marca</label>
                         <div class="relative">
                             <i class="fa-solid fa-briefcase absolute left-3 top-3.5 text-gray-400 text-sm"></i>
-                            <input type="text" id="nomeMarca" required class="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none transition-all" placeholder="Ex: Studio Alpha">
+                            <input type="text" id="nomeMarca" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Ex: Studio Alpha">
                         </div>
                     </div>
                 </div>
@@ -131,45 +147,45 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email para Receber Arquivos</label>
                     <div class="relative">
                         <i class="fa-solid fa-envelope absolute left-3 top-3.5 text-gray-400 text-sm"></i>
-                        <input type="email" id="email" required class="pl-10 w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none transition-all" placeholder="seuemail@exemplo.com">
+                        <input type="email" id="email" required class="pl-10 w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="seuemail@exemplo.com">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Segmento / Área de Atuação</label>
-                    <input type="text" id="nicho" required class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none transition-all" placeholder="Ex: Moda, Gastronomia, Tecnologia...">
+                    <input type="text" id="nicho" required class="w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Ex: Moda, Gastronomia, Tecnologia...">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cores de Preferência</label>
-                    <input type="text" id="cores" required class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-3 outline-none transition-all" placeholder="Ex: Azul e Branco, Vermelho e Branco...">
+                    <input type="text" id="cores" required class="w-full rounded-xl border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 dark:text-white px-4 py-3 outline-none transition-all shadow-sm focus:bg-white dark:focus:bg-gray-700" placeholder="Ex: Azul e Branco, Vermelho e Branco...">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Elementos Visuais Desejados</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Tipográfico (Letras)" class="w-4 h-4 text-blue-600 rounded">
                             <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Junção de Letras</span>
                         </label>
-                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Ícone Minimalista" class="w-4 h-4 text-blue-600 rounded">
                             <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Ícone Minimalista</span>
                         </label>
-                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Símbolo Geométrico" class="w-4 h-4 text-blue-600 rounded">
                             <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Símbolo Geométrico</span>
                         </label>
-                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600">
+                        <label class="flex items-center p-3 rounded-xl cursor-pointer transition-colors bg-white/40 hover:bg-white/70 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 border border-white/50 dark:border-gray-600/50 shadow-sm">
                             <input type="checkbox" name="objetos" value="Ilustração Orgânica" class="w-4 h-4 text-blue-600 rounded">
                             <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Ilustração Orgânica</span>
                         </label>
-                        <div class="flex flex-col p-3 border rounded-lg border-gray-200 dark:border-gray-600" id="outro-container">
+                        <div class="flex flex-col p-3 rounded-xl bg-white/40 dark:bg-gray-700/40 border border-white/50 dark:border-gray-600/50 shadow-sm" id="outro-container">
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" id="check-outro" class="w-4 h-4 text-blue-600 rounded">
                                 <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">Outro elemento...</span>
                             </label>
-                            <input type="text" id="outro-texto" class="hidden mt-2 ml-7 border-b border-gray-300 dark:border-gray-500 outline-none text-sm py-1 bg-transparent dark:text-white" placeholder="Descreva aqui...">
+                            <input type="text" id="outro-texto" class="hidden mt-2 ml-7 border-b border-gray-400 dark:border-gray-500 outline-none text-sm py-1 bg-transparent dark:text-white" placeholder="Descreva aqui...">
                         </div>
                     </div>
                 </div>
@@ -180,7 +196,7 @@
                         Imagens de Referência (Opcional - Máximo 3)
                     </label>
                     <div id="image-preview-grid" class="image-preview-container mb-3"></div>
-                    <div id="upload-area" class="upload-area">
+                    <div id="upload-area" class="upload-area border-white/60 shadow-sm">
                         <input type="file" id="image-input" accept="image/*" multiple class="hidden" max="3">
                         <i id="upload-icon" class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
                         <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">Clique para selecionar imagens</p>
@@ -194,14 +210,14 @@
             </form>
         </div>
 
-        <div id="success-msg" class="hidden bg-white dark:bg-gray-800 p-8 sm:p-10 rounded-3xl shadow-xl text-center mt-10 border border-gray-100 dark:border-gray-700 animate-fade-in max-w-lg mx-auto">
+        <div id="success-msg" class="hidden glass-card p-8 sm:p-10 rounded-3xl text-center mt-10 animate-fade-in max-w-lg mx-auto">
             <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200 dark:shadow-blue-900/50">
                 <i class="fa-solid fa-rocket text-2xl"></i>
             </div>
             
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Entendido! 🚀🎯</h2>
             
-            <div class="space-y-4 text-left bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 mb-8">
+            <div class="space-y-4 text-left bg-white/40 dark:bg-gray-800/40 p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 mb-8 shadow-sm">
                 <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
                     Com base em nossa experiência desde 2010 criando mais de 1 mil marcas + 
                     <span class="font-bold text-blue-600 dark:text-blue-400">SEU NOME</span> + 
@@ -215,7 +231,7 @@
                     de uma forma que fique além de bonita, profissional, legível com clareza e memorável 🧑🏼‍🎨🖼️
                 </p>
                 
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-2 space-y-2">
+                <div class="pt-4 border-t border-gray-300/50 dark:border-gray-600/50 mt-2 space-y-2">
                     <p class="text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
                         🚀🎯🧑🏼‍🎨🖼️ Assim que finalizar te enviamos atualizações.
                     </p>
@@ -229,10 +245,10 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <button onclick="resetForm()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-sm flex-1 sm:flex-none">
+                <button onclick="resetForm()" class="bg-white/60 dark:bg-gray-700/60 border border-white/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-white dark:hover:bg-gray-600 transition-all text-sm flex-1 sm:flex-none shadow-sm">
                     Voltar ao início
                 </button>
-                <a href="https://api.whatsapp.com/send?phone=5579988645865&text=Oi" target="_blank" class="bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-200 dark:shadow-none flex items-center justify-center text-sm flex-1 sm:flex-none">
+                <a href="https://api.whatsapp.com/send?phone=5579988645865&text=Oi" target="_blank" class="bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#20bd5a] transition-all shadow-lg shadow-green-200/50 dark:shadow-none flex items-center justify-center text-sm flex-1 sm:flex-none">
                     <i class="fa-brands fa-whatsapp mr-2 text-lg"></i> Falar no WhatsApp
                 </a>
             </div>
@@ -276,7 +292,7 @@
 
     <!-- Visão Administrativa -->
     <main id="admin-view" class="hidden max-w-7xl mx-auto p-4 py-8 animate-fade-in">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 border-b border-gray-200 dark:border-gray-700 pb-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 border-b border-gray-300/30 dark:border-gray-700/50 pb-4">
             <div>
                 <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
                     <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sair do Painel
@@ -287,60 +303,60 @@
             </div>
             
             <div class="flex items-center gap-4 flex-wrap">
-                <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="text-sm text-gray-600 dark:text-gray-300 flex items-center glass-card px-4 py-2 rounded-full shadow-sm">
                     <i class="fa-solid fa-user-shield mr-2 text-blue-500"></i>
                     <span id="admin-email-display" class="font-medium"></span>
                 </div>
                 
-                <button onclick="openOverviewModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-purple-200 dark:shadow-none flex items-center transform hover:-translate-y-0.5">
+                <button onclick="openOverviewModal()" class="bg-purple-600/90 backdrop-blur-md hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-purple-300/50 dark:shadow-none flex items-center transform hover:-translate-y-0.5 border border-purple-400/50">
                     <i class="fa-solid fa-chart-pie mr-2"></i> Visão Geral
                 </button>
                 
                 <!-- Botões Importar e Exportar -->
                 <div class="flex gap-2">
                     <input type="file" id="import-json-input" accept=".json" class="hidden">
-                    <button onclick="triggerImportJSON()" class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors border border-gray-200 dark:border-gray-600 flex items-center shadow-sm">
+                    <button onclick="triggerImportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
                         <i class="fa-solid fa-file-import mr-2 text-blue-500"></i> Importar
                     </button>
-                    <button onclick="exportJSON()" class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors border border-gray-200 dark:border-gray-600 flex items-center shadow-sm">
+                    <button onclick="exportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
                         <i class="fa-solid fa-file-export mr-2 text-green-500"></i> Exportar
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Dashboard Mini Estatísticas -->
+        <!-- Dashboard Mini Estatísticas com Liquid Glass -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-center transition-all hover:shadow-md">
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-center transition-all hover:-translate-y-1 hover:shadow-lg">
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase mb-1 flex items-center"><i class="fa-solid fa-briefcase text-blue-500 mr-2"></i> Total Projetos</p>
                 <p class="text-3xl font-black text-gray-800 dark:text-white" id="stat-total">0</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-center transition-all hover:shadow-md">
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-center transition-all hover:-translate-y-1 hover:shadow-lg">
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase mb-1 flex items-center"><i class="fa-solid fa-spinner text-yellow-500 mr-2"></i> Realizando</p>
                 <p class="text-3xl font-black text-gray-800 dark:text-white" id="stat-realizando">0</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-center transition-all hover:shadow-md">
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-center transition-all hover:-translate-y-1 hover:shadow-lg">
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase mb-1 flex items-center"><i class="fa-solid fa-check-circle text-green-500 mr-2"></i> Entregue</p>
                 <p class="text-3xl font-black text-gray-800 dark:text-white" id="stat-entregue">0</p>
             </div>
-            <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 p-5 rounded-2xl border border-green-200 dark:border-green-800 shadow-sm flex flex-col justify-center transition-all hover:shadow-md">
-                <p class="text-xs text-green-800 dark:text-green-400 font-bold uppercase mb-1 flex items-center"><i class="fa-solid fa-dollar-sign text-green-600 dark:text-green-400 mr-2"></i> Total em Valor</p>
-                <p class="text-2xl font-black text-green-900 dark:text-green-100" id="stat-valor">R$ 0,00</p>
+            <div class="glass-card !bg-emerald-50/50 dark:!bg-emerald-900/20 !border-emerald-200/50 dark:!border-emerald-800/30 p-5 rounded-2xl flex flex-col justify-center transition-all hover:-translate-y-1 hover:shadow-lg">
+                <p class="text-xs text-emerald-800 dark:text-emerald-400 font-bold uppercase mb-1 flex items-center"><i class="fa-solid fa-dollar-sign text-emerald-600 dark:text-emerald-400 mr-2"></i> Total em Valor</p>
+                <p class="text-2xl font-black text-emerald-900 dark:text-emerald-100" id="stat-valor">R$ 0,00</p>
             </div>
         </div>
 
-        <!-- Seção de Filtros de Busca -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-4 border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-4 items-end z-10 relative">
+        <!-- Seção de Filtros de Busca com Liquid Glass -->
+        <div class="glass-card p-4 rounded-xl mb-4 flex flex-col md:flex-row gap-4 items-end z-10 relative">
             <div class="w-full md:w-1/3">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Buscar Cliente</label>
                 <div class="relative">
                     <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="filter-search" oninput="applyFilters()" class="pl-10 w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 dark:bg-gray-700 dark:text-white outline-none focus:border-blue-500 transition-colors" placeholder="Nome, empresa, e-mail...">
+                    <input type="text" id="filter-search" oninput="applyFilters()" class="pl-10 w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm" placeholder="Nome, empresa, e-mail...">
                 </div>
             </div>
             <div class="w-full md:w-1/6">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Status do Pedido</label>
-                <select id="filter-status" onchange="applyFilters()" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 dark:bg-gray-700 dark:text-white outline-none focus:border-blue-500 transition-colors">
+                <select id="filter-status" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
                     <option value="todos">Todos</option>
                     <option value="realizando">Realizando</option>
                     <option value="pendente">Pendente</option>
@@ -349,29 +365,29 @@
             </div>
             <div class="w-full md:w-1/5">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data de Início</label>
-                <input type="date" id="filter-date-start" onchange="applyFilters()" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 dark:bg-gray-700 dark:text-white outline-none focus:border-blue-500 transition-colors">
+                <input type="date" id="filter-date-start" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
             </div>
             <div class="w-full md:w-1/5">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data Final</label>
-                <input type="date" id="filter-date-end" onchange="applyFilters()" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 dark:bg-gray-700 dark:text-white outline-none focus:border-blue-500 transition-colors">
+                <input type="date" id="filter-date-end" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-gray-600/50 dark:bg-gray-700/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
             </div>
             <div class="w-full md:w-auto flex items-end">
-                <button onclick="clearFilters()" class="w-full md:w-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg font-medium transition-colors border border-gray-200 dark:border-gray-600 h-[42px] whitespace-nowrap flex items-center justify-center">
+                <button onclick="clearFilters()" class="w-full md:w-auto bg-white/60 dark:bg-gray-700/60 hover:bg-white/90 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium transition-colors border border-white/50 dark:border-gray-600/50 h-[42px] whitespace-nowrap flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-eraser mr-2"></i> Limpar
                 </button>
             </div>
         </div>
 
-        <!-- Barra de Ações em Massa -->
-        <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-4 border border-gray-100 dark:border-gray-700">
+        <!-- Barra de Ações em Massa com Liquid Glass -->
+        <div class="glass-card flex items-center justify-between p-4 rounded-xl mb-4">
             <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" id="select-all" class="admin-checkbox" onchange="toggleSelectAll()">
+                <input type="checkbox" id="select-all" class="admin-checkbox bg-white/50" onchange="toggleSelectAll()">
                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Selecionar Todos</span>
             </label>
             <div class="flex items-center gap-4">
                 <span class="text-xs text-gray-400 dark:text-gray-500 italic"><i class="fa-solid fa-hand-pointer mr-1"></i>Arraste os cards para reorganizar</span>
-                <button id="btn-bulk-delete" class="hidden opacity-0 text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center" onclick="confirmBulkDelete()">
-                    <i class="fa-solid fa-trash-can mr-2"></i> Excluir Selecionados (<span id="selected-count">0</span>)
+                <button id="btn-bulk-delete" class="hidden opacity-0 text-red-600 bg-red-50/80 dark:bg-red-900/40 dark:text-red-400 hover:bg-red-100/90 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm border border-red-100 dark:border-red-800/50 flex items-center" onclick="confirmBulkDelete()">
+                    <i class="fa-solid fa-trash-can mr-2"></i> Excluir (<span id="selected-count">0</span>)
                 </button>
             </div>
         </div>
@@ -381,19 +397,19 @@
         </div>
 
         <!-- Grid de Registros -->
-        <div id="responses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 min-h-[200px]"></div>
+        <div id="responses-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 min-h-[200px]"></div>
 
         <!-- Paginação -->
-        <div id="pagination-container" class="hidden flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 mt-4">
-            <button id="btn-prev-page" onclick="changePage(-1)" class="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+        <div id="pagination-container" class="hidden flex items-center justify-between border-t border-gray-300/30 dark:border-gray-700/50 pt-6 mt-4">
+            <button id="btn-prev-page" onclick="changePage(-1)" class="flex items-center px-4 py-2 glass-card text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-chevron-left mr-2"></i> Anterior
             </button>
-            <div class="flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm">
+            <div class="flex items-center gap-2 glass-card px-3 py-1.5 rounded-lg">
                 <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 hidden sm:inline">Página</span>
-                <input type="number" id="page-input" class="w-16 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md text-sm font-semibold outline-none focus:border-blue-500 transition-all" min="1" value="1" onchange="goToPage(this.value)">
+                <input type="number" id="page-input" class="w-16 px-2 py-1 text-center border border-white/50 dark:border-gray-600/50 bg-white/50 dark:bg-gray-700/50 dark:text-white rounded-md text-sm font-semibold outline-none focus:border-blue-500 transition-all shadow-sm" min="1" value="1" onchange="goToPage(this.value)">
                 <span class="text-sm font-semibold text-gray-600 dark:text-gray-400" id="total-pages-info">de 1</span>
             </div>
-            <button id="btn-next-page" onclick="changePage(1)" class="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+            <button id="btn-next-page" onclick="changePage(1)" class="flex items-center px-4 py-2 glass-card text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 Próxima <i class="fa-solid fa-chevron-right ml-2"></i>
             </button>
         </div>
@@ -1135,7 +1151,7 @@
             const totalPages = Math.ceil(filteredResponses.length / ITEMS_PER_PAGE) || 1;
             
             if (filteredResponses.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-20 text-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i>Nenhuma resposta ou cliente encontrado.</div>`;
+                grid.innerHTML = `<div class="col-span-full py-20 text-center glass-card rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 text-gray-400"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i>Nenhuma resposta ou cliente encontrado.</div>`;
                 paginationContainer.classList.add('hidden');
                 updateBulkActionUI();
                 return;
@@ -1150,47 +1166,50 @@
                     dataHora = new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
                 } else if (resp.data) { dataHora = resp.data.split('-').reverse().join('/'); }
 
-                const imageBadge = resp.totalImagens && resp.totalImagens > 0 ? `<span class="text-[10px] bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-image mr-1"></i>${resp.totalImagens}</span>` : '';
-                const prioridadeBadge = resp.prioridade ? `<span class="text-[10px] ${resp.prioridade.toLowerCase() === 'alta' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded-full font-bold uppercase">${resp.prioridade}</span>` : '';
+                const imageBadge = resp.totalImagens && resp.totalImagens > 0 ? `<span class="text-[10px] bg-green-50/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 px-2 py-0.5 rounded font-bold"><i class="fa-solid fa-image mr-1"></i>${resp.totalImagens}</span>` : '';
+                const prioridadeBadge = resp.prioridade ? `<span class="text-[10px] ${resp.prioridade.toLowerCase() === 'alta' ? 'bg-red-50/80 dark:bg-red-900/40 text-red-600 dark:text-red-400' : 'bg-gray-100/80 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded font-bold uppercase">${resp.prioridade}</span>` : '';
                 const isSelected = selectedIds.has(resp.id) ? 'checked' : '';
 
                 const displayNome = resp.nomeCliente || resp.nome || 'Sem nome';
                 const displayMarca = resp.nomeMarca || resp.empresa || 'Sem marca/empresa';
                 
-                // Agora os cards mostram E-mail e Telefone separados se existirem
                 const displayEmail = resp.email || 'Sem e-mail';
                 const displayTelefone = resp.contato || 'Sem telefone';
                 
                 // Colorir borda se selecionado
-                const cardClass = isSelected ? 'ring-2 ring-blue-500 bg-blue-50/20 dark:bg-blue-900/20' : 'hover:border-blue-300 dark:hover:border-blue-500';
+                const cardClass = isSelected ? 'ring-2 ring-blue-500 !bg-blue-50/60 dark:!bg-blue-900/40' : 'hover:border-white dark:hover:border-gray-500/50';
 
                 return `
-                    <div data-id="${resp.id}" onclick="openDetails('${resp.id}')" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 cursor-move transition-all group animate-fade-in relative flex flex-col h-full hover:shadow-lg ${cardClass}">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-3" onclick="event.stopPropagation()">
-                                <input type="checkbox" class="admin-checkbox" ${isSelected} onclick="toggleSelection(event, '${resp.id}')">
-                                <span class="text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded font-bold uppercase tracking-wider">${dataHora}</span>
+                    <div data-id="${resp.id}" onclick="openDetails('${resp.id}')" class="glass-card rounded-2xl p-3 sm:p-5 cursor-move transition-all duration-300 group animate-fade-in relative flex flex-col h-full hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 ${cardClass}">
+                        <div class="flex justify-between items-center mb-2 sm:mb-3">
+                            <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                                <input type="checkbox" class="admin-checkbox w-4 h-4 sm:w-5 sm:h-5 bg-white/50" ${isSelected} onclick="toggleSelection(event, '${resp.id}')">
+                                <span class="text-[9px] sm:text-[10px] bg-blue-50/80 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-2 py-1 rounded font-bold uppercase tracking-wider shadow-sm">${dataHora}</span>
                             </div>
-                            <div class="flex gap-2 items-center">
+                            <div class="flex gap-1.5 items-center">
                                 ${prioridadeBadge}
                                 ${imageBadge}
-                                <button onclick="confirmDelete(event, '${resp.id}')" class="text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full w-6 h-6 flex items-center justify-center transition-colors ml-1" title="Excluir registro">
+                                <button onclick="confirmDelete(event, '${resp.id}')" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-900/40 rounded-full w-6 h-6 flex items-center justify-center transition-colors" title="Excluir registro">
                                     <i class="fa-solid fa-xmark text-sm"></i>
                                 </button>
                             </div>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors pr-6">${displayNome}</h3>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium truncate"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${displayMarca}</p>
                         
-                        <div class="mt-2 mb-3">
+                        <div class="pr-6">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white leading-tight mb-0.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">${displayNome}</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium truncate mb-2 sm:mb-0"><i class="fa-solid fa-tag mr-1 opacity-50"></i> ${displayMarca}</p>
+                        </div>
+                        
+                        <!-- EMAIL E CONTATO (OCULTOS NO CELULAR) -->
+                        <div class="hidden sm:block mt-2 mb-3">
                             <p class="text-gray-400 dark:text-gray-500 text-xs truncate"><i class="fa-solid fa-envelope mr-1 opacity-50 w-4"></i> ${displayEmail}</p>
                             <p class="text-gray-400 dark:text-gray-500 text-xs mt-1 truncate"><i class="fa-brands fa-whatsapp mr-1 opacity-50 w-4"></i> ${displayTelefone}</p>
                         </div>
                         
-                        ${resp.status ? `<div class="mt-auto pt-3 border-t border-gray-50 dark:border-gray-700"><span class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">Status:</span> <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 capitalize">${resp.status}</span></div>` : ''}
+                        ${resp.status ? `<div class="mt-2 sm:mt-auto pt-2 sm:pt-3 border-t border-gray-200/50 dark:border-gray-700/50 flex justify-between items-center"><span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Status</span> <span class="text-[10px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 capitalize bg-white/60 dark:bg-gray-800/60 px-2 py-0.5 rounded-md shadow-sm border border-white/50 dark:border-gray-600/50">${resp.status}</span></div>` : ''}
                         
-                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 dark:text-gray-600">
-                            <i class="fa-solid fa-grip-vertical text-xl"></i>
+                        <div class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 dark:text-gray-500">
+                            <i class="fa-solid fa-grip-vertical text-lg sm:text-xl"></i>
                         </div>
                     </div>
                 `;
