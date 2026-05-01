@@ -839,6 +839,7 @@
             
             const objetosRaw = document.getElementById('edit-objetos').value.trim();
             const objetosArray = objetosRaw ? objetosRaw.split(',').map(s => s.trim()).filter(s => s) : [];
+            const dataHoraRaw = document.getElementById('edit-data-hora')?.value;
 
             const newData = {
                 nomeCliente: document.getElementById('edit-nome').value.trim(),
@@ -853,6 +854,13 @@
                 status: document.getElementById('edit-status').value,
                 prioridade: document.getElementById('edit-prioridade').value
             };
+
+            // Atualiza a data e hora do registro se o campo não estiver vazio
+            if (dataHoraRaw) {
+                const newDate = new Date(dataHoraRaw);
+                newData.createdAt = newDate;
+                newData.sortOrder = newDate.getTime();
+            }
 
             try {
                 await window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'respostas', id), newData);
@@ -874,9 +882,29 @@
             }
 
             let dataFormatada = 'Recém registrado / Não informada';
+            let dataISO = '';
+            let dataOriginal = null;
+
+            // Converter propriedades de tempo do Firestore ou String em objeto Date nativo do Javascript
             if (resp.createdAt?.seconds) {
-                dataFormatada = new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            } else if (resp.data) { dataFormatada = resp.data.split('-').reverse().join('/'); }
+                dataOriginal = new Date(resp.createdAt.seconds * 1000);
+            } else if (resp.createdAt && typeof resp.createdAt.toDate === 'function') {
+                dataOriginal = resp.createdAt.toDate();
+            } else if (resp.createdAt instanceof Date) {
+                dataOriginal = resp.createdAt;
+            } else if (typeof resp.createdAt === 'string' || typeof resp.createdAt === 'number') {
+                dataOriginal = new Date(resp.createdAt);
+            }
+
+            if (dataOriginal && !isNaN(dataOriginal.valueOf())) {
+                dataFormatada = dataOriginal.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const pad = (n) => n.toString().padStart(2, '0');
+                // Formato ISO esperado pelo <input type="datetime-local">
+                dataISO = `${dataOriginal.getFullYear()}-${pad(dataOriginal.getMonth() + 1)}-${pad(dataOriginal.getDate())}T${pad(dataOriginal.getHours())}:${pad(dataOriginal.getMinutes())}`;
+            } else if (resp.data) { 
+                dataFormatada = resp.data.split('-').reverse().join('/');
+                dataISO = resp.data + 'T12:00';
+            }
 
             const displayNome = resp.nomeCliente || resp.nome || '';
             const displayEmail = resp.email || '';
@@ -942,6 +970,10 @@
                                 <option value="média" ${resp.prioridade==='média'?'selected':''}>Média</option>
                                 <option value="alta" ${resp.prioridade==='alta'?'selected':''}>Alta</option>
                             </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Data e Hora do Registro</label>
+                            <input type="datetime-local" id="edit-data-hora" value="${dataISO}" class="w-full border p-3 rounded-xl mt-1 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white outline-none">
                         </div>
                     </div>
                     <div class="mt-6 border-t dark:border-zinc-700 pt-6 flex justify-end">
@@ -1183,8 +1215,15 @@
 
             grid.innerHTML = currentItems.map(resp => {
                 let dataHora = 'Data indisp.';
+                // Ajuste para exibir a data atualizada se o createdAt for um objeto Date nativo ou Timestamp
                 if (resp.createdAt?.seconds) {
                     dataHora = new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+                } else if (resp.createdAt && typeof resp.createdAt.toDate === 'function') {
+                    dataHora = resp.createdAt.toDate().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+                } else if (resp.createdAt instanceof Date) {
+                    dataHora = resp.createdAt.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+                } else if (typeof resp.createdAt === 'string' || typeof resp.createdAt === 'number') {
+                    dataHora = new Date(resp.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
                 } else if (resp.data) { dataHora = resp.data.split('-').reverse().join('/'); }
 
                 const isAlta = resp.prioridade?.toLowerCase() === 'alta';
