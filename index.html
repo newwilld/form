@@ -4,8 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Briefing de Marca - Formulário Profissional</title>
-    
-    <!-- Removida a verificação de dark mode - sempre inicia em white mode -->
+
+    <!-- Meta Pixel Code -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '197975412807039');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none" 
+             src="https://www.facebook.com/tr?id=197975412807039&ev=PageView&noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
     <script>
         // Sempre inicia em white mode - removida a lógica de verificação
         document.documentElement.classList.remove('dark');
@@ -1687,6 +1705,11 @@
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-msg').classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // 🔥 DISPARA O EVENTO DE CONVERSÃO DO PIXEL (PIX)
+                if (typeof fbq !== 'undefined') {
+                    fbq('trackCustom', 'Purchase', { value: 99.90, currency: 'BRL' });
+                }
 
             } catch (err) {
                 console.error("Erro ao salvar:", err);
