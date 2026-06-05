@@ -1708,7 +1708,7 @@
 
                 // 🔥 DISPARA O EVENTO DE CONVERSÃO DO PIXEL (PIX)
                 if (typeof fbq !== 'undefined') {
-                    fbq('trackCustom', 'Purchase', { value: 99.90, currency: 'BRL' });
+                   fbq('track', 'Purchase', { value: 99.90, currency: 'BRL' });
                 }
 
             } catch (err) {
