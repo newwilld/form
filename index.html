@@ -1331,17 +1331,97 @@
             document.getElementById('select-all').checked = allSelected;
         }
 
-        window.exportJSON = () => {
-            if (!allResponses || allResponses.length === 0) return alert("Nenhum dado para exportar.");
-            const dataToExport = { clientes: allResponses };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-            const downloadNode = document.createElement('a');
-            downloadNode.setAttribute("href", dataStr);
-            downloadNode.setAttribute("download", "clientes_exportados.json");
-            document.body.appendChild(downloadNode);
-            downloadNode.click();
-            downloadNode.remove();
+     window.exportJSON = () => {
+    if (!allResponses || allResponses.length === 0) {
+        alert("Nenhum dado para exportar.");
+        return;
+    }
+
+    // Confirmação antes de exportar
+    const confirmExport = confirm(
+        `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
+        `• Total na base: ${allResponses.length} clientes\n` +
+        `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
+        `Deseja exportar TODOS os ${allResponses.length} registros?`
+    );
+
+    if (!confirmExport) return;
+
+    // Mostra progresso
+    const btn = document.querySelector('button[onclick="exportJSON()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
+    btn.disabled = true;
+
+    try {
+        // Prepara os dados para exportação (remove dados muito pesados se necessário)
+        const clientesParaExportar = allResponses.map(cliente => {
+            const clienteCopy = { ...cliente };
+            
+            // Se houver imagens em base64 muito grandes, você pode optar por removê-las
+            // ou comprimir ainda mais. Aqui mantemos tudo.
+            if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
+                clienteCopy.totalImagens = clienteCopy.imagens.length;
+                // Mantém as imagens, mas adiciona um aviso
+                clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
+            }
+            
+            return clienteCopy;
+        });
+
+        const dataToExport = {
+            metadata: {
+                dataExportacao: new Date().toISOString(),
+                totalClientes: allResponses.length,
+                versao: "2.0"
+            },
+            clientes: clientesParaExportar
         };
+
+        // Converte para JSON
+        const jsonString = JSON.stringify(dataToExport, null, 2);
+        
+        // Verifica o tamanho do arquivo
+        const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
+        
+        if (tamanhoMB > 50) {
+            const confirmarTamanho = confirm(
+                `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
+                `Deseja continuar mesmo assim?`
+            );
+            if (!confirmarTamanho) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+        }
+
+        // Cria e dispara o download
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const downloadNode = document.createElement('a');
+        downloadNode.href = url;
+        downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(downloadNode);
+        downloadNode.click();
+        
+        // Limpeza
+        setTimeout(() => {
+            document.body.removeChild(downloadNode);
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        // Feedback de sucesso
+        alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
+        
+    } catch (error) {
+        console.error("Erro na exportação:", error);
+        alert("❌ Erro ao exportar: " + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
 
         window.triggerImportJSON = () => document.getElementById('import-json-input').click();
 
