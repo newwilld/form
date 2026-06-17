@@ -645,6 +645,31 @@
             appId: "1:856018845836:web:aca36b5d63287a45afbba9",
             measurementId: "G-EKPPTKSHH7"
         };
+        // No início do script, adicione:
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        console.log('📨 Mensagem do SW:', event.data);
+        
+        if (event.data.type === 'BACKGROUND_NOTIFICATION') {
+            // O SW está nos avisando de uma notificação em background
+            console.log('🔔 Notificação em background detectada');
+            
+            // Forçar vibração e som
+            if ('vibrate' in navigator) {
+                navigator.vibrate([500, 200, 500]);
+            }
+        }
+        
+        if (event.data.type === 'NOTIFICATION_CLICK') {
+            // Usuário clicou na notificação
+            console.log('👆 Clique na notificação:', event.data.data);
+            
+            if (event.data.data && event.data.data.clienteId && isAdminLoggedIn) {
+                openDetails(event.data.data.clienteId);
+            }
+        }
+    });
+}
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -789,66 +814,164 @@
             }, 5000);
         }
 
-        // Função principal para enviar notificação completa (push + local + som + vibração)
-        async function enviarNotificacaoCompleta(dados) {
-            console.log('📢 Enviando notificação completa:', dados);
-            
-            // 1. Vibração
-            const vibrou = vibrarDispositivo([300, 100, 300, 100, 300]);
-            
-            // 2. Som
-            reproduzirSomNotificacao();
-            
-            // 3. Notificação do navegador (local)
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    const notification = new Notification(dados.titulo || 'Nova Atualização', {
-                        body: dados.mensagem || 'Você tem uma nova notificação',
-                        icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzNiODJmNiIvPjx0ZXh0IHg9IjUwIiB5PSI2NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPvCflIM8L3RleHQ+PC9zdmc+',
-                        vibrate: [300, 100, 300],
-                        requireInteraction: true,
-                        silent: false,
-                        tag: dados.tag || 'notificacao',
-                        data: dados.data || {}
-                    });
-
-                    notification.onclick = () => {
-                        window.focus();
-                        notification.close();
-                        if (dados.onClick) dados.onClick();
-                    };
-
-                    setTimeout(() => notification.close(), 10000);
-                    console.log('✅ Notificação local enviada');
-                } catch (error) {
-                    console.error('❌ Erro na notificação local:', error);
-                }
-            }
-            
-            // 4. Toast na tela
-            mostrarToastNotificacao(
-                dados.titulo || 'Atualização',
-                dados.mensagem || '',
-                dados.tipo || 'info'
-            );
-            
-            // 5. Tentar enviar push notification (se tiver service worker)
-            if ('serviceWorker' in navigator && window.swRegistration) {
-                try {
-                    const registration = window.swRegistration;
-                    await registration.showNotification(dados.titulo || 'Nova Atualização', {
-                        body: dados.mensagem || '',
-                        icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzNiODJmNiIvPjx0ZXh0IHg9IjUwIiB5PSI2NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIiIGZpbGw9IndoaXRlIj7wn5SDPC90ZXh0Pjwvc3ZnPg==',
-                        vibrate: [300, 100, 300, 100, 300],
-                        requireInteraction: true,
-                        data: dados.data || {}
-                    });
-                    console.log('✅ Push notification enviada via Service Worker');
-                } catch (error) {
-                    console.log('ℹ️ Push notification não disponível:', error.message);
-                }
-            }
+      // Função MELHORADA para notificações com tela bloqueada
+async function enviarNotificacaoCompleta(dados) {
+    console.log('📢 Enviando notificação completa:', dados);
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    // 1. Vibração FORTE (tenta superar modo silencioso)
+    if ('vibrate' in navigator) {
+        try {
+            // Padrão de vibração mais agressivo para iOS
+            const padraoVibracao = isIOS ? 
+                [500, 200, 500, 200, 500] : // Mais longo para iOS
+                [300, 100, 300, 100, 300];  // Padrão para Android
+                
+            navigator.vibrate(padraoVibracao);
+            console.log('📳 Vibração executada:', padraoVibracao);
+        } catch (error) {
+            console.log('📳 Vibração falhou:', error.message);
         }
+    }
+    
+    // 2. SOM - Técnica para reproduzir mesmo com tela bloqueada
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Criar um som mais alto e prolongado
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        const now = audioContext.currentTime;
+        
+        // Tom de alerta mais agudo e perceptível
+        oscillator.type = 'square'; // Onda quadrada é mais perceptível
+        oscillator.frequency.setValueAtTime(880, now);
+        oscillator.frequency.setValueAtTime(1200, now + 0.15);
+        oscillator.frequency.setValueAtTime(880, now + 0.3);
+        
+        // Volume mais alto e sustain mais longo
+        gainNode.gain.setValueAtTime(0.5, now); // 50% do volume máximo
+        gainNode.gain.setValueAtTime(0.5, now + 0.3);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.8);
+        
+        console.log('🔔 Som de alerta reproduzido');
+    } catch (error) {
+        console.log('🔇 Erro no som:', error.message);
+    }
+    
+    // 3. Notificação do Navegador (funciona em background)
+    if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+            const options = {
+                body: dados.mensagem || 'Nova atualização',
+                icon: dados.icon || 'data:image/svg+xml;base64,...',
+                badge: dados.badge || 'data:image/svg+xml;base64,...',
+                
+                // Configurações CRÍTICAS para iOS com tela bloqueada
+                requireInteraction: true,  // Não desaparece automaticamente
+                silent: false,             // IMPORTANTE: Permite som
+                renotify: true,            // Re-notifica se já existe
+                
+                // Vibração (iOS respeita isso)
+                vibrate: isIOS ? [500, 200, 500, 200, 500] : [300, 100, 300],
+                
+                // Tag para agrupar notificações
+                tag: dados.tag || 'notificacao-geral',
+                
+                // Dados extras
+                data: {
+                    ...dados.data,
+                    timestamp: Date.now(),
+                    url: window.location.href
+                },
+                
+                // Ações (botões interativos)
+                actions: [
+                    {
+                        action: 'ver',
+                        title: '📋 Ver Detalhes',
+                        icon: 'data:image/svg+xml;base64,...'
+                    },
+                    {
+                        action: 'fechar',
+                        title: '❌ Fechar',
+                        icon: 'data:image/svg+xml;base64,...'
+                    }
+                ]
+            };
+            
+            const notification = new Notification(dados.titulo || 'Atualização', options);
+            
+            // Eventos da notificação
+            notification.onshow = () => {
+                console.log('👁️ Notificação exibida (pode estar com tela bloqueada)');
+            };
+            
+            notification.onclick = (event) => {
+                event.preventDefault();
+                window.focus();
+                notification.close();
+                
+                if (dados.onClick) {
+                    dados.onClick();
+                }
+            };
+            
+            notification.onerror = (error) => {
+                console.error('❌ Erro na notificação:', error);
+            };
+            
+            // Auto-fechar após 30 segundos (se não houver interação)
+            setTimeout(() => {
+                notification.close();
+            }, 30000);
+            
+            console.log('✅ Notificação local criada');
+            
+        } catch (error) {
+            console.error('❌ Falha na notificação:', error);
+        }
+    }
+    
+    // 4. Tentar "acordar" o dispositivo via Service Worker
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        try {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'SHOW_NOTIFICATION',
+                payload: {
+                    title: dados.titulo,
+                    body: dados.mensagem,
+                    data: dados.data,
+                    tag: dados.tag,
+                    requireInteraction: true,
+                    silent: false,
+                    vibrate: isIOS ? [500, 200, 500] : [300, 100, 300]
+                }
+            });
+            console.log('📡 Mensagem enviada ao Service Worker');
+        } catch (error) {
+            console.log('⚠️ Service Worker não disponível:', error);
+        }
+    }
+    
+    // 5. Toast visual na tela (se o dispositivo estiver desbloqueado)
+    if (document.visibilityState === 'visible') {
+        mostrarToastNotificacao(
+            dados.titulo || 'Atualização',
+            dados.mensagem || '',
+            dados.tipo || 'info'
+        );
+    }
+}
 
         // ============ FUNÇÃO DE ATIVAR NOTIFICAÇÕES (BOTÃO PRINCIPAL) ============
         window.ativarNotificacoes = async () => {
