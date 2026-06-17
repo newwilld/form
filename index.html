@@ -308,6 +308,10 @@
                     <i class="fa-solid fa-chart-pie mr-2"></i> Visão Geral
                 </button>
                 
+                <button onclick="ativarNotificacoes()" id="btn-noti" class="bg-blue-600/90 backdrop-blur-md hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-blue-300/50 dark:shadow-none flex items-center transform hover:-translate-y-0.5 border border-blue-400/50">
+                    <i class="fa-solid fa-bell mr-2"></i> Alertas no iPhone
+                </button>
+
                 <div class="flex gap-2">
                     <input type="file" id="import-json-input" accept=".json" class="hidden">
                     <button onclick="triggerImportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
@@ -534,6 +538,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, collection, addDoc, setDoc, getDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js"; // Novo import para Push Notifications
 
         // Expor para o escopo global do Window para os modais e inline functions usarem
         window.firebaseUpdateDoc = updateDoc;
@@ -553,6 +558,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const messaging = getMessaging(app); // Inicializando o serviço de mensagens
         window.db = db;
 
         const MAX_IMAGES = 3;
@@ -617,6 +623,49 @@
             .catch((error) => {
                 console.error("Erro ao configurar persistência do Firebase:", error);
             });
+
+        // ============ LÓGICA DE NOTIFICAÇÕES (PUSH) ============
+        window.ativarNotificacoes = async () => {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // ATENÇÃO: Gere sua Chave VAPID no Console Firebase > Configurações do Projeto > Cloud Messaging > Certificados Web Push
+                    // Substitua a string abaixo pela chave gerada.
+                    const vapidKey = 'BPkB8G74KwBwsCz9fTlPsB-zcRSJWerngH5p8X9CktqnR914Od1Mg_duXh4TYKds3BEtZOcNZ6FAUKtzkELKv2U'; 
+                    
+                    try {
+                        const token = await getToken(messaging, { vapidKey: vapidKey });
+                        
+                        if (token) {
+                            // Salva o token único do seu iPhone no banco de dados Firestore
+                            await window.firebaseSetDoc(window.firebaseDoc(window.db, 'admin_tokens', 'meu_celular'), { 
+                                token: token,
+                                atualizadoEm: serverTimestamp()
+                            });
+                            
+                            const btn = document.getElementById('btn-noti');
+                            btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Alertas Ativos';
+                            btn.classList.replace('bg-blue-600/90', 'bg-green-600/90');
+                            btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+                            btn.classList.replace('shadow-blue-300/50', 'shadow-green-300/50');
+                            btn.classList.replace('border-blue-400/50', 'border-green-400/50');
+                            
+                            alert("Notificações vinculadas a este aparelho com sucesso!");
+                        } else {
+                            alert("Não foi possível obter o token de notificação.");
+                        }
+                    } catch (tokenError) {
+                        console.error("Erro ao pegar o token VAPID:", tokenError);
+                        alert("Lembre-se de colocar a sua CHAVE VAPID no código para as notificações funcionarem!");
+                    }
+                } else {
+                    alert("Você precisa permitir as notificações no Safari/Navegador para continuar.");
+                }
+            } catch (error) {
+                console.error("Erro ao ativar notificações:", error);
+                alert("Aviso: No iPhone (iOS), você precisa primeiro 'Adicionar à Tela de Início' e abrir o app por lá para poder ativar as notificações.");
+            }
+        };
 
         // ============ LÓGICA DO DASHBOARD (VISÃO GERAL) ============
         window.openOverviewModal = async (isRefreshOnly = false) => {
@@ -1316,97 +1365,97 @@
             // Removemos a linha do 'select-all' para evitar erros no JS
         }
 
-     window.exportJSON = () => {
-    if (!allResponses || allResponses.length === 0) {
-        alert("Nenhum dado para exportar.");
-        return;
-    }
-
-    // Confirmação antes de exportar
-    const confirmExport = confirm(
-        `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
-        `• Total na base: ${allResponses.length} clientes\n` +
-        `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
-        `Deseja exportar TODOS os ${allResponses.length} registros?`
-    );
-
-    if (!confirmExport) return;
-
-    // Mostra progresso
-    const btn = document.querySelector('button[onclick="exportJSON()"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
-    btn.disabled = true;
-
-    try {
-        // Prepara os dados para exportação (remove dados muito pesados se necessário)
-        const clientesParaExportar = allResponses.map(cliente => {
-            const clienteCopy = { ...cliente };
-            
-            // Se houver imagens em base64 muito grandes, você pode optar por removê-las
-            // ou comprimir ainda mais. Aqui mantemos tudo.
-            if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
-                clienteCopy.totalImagens = clienteCopy.imagens.length;
-                // Mantém as imagens, mas adiciona um aviso
-                clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
-            }
-            
-            return clienteCopy;
-        });
-
-        const dataToExport = {
-            metadata: {
-                dataExportacao: new Date().toISOString(),
-                totalClientes: allResponses.length,
-                versao: "2.0"
-            },
-            clientes: clientesParaExportar
-        };
-
-        // Converte para JSON
-        const jsonString = JSON.stringify(dataToExport, null, 2);
-        
-        // Verifica o tamanho do arquivo
-        const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
-        
-        if (tamanhoMB > 50) {
-            const confirmarTamanho = confirm(
-                `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
-                `Deseja continuar mesmo assim?`
-            );
-            if (!confirmarTamanho) {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+        window.exportJSON = () => {
+            if (!allResponses || allResponses.length === 0) {
+                alert("Nenhum dado para exportar.");
                 return;
             }
-        }
 
-        // Cria e dispara o download
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const downloadNode = document.createElement('a');
-        downloadNode.href = url;
-        downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(downloadNode);
-        downloadNode.click();
-        
-        // Limpeza
-        setTimeout(() => {
-            document.body.removeChild(downloadNode);
-            URL.revokeObjectURL(url);
-        }, 100);
+            // Confirmação antes de exportar
+            const confirmExport = confirm(
+                `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
+                `• Total na base: ${allResponses.length} clientes\n` +
+                `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
+                `Deseja exportar TODOS os ${allResponses.length} registros?`
+            );
 
-        // Feedback de sucesso
-        alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
-        
-    } catch (error) {
-        console.error("Erro na exportação:", error);
-        alert("❌ Erro ao exportar: " + error.message);
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-};
+            if (!confirmExport) return;
+
+            // Mostra progresso
+            const btn = document.querySelector('button[onclick="exportJSON()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
+            btn.disabled = true;
+
+            try {
+                // Prepara os dados para exportação (remove dados muito pesados se necessário)
+                const clientesParaExportar = allResponses.map(cliente => {
+                    const clienteCopy = { ...cliente };
+                    
+                    // Se houver imagens em base64 muito grandes, você pode optar por removê-las
+                    // ou comprimir ainda mais. Aqui mantemos tudo.
+                    if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
+                        clienteCopy.totalImagens = clienteCopy.imagens.length;
+                        // Mantém as imagens, mas adiciona um aviso
+                        clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
+                    }
+                    
+                    return clienteCopy;
+                });
+
+                const dataToExport = {
+                    metadata: {
+                        dataExportacao: new Date().toISOString(),
+                        totalClientes: allResponses.length,
+                        versao: "2.0"
+                    },
+                    clientes: clientesParaExportar
+                };
+
+                // Converte para JSON
+                const jsonString = JSON.stringify(dataToExport, null, 2);
+                
+                // Verifica o tamanho do arquivo
+                const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
+                
+                if (tamanhoMB > 50) {
+                    const confirmarTamanho = confirm(
+                        `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
+                        `Deseja continuar mesmo assim?`
+                    );
+                    if (!confirmarTamanho) {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                }
+
+                // Cria e dispara o download
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const downloadNode = document.createElement('a');
+                downloadNode.href = url;
+                downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(downloadNode);
+                downloadNode.click();
+                
+                // Limpeza
+                setTimeout(() => {
+                    document.body.removeChild(downloadNode);
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+                // Feedback de sucesso
+                alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
+                
+            } catch (error) {
+                console.error("Erro na exportação:", error);
+                alert("❌ Erro ao exportar: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
 
         window.triggerImportJSON = () => document.getElementById('import-json-input').click();
 
@@ -1519,7 +1568,7 @@
                 loginError.classList.remove('hidden');
                 modalBox.classList.add('shake'); setTimeout(() => modalBox.classList.remove('shake'), 500);
             } finally {
-                btnLogin.disabled = false; btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel';
+                btnLogin.disabled = false; btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar';
             }
         });
 
