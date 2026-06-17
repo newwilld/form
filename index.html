@@ -371,11 +371,7 @@
             </div>
         </div>
 
-        <div class="glass-card flex items-center justify-between p-4 rounded-xl mb-4">
-            <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" id="select-all" class="admin-checkbox bg-white/50" onchange="toggleSelectAll()">
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Selecionar Todos</span>
-            </label>
+        <div class="glass-card flex items-center justify-end p-4 rounded-xl mb-4">
             <div class="flex items-center gap-4">
                 <span class="text-xs text-gray-400 dark:text-gray-500 italic"><i class="fa-solid fa-hand-pointer mr-1"></i>Arraste os cards para reorganizar</span>
                 <button id="btn-bulk-delete" class="hidden opacity-0 text-red-600 bg-red-50/80 dark:bg-red-900/40 dark:text-red-400 hover:bg-red-100/90 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm border border-red-100 dark:border-red-800/50 flex items-center" onclick="confirmBulkDelete()">
@@ -1304,16 +1300,6 @@
             renderAdminDashboard();
         };
 
-        window.toggleSelectAll = () => {
-            const isChecked = document.getElementById('select-all').checked;
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const pageItems = filteredResponses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-            
-            if (isChecked) pageItems.forEach(item => selectedIds.add(item.id));
-            else pageItems.forEach(item => selectedIds.delete(item.id));
-            renderAdminDashboard();
-        };
-
         function updateBulkActionUI() {
             const btnBulk = document.getElementById('btn-bulk-delete');
             const countSpan = document.getElementById('selected-count');
@@ -1327,8 +1313,7 @@
 
             const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
             const pageItems = filteredResponses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-            const allSelected = pageItems.length > 0 && pageItems.every(item => selectedIds.has(item.id));
-            document.getElementById('select-all').checked = allSelected;
+            // Removemos a linha do 'select-all' para evitar erros no JS
         }
 
      window.exportJSON = () => {
