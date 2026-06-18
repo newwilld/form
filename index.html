@@ -2,21 +2,11 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Briefing de Marca - Formulário Profissional</title>
 
-    <!-- Meta tags para PWA iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Briefing">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#3b82f6">
-    
-    <!-- Manifest PWA inline -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJyaWVmaW5nIGRlIE1hcmNhIiwKICAic2hvcnRfbmFtZSI6ICJCcmllZmluZyIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmZmZmZmIiwKICAidGhlbWVfY29sb3IiOiAiIzNiODJmNiIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiaWNvbnMiOiBbXSwKICAicHJlZmVyX3JlbGF0ZWRfYXBwbGljYXRpb25zIjogdHJ1ZX0=">
-
     <script>
-        // Sempre inicia em white mode
+        // Sempre inicia em white mode - removida a lógica de verificação
         document.documentElement.classList.remove('dark');
         localStorage.setItem('theme', 'light');
     </script>
@@ -66,7 +56,9 @@
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
-        /* GLASSMORPHISM */
+        /* ========================================= */
+        /* ✨ EFEITO LIQUID GLASS (GLASSMORPHISM) ✨ */
+        /* ========================================= */
         .glass-card {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(14px);
@@ -104,94 +96,12 @@
 
         .admin-checkbox { width: 20px; height: 20px; cursor: pointer; border-radius: 4px; accent-color: #3b82f6; }
         
+        /* Ajuste do Drag and Drop */
         .sortable-ghost { opacity: 0.4; background-color: rgba(239,246,255,0.8) !important; border: 2px dashed #3b82f6 !important; }
         .dark .sortable-ghost { background-color: rgba(30,58,138,0.8) !important; }
-
-        /* Toast de notificação */
-        .notification-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            animation: slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(120%); opacity: 0; }
-        }
-
-        /* Indicador de status da notificação */
-        .notification-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-            animation: pulse 2s infinite;
-        }
-        
-        .notification-indicator.active { background-color: #10b981; }
-        .notification-indicator.inactive { background-color: #ef4444; }
-        .notification-indicator.checking { background-color: #f59e0b; }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
     </style>
-    <!-- Meta tags CRÍTICAS para notificações iOS -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Briefing CRM">
-<meta name="mobile-web-app-capable" content="yes">
-
-<!-- Permissões de áudio para iOS -->
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-<!-- Prevenir que iOS bloqueie notificações -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-200 dark:from-black dark:to-zinc-900 text-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen">
-
-    <!-- Service Worker Registration (antes de tudo) -->
-    <script>
-        // Registrar Service Worker para Push Notifications
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .then(registration => {
-                        console.log('✅ Service Worker registrado:', registration.scope);
-                        window.swRegistration = registration;
-                        
-                        // Verificar subscription existente
-                        registration.pushManager.getSubscription()
-                            .then(subscription => {
-                                if (subscription) {
-                                    console.log('📱 Já existe uma subscription ativa');
-                                    window.existingSubscription = subscription;
-                                }
-                            });
-                    })
-                    .catch(error => {
-                        console.error('❌ Falha no Service Worker:', error);
-                    });
-            });
-        }
-
-        // Verificar se é iOS e se está em modo standalone (PWA)
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isStandalone = window.navigator.standalone || 
-                           window.matchMedia('(display-mode: standalone)').matches;
-        
-        console.log('📱 Dispositivo:', { isIOS, isStandalone, userAgent: navigator.userAgent });
-    </script>
 
     <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-[70] glass-card text-gray-800 dark:text-gray-200 p-2.5 w-10 h-10 rounded-full transition-all hover:scale-110 flex items-center justify-center">
         <i id="theme-icon" class="fa-solid fa-sun"></i>
@@ -398,11 +308,6 @@
                     <i class="fa-solid fa-chart-pie mr-2"></i> Visão Geral
                 </button>
                 
-                <button onclick="ativarNotificacoes()" id="btn-noti" class="bg-blue-600/90 backdrop-blur-md hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-blue-300/50 dark:shadow-none flex items-center transform hover:-translate-y-0.5 border border-blue-400/50">
-                    <span class="notification-indicator checking"></span>
-                    <i class="fa-solid fa-bell mr-2"></i> Alertas no iPhone
-                </button>
-
                 <div class="flex gap-2">
                     <input type="file" id="import-json-input" accept=".json" class="hidden">
                     <button onclick="triggerImportJSON()" class="glass-card hover:bg-white/80 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors flex items-center">
@@ -496,7 +401,6 @@
         </div>
     </main>
 
-    <!-- Modais mantidos iguais -->
     <div id="overview-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 modal-overlay">
         <div class="bg-white dark:bg-zinc-900 rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col border dark:border-zinc-700">
             <div class="p-6 border-b dark:border-zinc-700 flex justify-between items-center bg-gray-50 dark:bg-zinc-800 shrink-0">
@@ -527,7 +431,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Métricas por Período</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="overview-periods">
-                    </div>
+                        </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -556,7 +460,7 @@
                         <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">Top Serviços (Segmento/Tipo)</h3>
                             <div id="ov-top-services" class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-                            </div>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -602,7 +506,7 @@
                 </div>
             </div>
             <div id="modal-content" class="p-8 overflow-y-auto space-y-6 grow">
-            </div>
+                </div>
         </div>
     </div>
 
@@ -631,7 +535,7 @@
         import { getFirestore, collection, addDoc, setDoc, getDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-        // Expor para o escopo global
+        // Expor para o escopo global do Window para os modais e inline functions usarem
         window.firebaseUpdateDoc = updateDoc;
         window.firebaseDoc = doc;
         window.firebaseSetDoc = setDoc;
@@ -645,31 +549,6 @@
             appId: "1:856018845836:web:aca36b5d63287a45afbba9",
             measurementId: "G-EKPPTKSHH7"
         };
-        // No início do script, adicione:
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-        console.log('📨 Mensagem do SW:', event.data);
-        
-        if (event.data.type === 'BACKGROUND_NOTIFICATION') {
-            // O SW está nos avisando de uma notificação em background
-            console.log('🔔 Notificação em background detectada');
-            
-            // Forçar vibração e som
-            if ('vibrate' in navigator) {
-                navigator.vibrate([500, 200, 500]);
-            }
-        }
-        
-        if (event.data.type === 'NOTIFICATION_CLICK') {
-            // Usuário clicou na notificação
-            console.log('👆 Clique na notificação:', event.data.data);
-            
-            if (event.data.data && event.data.data.clienteId && isAdminLoggedIn) {
-                openDetails(event.data.data.clienteId);
-            }
-        }
-    });
-}
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -694,407 +573,7 @@ if ('serviceWorker' in navigator) {
         const ITEMS_PER_PAGE = 15;
         let currentPage = 1;
 
-        // ============ FUNÇÕES DE NOTIFICAÇÃO, VIBRAÇÃO E SOM ============
-        
-        // Função para verificar e atualizar status das notificações
-        function atualizarStatusNotificacoes() {
-            const btn = document.getElementById('btn-noti');
-            const indicator = btn.querySelector('.notification-indicator');
-            
-            if (!('Notification' in window)) {
-                indicator.className = 'notification-indicator inactive';
-                btn.title = 'Navegador não suporta notificações';
-                return;
-            }
-
-            if (Notification.permission === 'granted') {
-                indicator.className = 'notification-indicator active';
-                btn.title = 'Notificações ativas';
-                
-                // Verificar se tem subscription push ativa
-                if (window.existingSubscription) {
-                    btn.classList.replace('bg-blue-600/90', 'bg-green-600/90');
-                    btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
-                    btn.innerHTML = '<span class="notification-indicator active"></span><i class="fa-solid fa-check mr-2"></i> Alertas Ativos ✅';
-                }
-            } else if (Notification.permission === 'denied') {
-                indicator.className = 'notification-indicator inactive';
-                btn.title = 'Notificações bloqueadas - Verifique as configurações';
-                btn.classList.replace('bg-blue-600/90', 'bg-red-600/90');
-                btn.classList.replace('hover:bg-blue-700', 'hover:bg-red-700');
-                btn.innerHTML = '<span class="notification-indicator inactive"></span><i class="fa-solid fa-ban mr-2"></i> Bloqueado';
-            } else {
-                indicator.className = 'notification-indicator checking';
-                btn.title = 'Notificações não configuradas';
-            }
-        }
-
-        // Função para reproduzir som de notificação
-        function reproduzirSomNotificacao() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // Criar um som agradável de "ping"
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                // Configurar frequências para um som de notificação
-                const now = audioContext.currentTime;
-                oscillator.type = 'sine';
-                
-                // Primeiro tom
-                oscillator.frequency.setValueAtTime(880, now);
-                oscillator.frequency.setValueAtTime(1100, now + 0.1);
-                
-                // Volume com fade out
-                gainNode.gain.setValueAtTime(0.3, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                
-                oscillator.start(now);
-                oscillator.stop(now + 0.4);
-                
-                console.log('🔔 Som de notificação reproduzido');
-            } catch (error) {
-                console.log('🔇 Não foi possível reproduzir som:', error.message);
-            }
-        }
-
-        // Função para vibrar o dispositivo
-        function vibrarDispositivo(padrao = [200, 100, 200]) {
-            if ('vibrate' in navigator) {
-                try {
-                    navigator.vibrate(padrao);
-                    console.log('📳 Vibração executada:', padrao);
-                    return true;
-                } catch (error) {
-                    console.log('📳 Vibração não suportada:', error.message);
-                }
-            }
-            return false;
-        }
-
-        // Função para mostrar toast de notificação na tela
-        function mostrarToastNotificacao(titulo, mensagem, tipo = 'info') {
-            const cores = {
-                info: 'bg-blue-600',
-                success: 'bg-green-600',
-                warning: 'bg-yellow-600',
-                error: 'bg-red-600'
-            };
-
-            const icones = {
-                info: 'fa-bell',
-                success: 'fa-check-circle',
-                warning: 'fa-exclamation-triangle',
-                error: 'fa-times-circle'
-            };
-
-            const toast = document.createElement('div');
-            toast.className = `notification-toast ${cores[tipo]} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-sm`;
-            toast.innerHTML = `
-                <i class="fa-solid ${icones[tipo]} text-2xl"></i>
-                <div>
-                    <p class="font-bold text-sm">${titulo}</p>
-                    <p class="text-xs opacity-90">${mensagem}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="ml-2 text-white/70 hover:text-white">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Remover após 5 segundos
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.5s ease-in forwards';
-                setTimeout(() => toast.remove(), 500);
-            }, 5000);
-        }
-
-      // Função MELHORADA para notificações com tela bloqueada
-async function enviarNotificacaoCompleta(dados) {
-    console.log('📢 Enviando notificação completa:', dados);
-    
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    
-    // 1. Vibração FORTE (tenta superar modo silencioso)
-    if ('vibrate' in navigator) {
-        try {
-            // Padrão de vibração mais agressivo para iOS
-            const padraoVibracao = isIOS ? 
-                [500, 200, 500, 200, 500] : // Mais longo para iOS
-                [300, 100, 300, 100, 300];  // Padrão para Android
-                
-            navigator.vibrate(padraoVibracao);
-            console.log('📳 Vibração executada:', padraoVibracao);
-        } catch (error) {
-            console.log('📳 Vibração falhou:', error.message);
-        }
-    }
-    
-    // 2. SOM - Técnica para reproduzir mesmo com tela bloqueada
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Criar um som mais alto e prolongado
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        const now = audioContext.currentTime;
-        
-        // Tom de alerta mais agudo e perceptível
-        oscillator.type = 'square'; // Onda quadrada é mais perceptível
-        oscillator.frequency.setValueAtTime(880, now);
-        oscillator.frequency.setValueAtTime(1200, now + 0.15);
-        oscillator.frequency.setValueAtTime(880, now + 0.3);
-        
-        // Volume mais alto e sustain mais longo
-        gainNode.gain.setValueAtTime(0.5, now); // 50% do volume máximo
-        gainNode.gain.setValueAtTime(0.5, now + 0.3);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
-        
-        oscillator.start(now);
-        oscillator.stop(now + 0.8);
-        
-        console.log('🔔 Som de alerta reproduzido');
-    } catch (error) {
-        console.log('🔇 Erro no som:', error.message);
-    }
-    
-    // 3. Notificação do Navegador (funciona em background)
-    if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-            const options = {
-                body: dados.mensagem || 'Nova atualização',
-                icon: dados.icon || 'data:image/svg+xml;base64,...',
-                badge: dados.badge || 'data:image/svg+xml;base64,...',
-                
-                // Configurações CRÍTICAS para iOS com tela bloqueada
-                requireInteraction: true,  // Não desaparece automaticamente
-                silent: false,             // IMPORTANTE: Permite som
-                renotify: true,            // Re-notifica se já existe
-                
-                // Vibração (iOS respeita isso)
-                vibrate: isIOS ? [500, 200, 500, 200, 500] : [300, 100, 300],
-                
-                // Tag para agrupar notificações
-                tag: dados.tag || 'notificacao-geral',
-                
-                // Dados extras
-                data: {
-                    ...dados.data,
-                    timestamp: Date.now(),
-                    url: window.location.href
-                },
-                
-                // Ações (botões interativos)
-                actions: [
-                    {
-                        action: 'ver',
-                        title: '📋 Ver Detalhes',
-                        icon: 'data:image/svg+xml;base64,...'
-                    },
-                    {
-                        action: 'fechar',
-                        title: '❌ Fechar',
-                        icon: 'data:image/svg+xml;base64,...'
-                    }
-                ]
-            };
-            
-            const notification = new Notification(dados.titulo || 'Atualização', options);
-            
-            // Eventos da notificação
-            notification.onshow = () => {
-                console.log('👁️ Notificação exibida (pode estar com tela bloqueada)');
-            };
-            
-            notification.onclick = (event) => {
-                event.preventDefault();
-                window.focus();
-                notification.close();
-                
-                if (dados.onClick) {
-                    dados.onClick();
-                }
-            };
-            
-            notification.onerror = (error) => {
-                console.error('❌ Erro na notificação:', error);
-            };
-            
-            // Auto-fechar após 30 segundos (se não houver interação)
-            setTimeout(() => {
-                notification.close();
-            }, 30000);
-            
-            console.log('✅ Notificação local criada');
-            
-        } catch (error) {
-            console.error('❌ Falha na notificação:', error);
-        }
-    }
-    
-    // 4. Tentar "acordar" o dispositivo via Service Worker
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        try {
-            navigator.serviceWorker.controller.postMessage({
-                type: 'SHOW_NOTIFICATION',
-                payload: {
-                    title: dados.titulo,
-                    body: dados.mensagem,
-                    data: dados.data,
-                    tag: dados.tag,
-                    requireInteraction: true,
-                    silent: false,
-                    vibrate: isIOS ? [500, 200, 500] : [300, 100, 300]
-                }
-            });
-            console.log('📡 Mensagem enviada ao Service Worker');
-        } catch (error) {
-            console.log('⚠️ Service Worker não disponível:', error);
-        }
-    }
-    
-    // 5. Toast visual na tela (se o dispositivo estiver desbloqueado)
-    if (document.visibilityState === 'visible') {
-        mostrarToastNotificacao(
-            dados.titulo || 'Atualização',
-            dados.mensagem || '',
-            dados.tipo || 'info'
-        );
-    }
-}
-
-        // ============ FUNÇÃO DE ATIVAR NOTIFICAÇÕES (BOTÃO PRINCIPAL) ============
-        window.ativarNotificacoes = async () => {
-            console.log('🔔 Iniciando ativação de notificações...');
-            
-            // Verificar suporte básico
-            if (!('Notification' in window)) {
-                alert('❌ Seu navegador não suporta notificações. Use um navegador mais recente.');
-                return;
-            }
-
-            // Verificar se é iOS e precisa adicionar à tela inicial
-            const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            const isInStandaloneMode = window.navigator.standalone || 
-                                      window.matchMedia('(display-mode: standalone)').matches;
-
-            if (isIOSDevice && !isInStandaloneMode) {
-                const instrucoes = `
-📱 PARA ATIVAR NOTIFICAÇÕES NO iPHONE:
-
-1️⃣ Toque no botão "Compartilhar" (📤) na barra inferior
-2️⃣ Role e selecione "Adicionar à Tela de Início"
-3️⃣ Toque em "Adicionar" no canto superior
-4️⃣ Abra o app pelo ícone na tela inicial
-5️⃣ Volte e toque em "Ativar Alertas" novamente
-
-⚠️ Só funciona pelo app salvo na tela inicial!
-                `;
-                alert(instrucoes);
-                return;
-            }
-
-            try {
-                // Solicitar permissão de notificação
-                const permission = await Notification.requestPermission();
-                console.log('📋 Permissão:', permission);
-                
-                if (permission !== 'granted') {
-                    alert('⚠️ Permissão negada. Ative nas configurações do seu dispositivo.');
-                    atualizarStatusNotificacoes();
-                    return;
-                }
-
-                // Testar notificação imediatamente
-                await enviarNotificacaoCompleta({
-                    titulo: '✅ Teste de Notificação',
-                    mensagem: 'As notificações estão funcionando! Você receberá alertas de novos clientes.',
-                    tipo: 'success',
-                    tag: 'teste-notificacao'
-                });
-
-                // Tentar configurar push notifications
-                if ('serviceWorker' in navigator && 'PushManager' in window && window.swRegistration) {
-                    try {
-                        const registration = window.swRegistration;
-                        
-                        // SUA CHAVE VAPID REAL AQUI!
-                        const vapidKey = 'BPkB8G74KwBwsCz9fTlPsB-zcRSJWerngH5p8X9CktqnR914Od1Mg_duXh4TYKds3BEtZOcNZ6FAUKtzkELKv2U';
-                        
-                        const subscription = await registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: urlBase64ToUint8Array(vapidKey)
-                        });
-
-                        console.log('📡 Push subscription criada:', subscription);
-                        window.existingSubscription = subscription;
-
-                        // Salvar no Firestore
-                        await window.firebaseSetDoc(
-                            window.firebaseDoc(window.db, 'push_subscriptions', 'admin_iphone'), 
-                            {
-                                subscription: JSON.parse(JSON.stringify(subscription)),
-                                device: isIOSDevice ? 'iPhone' : 'Outro',
-                                platform: navigator.platform,
-                                userAgent: navigator.userAgent,
-                                updatedAt: serverTimestamp()
-                            }
-                        );
-
-                        console.log('💾 Subscription salva no Firestore');
-                    } catch (pushError) {
-                        console.warn('⚠️ Push notifications não configuradas:', pushError);
-                        console.log('ℹ️ Usando apenas notificações locais');
-                    }
-                }
-
-                // Atualizar interface
-                atualizarStatusNotificacoes();
-                
-                mostrarToastNotificacao(
-                    '🔔 Notificações Ativadas',
-                    'Você será notificado de novos clientes e alterações!',
-                    'success'
-                );
-
-            } catch (error) {
-                console.error('❌ Erro ao ativar notificações:', error);
-                alert('Erro: ' + error.message);
-                atualizarStatusNotificacoes();
-            }
-        };
-
-        // Função auxiliar para converter VAPID key
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding)
-                .replace(/\-/g, '+')
-                .replace(/_/g, '/');
-            
-            const rawData = window.atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-
-        // Verificar status ao carregar a página
-        atualizarStatusNotificacoes();
-
-        // Dark Mode
+        // Dark Mode Logic - Inicia sempre com ícone de sol (white mode ativo)
         window.toggleDarkMode = () => {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -1104,18 +583,19 @@ async function enviarNotificacaoCompleta(dados) {
             } else { 
                 icon.classList.replace('fa-moon', 'fa-sun'); 
             }
-            if(window.salesChartInstance) window.openOverviewModal(true);
+            if(window.salesChartInstance) window.openOverviewModal(true); // Redesenhar gráfico
         };
 
         // Formatação Dinheiro
         const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
 
-        // FORÇA A PERSISTÊNCIA DE SESSÃO LOCAL
+        // FORÇA A PERSISTÊNCIA DE SESSÃO LOCAL PARA NÃO PERDER O ADMIN NO F5
         setPersistence(auth, browserLocalPersistence)
             .then(() => {
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         currentUser = user;
+                        
                         isAdminLoggedIn = !user.isAnonymous; 
                         
                         document.getElementById('initial-loader').classList.add('hidden');
@@ -1138,8 +618,7 @@ async function enviarNotificacaoCompleta(dados) {
                 console.error("Erro ao configurar persistência do Firebase:", error);
             });
 
-        // ============ DASHBOARD E DEMAIS FUNÇÕES (MANTIDAS DO ORIGINAL) ============
-        
+        // ============ LÓGICA DO DASHBOARD (VISÃO GERAL) ============
         window.openOverviewModal = async (isRefreshOnly = false) => {
             if(!isRefreshOnly) {
                 document.getElementById('overview-modal').classList.remove('hidden');
@@ -1233,6 +712,7 @@ async function enviarNotificacaoCompleta(dados) {
                 </div>
             `).join('');
 
+            // KPI Globais
             let faturamento = 0;
             allResponses.forEach(r => { if(r.valor) faturamento += parseFloat(r.valor); });
             const lucro = faturamento - (expenses.ads || 0) - (expenses.total || 0);
@@ -1342,6 +822,7 @@ async function enviarNotificacaoCompleta(dados) {
                 prioridade: document.getElementById('edit-prioridade').value
             };
 
+            // Atualiza a data e hora do registro se o campo não estiver vazio
             if (dataHoraRaw) {
                 const newDate = new Date(dataHoraRaw);
                 newData.createdAt = newDate;
@@ -1350,22 +831,9 @@ async function enviarNotificacaoCompleta(dados) {
 
             try {
                 await window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'respostas', id), newData);
-                
-                // Notificar sobre a edição
-                await enviarNotificacaoCompleta({
-                    titulo: '✏️ Registro Atualizado',
-                    mensagem: `Cliente ${newData.nomeCliente} foi editado com sucesso!`,
-                    tipo: 'info',
-                    tag: 'registro-editado',
-                    data: { clienteId: id }
-                });
-                
                 isEditMode = false;
                 setTimeout(() => { if(currentlyViewingId === id) renderDetailModal(); }, 300);
-            } catch(e) { 
-                alert("Erro ao atualizar."); 
-                btn.innerHTML = 'Tentar Novamente'; 
-            }
+            } catch(e) { alert("Erro ao atualizar."); btn.innerHTML = 'Tentar Novamente'; }
         }
 
         function renderDetailModal() {
@@ -1384,6 +852,7 @@ async function enviarNotificacaoCompleta(dados) {
             let dataISO = '';
             let dataOriginal = null;
 
+            // Converter propriedades de tempo do Firestore ou String em objeto Date nativo do Javascript
             if (resp.createdAt?.seconds) {
                 dataOriginal = new Date(resp.createdAt.seconds * 1000);
             } else if (resp.createdAt && typeof resp.createdAt.toDate === 'function') {
@@ -1397,6 +866,7 @@ async function enviarNotificacaoCompleta(dados) {
             if (dataOriginal && !isNaN(dataOriginal.valueOf())) {
                 dataFormatada = dataOriginal.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const pad = (n) => n.toString().padStart(2, '0');
+                // Formato ISO esperado pelo <input type="datetime-local">
                 dataISO = `${dataOriginal.getFullYear()}-${pad(dataOriginal.getMonth() + 1)}-${pad(dataOriginal.getDate())}T${pad(dataOriginal.getHours())}:${pad(dataOriginal.getMinutes())}`;
             } else if (resp.data) { 
                 dataFormatada = resp.data.split('-').reverse().join('/');
@@ -1655,8 +1125,6 @@ async function enviarNotificacaoCompleta(dados) {
             if (unsubscribeAdmin) unsubscribeAdmin();
             
             unsubscribeAdmin = onSnapshot(q, (snapshot) => {
-                const previousLength = allResponses.length;
-                
                 allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 allResponses.forEach(r => {
@@ -1676,26 +1144,6 @@ async function enviarNotificacaoCompleta(dados) {
 
                     return b.sortOrder - a.sortOrder;
                 });
-
-                // Verificar se há novos registros para notificar
-                if (allResponses.length > previousLength && previousLength > 0) {
-                    const novoCliente = allResponses[0]; // O mais recente
-                    if (novoCliente && isAdminLoggedIn) {
-                        console.log('🆕 Novo cliente detectado:', novoCliente.nomeCliente);
-                        enviarNotificacaoCompleta({
-                            titulo: '🎉 Novo Cliente Registrado!',
-                            mensagem: `${novoCliente.nomeCliente || 'Cliente'} - ${novoCliente.nomeMarca || 'Nova marca'} - R$ ${novoCliente.valor || '0,00'}`,
-                            tipo: 'success',
-                            tag: 'novo-cliente',
-                            data: { clienteId: novoCliente.id },
-                            onClick: () => {
-                                if (novoCliente.id) {
-                                    openDetails(novoCliente.id);
-                                }
-                            }
-                        });
-                    }
-                }
 
                 applyFilters();
                 loader.classList.add('hidden');
@@ -1734,6 +1182,7 @@ async function enviarNotificacaoCompleta(dados) {
 
             grid.innerHTML = currentItems.map(resp => {
                 let dataHora = 'Data indisp.';
+                // Ajuste para exibir a data atualizada se o createdAt for um objeto Date nativo ou Timestamp
                 if (resp.createdAt?.seconds) {
                     dataHora = new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
                 } else if (resp.createdAt && typeof resp.createdAt.toDate === 'function') {
@@ -1861,85 +1310,103 @@ async function enviarNotificacaoCompleta(dados) {
             } else {
                 btnBulk.classList.add('hidden', 'opacity-0');
             }
+
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const pageItems = filteredResponses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+            // Removemos a linha do 'select-all' para evitar erros no JS
         }
 
-        window.exportJSON = () => {
-            if (!allResponses || allResponses.length === 0) {
-                alert("Nenhum dado para exportar.");
-                return;
+     window.exportJSON = () => {
+    if (!allResponses || allResponses.length === 0) {
+        alert("Nenhum dado para exportar.");
+        return;
+    }
+
+    // Confirmação antes de exportar
+    const confirmExport = confirm(
+        `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
+        `• Total na base: ${allResponses.length} clientes\n` +
+        `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
+        `Deseja exportar TODOS os ${allResponses.length} registros?`
+    );
+
+    if (!confirmExport) return;
+
+    // Mostra progresso
+    const btn = document.querySelector('button[onclick="exportJSON()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
+    btn.disabled = true;
+
+    try {
+        // Prepara os dados para exportação (remove dados muito pesados se necessário)
+        const clientesParaExportar = allResponses.map(cliente => {
+            const clienteCopy = { ...cliente };
+            
+            // Se houver imagens em base64 muito grandes, você pode optar por removê-las
+            // ou comprimir ainda mais. Aqui mantemos tudo.
+            if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
+                clienteCopy.totalImagens = clienteCopy.imagens.length;
+                // Mantém as imagens, mas adiciona um aviso
+                clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
             }
+            
+            return clienteCopy;
+        });
 
-            const confirmExport = confirm(
-                `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
-                `• Total na base: ${allResponses.length} clientes\n` +
-                `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
-                `Deseja exportar TODOS os ${allResponses.length} registros?`
+        const dataToExport = {
+            metadata: {
+                dataExportacao: new Date().toISOString(),
+                totalClientes: allResponses.length,
+                versao: "2.0"
+            },
+            clientes: clientesParaExportar
+        };
+
+        // Converte para JSON
+        const jsonString = JSON.stringify(dataToExport, null, 2);
+        
+        // Verifica o tamanho do arquivo
+        const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
+        
+        if (tamanhoMB > 50) {
+            const confirmarTamanho = confirm(
+                `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
+                `Deseja continuar mesmo assim?`
             );
-
-            if (!confirmExport) return;
-
-            const btn = document.querySelector('button[onclick="exportJSON()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
-            btn.disabled = true;
-
-            try {
-                const clientesParaExportar = allResponses.map(cliente => {
-                    const clienteCopy = { ...cliente };
-                    if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
-                        clienteCopy.totalImagens = clienteCopy.imagens.length;
-                        clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
-                    }
-                    return clienteCopy;
-                });
-
-                const dataToExport = {
-                    metadata: {
-                        dataExportacao: new Date().toISOString(),
-                        totalClientes: allResponses.length,
-                        versao: "2.0"
-                    },
-                    clientes: clientesParaExportar
-                };
-
-                const jsonString = JSON.stringify(dataToExport, null, 2);
-                const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
-                
-                if (tamanhoMB > 50) {
-                    const confirmarTamanho = confirm(
-                        `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
-                        `Deseja continuar mesmo assim?`
-                    );
-                    if (!confirmarTamanho) {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                        return;
-                    }
-                }
-
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const downloadNode = document.createElement('a');
-                downloadNode.href = url;
-                downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(downloadNode);
-                downloadNode.click();
-                
-                setTimeout(() => {
-                    document.body.removeChild(downloadNode);
-                    URL.revokeObjectURL(url);
-                }, 100);
-
-                alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
-                
-            } catch (error) {
-                console.error("Erro na exportação:", error);
-                alert("❌ Erro ao exportar: " + error.message);
-            } finally {
+            if (!confirmarTamanho) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+                return;
             }
-        };
+        }
+
+        // Cria e dispara o download
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const downloadNode = document.createElement('a');
+        downloadNode.href = url;
+        downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(downloadNode);
+        downloadNode.click();
+        
+        // Limpeza
+        setTimeout(() => {
+            document.body.removeChild(downloadNode);
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        // Feedback de sucesso
+        alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
+        
+    } catch (error) {
+        console.error("Erro na exportação:", error);
+        alert("❌ Erro ao exportar: " + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
 
         window.triggerImportJSON = () => document.getElementById('import-json-input').click();
 
@@ -1963,19 +1430,8 @@ async function enviarNotificacaoCompleta(dados) {
                         else await addDoc(colRef, data);
                         count++;
                     }
-                    
-                    // Notificar sobre a importação
-                    await enviarNotificacaoCompleta({
-                        titulo: '📥 Importação Concluída',
-                        mensagem: `${count} clientes importados com sucesso!`,
-                        tipo: 'success',
-                        tag: 'importacao'
-                    });
-                    
                     alert(`${count} clientes importados com sucesso!`);
-                } catch (err) { 
-                    alert("Erro ao ler o arquivo."); 
-                } 
+                } catch (err) { alert("Erro ao ler o arquivo."); } 
                 finally { e.target.value = ''; }
             };
             reader.readAsText(file);
@@ -2063,7 +1519,7 @@ async function enviarNotificacaoCompleta(dados) {
                 loginError.classList.remove('hidden');
                 modalBox.classList.add('shake'); setTimeout(() => modalBox.classList.remove('shake'), 500);
             } finally {
-                btnLogin.disabled = false; btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar';
+                btnLogin.disabled = false; btnLogin.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Painel';
             }
         });
 
@@ -2262,18 +1718,7 @@ async function enviarNotificacaoCompleta(dados) {
                 };
 
                 const colRef = collection(db, 'respostas');
-                const docRef = await addDoc(colRef, payload);
-
-                // Enviar notificação de novo cliente
-                if (isAdminLoggedIn) {
-                    await enviarNotificacaoCompleta({
-                        titulo: '🎉 Novo Briefing Recebido!',
-                        mensagem: `${nomeValue} - ${payload.nomeMarca} - R$ ${payload.valor}`,
-                        tipo: 'success',
-                        tag: 'novo-cliente',
-                        data: { clienteId: docRef.id }
-                    });
-                }
+                await addDoc(colRef, payload);
 
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-msg').classList.remove('hidden');
