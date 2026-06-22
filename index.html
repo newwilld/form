@@ -197,7 +197,7 @@
                     <div id="upload-area" class="upload-area border-white/60 shadow-sm">
                         <input type="file" id="image-input" accept="image/*" multiple class="hidden" max="3">
                         <i id="upload-icon" class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3"></i>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">Clique para selecionar imagens</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">Clique ou arraste imagens aqui</p>
                         <p id="image-count" class="text-xs text-blue-600 dark:text-blue-400 mt-2 font-medium hidden"></p>
                     </div>
                 </div>
@@ -557,6 +557,7 @@
 
         const MAX_IMAGES = 3;
         let selectedImages = [];
+        let isCompressingImages = false; // Trava de segurança para impedir envio precipitado
         let currentUser = null;
         let isAdminLoggedIn = false;
         let allResponses = [];
@@ -969,8 +970,8 @@
                             <p class="text-xs text-gray-400 font-bold uppercase mb-3">📸 Imagens de Referência (${resp.imagens.length})</p>
                             <div class="admin-image-grid">
                                 ${resp.imagens.map((img) => `
-                                    <div class="admin-image-item" onclick="viewImage(event, '${img.base64.replace(/'/g, "\\'")}')" title="${img.name}">
-                                        <img src="${img.base64}" alt="${img.name}" loading="lazy">
+                                    <div class="admin-image-item" onclick="viewImage(event, '${(img.base64 || '').replace(/'/g, "\\'")}')" title="${img.name || 'Imagem'}">
+                                        <img src="${img.base64 || ''}" alt="${img.name || 'Imagem'}" loading="lazy">
                                     </div>
                                 `).join('')}
                             </div>
@@ -1310,10 +1311,6 @@
             } else {
                 btnBulk.classList.add('hidden', 'opacity-0');
             }
-
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const pageItems = filteredResponses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-            // Removemos a linha do 'select-all' para evitar erros no JS
         }
 
      window.exportJSON = () => {
@@ -1536,8 +1533,11 @@
         const imageCount = document.getElementById('image-count');
         const uploadIcon = document.getElementById('upload-icon');
 
+        // AJUSTE: Compressão protegida contra nome de arquivos nulos ou browsers antigos
         function compressImage(file) {
             return new Promise((resolve, reject) => {
+                if (!file) return reject(new Error("Arquivo inválido"));
+
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
@@ -1561,17 +1561,27 @@
                             }
                         }
 
-                        canvas.width = width;
-                        canvas.height = height;
+                        // Garante que é número inteiro
+                        canvas.width = Math.floor(width);
+                        canvas.height = Math.floor(height);
                         const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                        const dataUrl = canvas.toDataURL('image/webp', 0.5); 
+                        let dataUrl = canvas.toDataURL('image/webp', 0.6); 
+                        // Fallback de segurança para navegadores muito antigos que não suportam WebP
+                        if(dataUrl.length < 100) {
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        }
+                        
+                        // Garante que "name" nunca será undefined para não quebrar o Firebase
+                        const safeName = file.name ? file.name : `imagem_${Date.now()}.jpg`;
+                        const safeType = dataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+
                         resolve({
-                            name: file.name,
-                            type: 'image/webp',
-                            size: Math.round((dataUrl.length * 3) / 4), 
-                            base64: dataUrl
+                            name: String(safeName),
+                            type: String(safeType),
+                            size: Number(Math.round((dataUrl.length * 3) / 4)) || 0, 
+                            base64: String(dataUrl)
                         });
                     };
                     img.onerror = reject;
@@ -1601,20 +1611,30 @@
         uploadArea.addEventListener('drop', async (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-            await handleFiles(e.dataTransfer.files);
+            if(e.dataTransfer && e.dataTransfer.files) {
+                await handleFiles(e.dataTransfer.files);
+            }
         });
 
         async function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            if (isCompressingImages) {
+                alert("Por favor, aguarde as imagens atuais terminarem de carregar.");
+                return;
+            }
+
             const remaining = MAX_IMAGES - selectedImages.length;
             const filesToProcess = Array.from(files).slice(0, remaining);
 
             if (files.length > remaining) alert(`Você pode adicionar no máximo ${MAX_IMAGES} imagens.`);
+            
+            isCompressingImages = true;
             uploadIcon.className = 'loader mb-3 mx-auto';
 
             try {
                 for (const file of filesToProcess) {
-                    if (!file.type.startsWith('image/')) {
-                        alert(`${file.name} não é uma imagem válida.`);
+                    if (!file.type || !file.type.startsWith('image/')) {
+                        alert(`${file.name || 'Um dos arquivos'} não é uma imagem válida.`);
                         continue;
                     }
                     const compressedFile = await compressImage(file);
@@ -1626,6 +1646,7 @@
                 alert("Ocorreu um erro ao processar uma ou mais imagens.");
             } finally {
                 uploadIcon.className = 'fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-3';
+                isCompressingImages = false;
             }
         }
 
@@ -1686,6 +1707,12 @@
                 return;
             }
 
+            // Trava de segurança: impede o envio se as imagens ainda estiverem sendo processadas
+            if (isCompressingImages) {
+                alert("Por favor, aguarde o carregamento das imagens terminar antes de enviar.");
+                return;
+            }
+
             const btn = document.getElementById('btn-submit');
             const nomeValue = document.getElementById('nomeCliente').value.trim();
             const nichoValue = document.getElementById('nicho').value.trim();
@@ -1701,16 +1728,26 @@
                     objetosChecked.push(`Personalizado: ${outroTexto.value.trim()}`);
                 }
 
+                // AJUSTE: Blindagem extra (Mapeamento seguro antes de mandar pro Firebase)
+                const imagensParaFirebase = selectedImages.map(img => {
+                    return {
+                        name: img.name ? String(img.name) : `imagem_${Date.now()}.jpg`,
+                        type: img.type ? String(img.type) : 'image/jpeg',
+                        size: Number(img.size) || 0,
+                        base64: img.base64 ? String(img.base64) : ''
+                    };
+                });
+
                 const payload = {
-                    nomeCliente: nomeValue,
-                    nomeMarca: document.getElementById('nomeMarca').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    nicho: nichoValue,
-                    cores: document.getElementById('cores').value.trim(),
-                    objetos: objetosChecked,
-                    imagens: selectedImages.map(img => ({ name: img.name, type: img.type, size: img.size, base64: img.base64 })),
-                    totalImagens: selectedImages.length,
-                    userId: currentUser.uid,
+                    nomeCliente: nomeValue || '',
+                    nomeMarca: document.getElementById('nomeMarca').value.trim() || '',
+                    email: document.getElementById('email').value.trim() || '',
+                    nicho: nichoValue || '',
+                    cores: document.getElementById('cores').value.trim() || '',
+                    objetos: objetosChecked || [],
+                    imagens: imagensParaFirebase,
+                    totalImagens: imagensParaFirebase.length,
+                    userId: currentUser.uid || 'anonimo',
                     createdAt: serverTimestamp(),
                     status: 'realizando',
                     prioridade: 'alta', 
@@ -1728,13 +1765,16 @@
                 console.error("Erro ao salvar:", err);
                 let msgErro = "Ocorreu um erro desconhecido ao enviar. Tente novamente.";
                 if (err.code === 'permission-denied' || (err.message && err.message.includes('permission'))) {
-                    msgErro = "⚠️ ERRO DE PERMISSÃO: Adicione 'allow create: if true;' nas regras do Firestore.";
+                    msgErro = "⚠️ ERRO DE PERMISSÃO: Verifique as regras do Firestore.";
                 } else if (err.message && (err.message.includes('payload') || err.message.includes('large'))) {
-                    msgErro = "⚠️ ERRO DE TAMANHO: Imagens muito grandes.";
+                    msgErro = "⚠️ ERRO DE TAMANHO: As imagens escolhidas são pesadas demais. O servidor recusa arquivos gigantescos.";
+                } else if (err.message && err.message.includes('invalid')) {
+                    msgErro = "⚠️ ERRO NO ARQUIVO: A imagem contém metadados inválidos ou corrompidos.";
                 } else {
                     msgErro = `⚠️ Erro ao enviar: ${err.message}`;
                 }
                 alert(msgErro);
+            } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Enviar Briefing';
             }
