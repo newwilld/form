@@ -6,7 +6,7 @@
     <title>Briefing de Marca - Formulário Profissional</title>
 
     <script>
-        // Sempre inicia em white mode - removida a lógica de verificação
+        // Sempre inicia em white mode
         document.documentElement.classList.remove('dark');
         localStorage.setItem('theme', 'light');
     </script>
@@ -56,9 +56,7 @@
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
 
-        /* ========================================= */
-        /* ✨ EFEITO LIQUID GLASS (GLASSMORPHISM) ✨ */
-        /* ========================================= */
+        /* ✨ EFEITO LIQUID GLASS ✨ */
         .glass-card {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(14px);
@@ -96,7 +94,6 @@
 
         .admin-checkbox { width: 20px; height: 20px; cursor: pointer; border-radius: 4px; accent-color: #3b82f6; }
         
-        /* Ajuste do Drag and Drop */
         .sortable-ghost { opacity: 0.4; background-color: rgba(239,246,255,0.8) !important; border: 2px dashed #3b82f6 !important; }
         .dark .sortable-ghost { background-color: rgba(30,58,138,0.8) !important; }
     </style>
@@ -287,8 +284,11 @@
         </div>
     </div>
 
+    <!-- MAIN ADMIN VIEW -->
     <main id="admin-view" class="hidden max-w-7xl mx-auto p-4 py-8 animate-fade-in">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 border-b border-gray-300/30 dark:border-zinc-700/50 pb-4">
+        
+        <!-- HEADER ADMIN -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4 border-b border-gray-300/30 dark:border-zinc-700/50 pb-4">
             <div>
                 <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-medium mb-2 inline-flex items-center transition-colors">
                     <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sair do Painel
@@ -320,6 +320,38 @@
             </div>
         </div>
 
+        <!-- BOTÃO ORDENAR (Abaixo do Header) -->
+        <div class="mb-4 flex justify-start">
+            <button id="btn-reset-order" onclick="organizarPorData()" class="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 hover:bg-blue-200 dark:hover:bg-blue-800/60 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center w-full md:w-auto justify-center">
+                <i class="fa-solid fa-arrow-down-1-9 mr-2"></i> Ordenar por Data (Fila)
+            </button>
+        </div>
+
+        <!-- BUSCAR E DATAS -->
+        <div class="glass-card p-4 rounded-xl mb-6 flex flex-col md:flex-row gap-4 items-end z-10 relative">
+            <div class="w-full md:w-2/5">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Buscar Cliente</label>
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" id="filter-search" oninput="applyFilters()" class="pl-10 w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm" placeholder="Nome, empresa, e-mail...">
+                </div>
+            </div>
+            <div class="w-full md:w-1/5">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data de Início</label>
+                <input type="date" id="filter-date-start" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
+            </div>
+            <div class="w-full md:w-1/5">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data Final</label>
+                <input type="date" id="filter-date-end" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
+            </div>
+            <div class="w-full md:w-1/5 flex items-end">
+                <button onclick="clearFilters()" class="w-full bg-white/60 dark:bg-zinc-800/60 hover:bg-white/90 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium transition-colors border border-white/50 dark:border-zinc-700/50 h-[42px] whitespace-nowrap flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-eraser mr-2"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- CONTADORES NUMÉRICOS -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="glass-card p-5 rounded-2xl flex flex-col justify-center transition-all hover:-translate-y-1 hover:shadow-lg">
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase mb-1 flex items-center"><i class="fa-solid fa-briefcase text-blue-500 mr-2"></i> Total Projetos</p>
@@ -339,43 +371,33 @@
             </div>
         </div>
 
-        <div class="glass-card p-4 rounded-xl mb-4 flex flex-col md:flex-row gap-4 items-end z-10 relative">
-            <div class="w-full md:w-1/3">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Buscar Cliente</label>
-                <div class="relative">
-                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="filter-search" oninput="applyFilters()" class="pl-10 w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm" placeholder="Nome, empresa, e-mail...">
-                </div>
-            </div>
-            <div class="w-full md:w-1/6">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Status do Pedido</label>
-                <select id="filter-status" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
-                    <option value="todos">Todos</option>
+        <!-- FILTROS ESPECÍFICOS ACIMA DOS CARDS -->
+        <div class="glass-card flex flex-col lg:flex-row lg:items-center justify-between p-4 rounded-xl mb-4 gap-4">
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <select id="filter-status" onchange="applyFilters()" class="w-full sm:w-auto border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg px-3 py-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm text-sm font-semibold">
+                    <option value="todos">Status: Todos</option>
                     <option value="realizando">Realizando</option>
                     <option value="pendente">Pendente</option>
                     <option value="entregue">Entregue</option>
                 </select>
-            </div>
-            <div class="w-full md:w-1/5">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data de Início</label>
-                <input type="date" id="filter-date-start" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
-            </div>
-            <div class="w-full md:w-1/5">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Data Final</label>
-                <input type="date" id="filter-date-end" onchange="applyFilters()" class="w-full border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg p-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm">
-            </div>
-            <div class="w-full md:w-auto flex items-end">
-                <button onclick="clearFilters()" class="w-full md:w-auto bg-white/60 dark:bg-zinc-800/60 hover:bg-white/90 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium transition-colors border border-white/50 dark:border-zinc-700/50 h-[42px] whitespace-nowrap flex items-center justify-center shadow-sm">
-                    <i class="fa-solid fa-eraser mr-2"></i> Limpar
-                </button>
-            </div>
-        </div>
+                
+                <select id="filter-tipo" onchange="applyFilters()" class="w-full sm:w-auto border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg px-3 py-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm text-sm font-semibold">
+                    <option value="todos">Tipo: Todos</option>
+                    <option value="logotipo">Logotipo</option>
+                    <option value="anuncio">Anúncio</option>
+                    <option value="site">Site</option>
+                    <option value="outros">Outros</option>
+                </select>
 
-        <div class="glass-card flex flex-col md:flex-row items-center justify-between p-4 rounded-xl mb-4 gap-4">
-            <button id="btn-reset-order" onclick="organizarPorData()" class="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 hover:bg-blue-200 dark:hover:bg-blue-800/60 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center w-full md:w-auto justify-center">
-                <i class="fa-solid fa-arrow-down-1-9 mr-2"></i> Ordenar por Data (Fila)
-            </button>
-            <div class="flex items-center gap-4">
+                <select id="filter-prioridade" onchange="applyFilters()" class="w-full sm:w-auto border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg px-3 py-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm text-sm font-semibold">
+                    <option value="todas">Prioridade: Todas</option>
+                    <option value="alta">Alta</option>
+                    <option value="média">Média</option>
+                    <option value="baixa">Baixa</option>
+                </select>
+            </div>
+            
+            <div class="flex items-center justify-end gap-4 ml-auto">
                 <span class="text-xs text-gray-400 dark:text-gray-500 italic hidden sm:inline-block"><i class="fa-solid fa-hand-pointer mr-1"></i>Arraste os cards para reorganizar manualmente</span>
                 <button id="btn-bulk-delete" class="hidden opacity-0 text-red-600 bg-red-50/80 dark:bg-red-900/40 dark:text-red-400 hover:bg-red-100/90 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm border border-red-100 dark:border-red-800/50 flex items-center" onclick="confirmBulkDelete()">
                     <i class="fa-solid fa-trash-can mr-2"></i> Excluir (<span id="selected-count">0</span>)
@@ -538,7 +560,7 @@
         import { getFirestore, collection, addDoc, setDoc, getDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-        // Expor para o escopo global do Window para os modais e inline functions usarem
+        // Expor para o escopo global do Window
         window.firebaseUpdateDoc = updateDoc;
         window.firebaseDoc = doc;
         window.firebaseSetDoc = setDoc;
@@ -1052,21 +1074,20 @@
 
         window.applyFilters = () => {
             const searchTerm = document.getElementById('filter-search').value.toLowerCase();
-            const statusFilter = document.getElementById('filter-status').value;
             const dateStart = document.getElementById('filter-date-start').value;
             const dateEnd = document.getElementById('filter-date-end').value;
+            
+            // Novos filtros logo acima dos cards
+            const statusFilter = document.getElementById('filter-status').value;
+            const tipoFilter = document.getElementById('filter-tipo').value;
+            const prioridadeFilter = document.getElementById('filter-prioridade').value;
 
             filteredResponses = allResponses.filter(r => {
+                // Filtro de Texto
                 const textStr = [r.nomeCliente, r.nome, r.nomeMarca, r.empresa, r.email, r.contato, r.obs, r.nicho, r.tipo].join(' ').toLowerCase();
                 if (searchTerm && !textStr.includes(searchTerm)) return false;
 
-                const rStatus = (r.status || 'pendente').toLowerCase().trim();
-                if (statusFilter !== 'todos') {
-                    if (statusFilter === 'realizando' && rStatus !== 'realizando') return false;
-                    if (statusFilter === 'entregue' && rStatus !== 'entregue') return false;
-                    if (statusFilter === 'pendente' && rStatus !== 'pendente') return false;
-                }
-
+                // Filtro de Data
                 let rDate = null;
                 if (r.createdAt?.seconds) {
                     rDate = new Date(r.createdAt.seconds * 1000);
@@ -1083,6 +1104,30 @@
                     if (rDate > end) return false;
                 }
 
+                // Filtro de Status
+                const rStatus = (r.status || 'pendente').toLowerCase().trim();
+                if (statusFilter !== 'todos' && rStatus !== statusFilter) return false;
+
+                // Filtro de Tipo/Nicho
+                const rTipo = (r.nicho || r.tipo || '').toLowerCase();
+                if (tipoFilter !== 'todos') {
+                    const isLogo = rTipo.includes('logo') || rTipo.includes('marca') || rTipo.includes('identidade');
+                    const isAnuncio = rTipo.includes('anunc') || rTipo.includes('anúnc') || rTipo.includes('ads') || rTipo.includes('tráfego') || rTipo.includes('social');
+                    const isSite = rTipo.includes('site') || rTipo.includes('web') || rTipo.includes('landing');
+                    
+                    if (tipoFilter === 'logotipo' && !isLogo) return false;
+                    if (tipoFilter === 'anuncio' && !isAnuncio) return false;
+                    if (tipoFilter === 'site' && !isSite) return false;
+                    if (tipoFilter === 'outros' && (isLogo || isAnuncio || isSite)) return false;
+                }
+
+                // Filtro de Prioridade
+                const rPrioridade = (r.prioridade || '').toLowerCase();
+                if (prioridadeFilter !== 'todas') {
+                    // Se não tiver prioridade definida, consideramos diferente dos filtros explícitos
+                    if (rPrioridade !== prioridadeFilter) return false;
+                }
+
                 return true;
             });
 
@@ -1092,9 +1137,11 @@
 
         window.clearFilters = () => {
             document.getElementById('filter-search').value = '';
-            document.getElementById('filter-status').value = 'todos';
             document.getElementById('filter-date-start').value = '';
             document.getElementById('filter-date-end').value = '';
+            document.getElementById('filter-status').value = 'todos';
+            document.getElementById('filter-tipo').value = 'todos';
+            document.getElementById('filter-prioridade').value = 'todas';
             applyFilters();
         };
 
@@ -1126,7 +1173,6 @@
                     if (isAEntregue && !isBEntregue) return 1;
                     if (!isAEntregue && isBEntregue) return -1;
 
-                    // ORDEM CRESCENTE: Clientes Antigos ficam no Topo. Clientes Novos (sortOrder maior) vão para o Fim da Fila.
                     return a.sortOrder - b.sortOrder;
                 });
 
@@ -1135,7 +1181,6 @@
             });
         }
 
-        // ====== FUNÇÃO PARA O BOTÃO: REORGANIZAR CRONOLOGICAMENTE ======
         window.organizarPorData = async () => {
             const btn = document.getElementById('btn-reset-order');
             const originalHTML = btn.innerHTML;
@@ -1145,12 +1190,11 @@
             try {
                 const updates = [];
                 allResponses.forEach(r => {
-                    // Extrai a timestamp verdadeira da data
                     const timestamp = r.createdAt?.seconds ? (r.createdAt.seconds * 1000) : (r.data ? new Date(r.data + "T12:00:00").getTime() : 0);
                     
                     if (r.sortOrder !== timestamp) {
                         updates.push(window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'respostas', r.id), { sortOrder: timestamp }));
-                        r.sortOrder = timestamp; // Atualiza a UI imediatamente para nao piscar
+                        r.sortOrder = timestamp;
                     }
                 });
                 
@@ -1158,7 +1202,6 @@
                     await Promise.all(updates);
                 }
                 
-                // Força reordenação visual baseada nas regras de cima
                 allResponses.sort((a, b) => {
                     const statusA = (a.status || '').toLowerCase().trim();
                     const statusB = (b.status || '').toLowerCase().trim();
@@ -1301,11 +1344,9 @@
                         newSortOrder = (prevOrder + nextOrder) / 2;
                     } else if (prevEl) {
                         const prevOrder = allResponses.find(r => r.id === prevEl.getAttribute('data-id')).sortOrder;
-                        // Ajustado para ordem crescente: O que vai pro final fica com numero maior
                         newSortOrder = prevOrder + 100000;
                     } else if (nextEl) {
                         const nextOrder = allResponses.find(r => r.id === nextEl.getAttribute('data-id')).sortOrder;
-                        // Ajustado para ordem crescente: O que vai pro inicio fica com numero menor
                         newSortOrder = nextOrder - 100000;
                     }
 
@@ -1339,83 +1380,83 @@
             }
         }
 
-     window.exportJSON = () => {
-    if (!allResponses || allResponses.length === 0) {
-        alert("Nenhum dado para exportar.");
-        return;
-    }
-
-    const confirmExport = confirm(
-        `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
-        `• Total na base: ${allResponses.length} clientes\n` +
-        `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
-        `Deseja exportar TODOS os ${allResponses.length} registros?`
-    );
-
-    if (!confirmExport) return;
-
-    const btn = document.querySelector('button[onclick="exportJSON()"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
-    btn.disabled = true;
-
-    try {
-        const clientesParaExportar = allResponses.map(cliente => {
-            const clienteCopy = { ...cliente };
-            if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
-                clienteCopy.totalImagens = clienteCopy.imagens.length;
-                clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
-            }
-            return clienteCopy;
-        });
-
-        const dataToExport = {
-            metadata: {
-                dataExportacao: new Date().toISOString(),
-                totalClientes: allResponses.length,
-                versao: "2.0"
-            },
-            clientes: clientesParaExportar
-        };
-
-        const jsonString = JSON.stringify(dataToExport, null, 2);
-        const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
-        
-        if (tamanhoMB > 50) {
-            const confirmarTamanho = confirm(
-                `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
-                `Deseja continuar mesmo assim?`
-            );
-            if (!confirmarTamanho) {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+        window.exportJSON = () => {
+            if (!allResponses || allResponses.length === 0) {
+                alert("Nenhum dado para exportar.");
                 return;
             }
-        }
 
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const downloadNode = document.createElement('a');
-        downloadNode.href = url;
-        downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(downloadNode);
-        downloadNode.click();
-        
-        setTimeout(() => {
-            document.body.removeChild(downloadNode);
-            URL.revokeObjectURL(url);
-        }, 100);
+            const confirmExport = confirm(
+                `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
+                `• Total na base: ${allResponses.length} clientes\n` +
+                `• Filtrados na tela: ${filteredResponses.length} clientes\n\n` +
+                `Deseja exportar TODOS os ${allResponses.length} registros?`
+            );
 
-        alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
-        
-    } catch (error) {
-        console.error("Erro na exportação:", error);
-        alert("❌ Erro ao exportar: " + error.message);
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-};
+            if (!confirmExport) return;
+
+            const btn = document.querySelector('button[onclick="exportJSON()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
+            btn.disabled = true;
+
+            try {
+                const clientesParaExportar = allResponses.map(cliente => {
+                    const clienteCopy = { ...cliente };
+                    if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
+                        clienteCopy.totalImagens = clienteCopy.imagens.length;
+                        clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
+                    }
+                    return clienteCopy;
+                });
+
+                const dataToExport = {
+                    metadata: {
+                        dataExportacao: new Date().toISOString(),
+                        totalClientes: allResponses.length,
+                        versao: "2.0"
+                    },
+                    clientes: clientesParaExportar
+                };
+
+                const jsonString = JSON.stringify(dataToExport, null, 2);
+                const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
+                
+                if (tamanhoMB > 50) {
+                    const confirmarTamanho = confirm(
+                        `O arquivo tem ${tamanhoMB}MB e pode ser grande para alguns editores.\n\n` +
+                        `Deseja continuar mesmo assim?`
+                    );
+                    if (!confirmarTamanho) {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+                }
+
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const downloadNode = document.createElement('a');
+                downloadNode.href = url;
+                downloadNode.download = `clientes_${allResponses.length}_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(downloadNode);
+                downloadNode.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(downloadNode);
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+                alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
+                
+            } catch (error) {
+                console.error("Erro na exportação:", error);
+                alert("❌ Erro ao exportar: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
 
         window.triggerImportJSON = () => document.getElementById('import-json-input').click();
 
