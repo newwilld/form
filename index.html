@@ -391,9 +391,9 @@
 
                 <select id="filter-prioridade" onchange="applyFilters()" class="w-full sm:w-auto border border-white/50 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 rounded-lg px-3 py-2 dark:text-white outline-none focus:border-blue-500 transition-colors shadow-sm text-sm font-semibold">
                     <option value="todas">Prioridade: Todas</option>
-                    <option value="alta">Alta</option>
-                    <option value="média">Média</option>
-                    <option value="baixa">Baixa</option>
+                    <option value="alta">Prioridade: Alta</option>
+                    <option value="média">Prioridade: Média</option>
+                    <option value="baixa">Prioridade: Baixa</option>
                 </select>
             </div>
             
@@ -1082,6 +1082,9 @@
             const tipoFilter = document.getElementById('filter-tipo').value;
             const prioridadeFilter = document.getElementById('filter-prioridade').value;
 
+            console.log('Filtro de tipo selecionado:', tipoFilter);
+            console.log('Total de registros antes do filtro:', allResponses.length);
+
             filteredResponses = allResponses.filter(r => {
                 // Filtro de Texto
                 const textStr = [r.nomeCliente, r.nome, r.nomeMarca, r.empresa, r.email, r.contato, r.obs, r.nicho, r.tipo].join(' ').toLowerCase();
@@ -1108,9 +1111,9 @@
                 const rStatus = (r.status || 'pendente').toLowerCase().trim();
                 if (statusFilter !== 'todos' && rStatus !== statusFilter) return false;
 
-                // Filtro de Tipo/Nicho - CORRIGIDO
+                // Filtro de Tipo/Nicho - CORRIGIDO PARA NÃO REMOVER LOGOTIPOS
                 const rTipo = (r.nicho || r.tipo || '').toLowerCase().trim();
-                if (tipoFilter !== 'todos' && rTipo) {
+                if (tipoFilter !== 'todos') {
                     // Verificações mais abrangentes para capturar todos os logotipos
                     const isLogo = rTipo.includes('logo') || 
                                    rTipo.includes('marca') || 
@@ -1136,10 +1139,16 @@
                                    rTipo.includes('pagina') ||
                                    rTipo.includes('website');
                     
+                    console.log(`Registro: nicho="${r.nicho}", tipo="${r.tipo}", rTipo="${rTipo}", isLogo=${isLogo}, isAnuncio=${isAnuncio}, isSite=${isSite}`);
+                    
                     // Lógica de filtro corrigida
                     if (tipoFilter === 'logotipo') {
                         // Quando seleciona logotipo, mostra APENAS os logotipos
-                        if (!isLogo) return false;
+                        if (!isLogo) {
+                            console.log('Removendo registro que NÃO é logotipo:', r.nomeCliente);
+                            return false;
+                        }
+                        console.log('Mantendo registro que É logotipo:', r.nomeCliente);
                     } else if (tipoFilter === 'anuncio') {
                         // Quando seleciona anúncio, mostra APENAS os anúncios
                         if (!isAnuncio) return false;
@@ -1162,6 +1171,7 @@
                 return true;
             });
 
+            console.log('Total de registros após o filtro:', filteredResponses.length);
             currentPage = 1;
             renderAdminDashboard();
         };
