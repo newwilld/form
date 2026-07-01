@@ -1108,17 +1108,48 @@
                 const rStatus = (r.status || 'pendente').toLowerCase().trim();
                 if (statusFilter !== 'todos' && rStatus !== statusFilter) return false;
 
-                // Filtro de Tipo/Nicho
-                const rTipo = (r.nicho || r.tipo || '').toLowerCase();
-                if (tipoFilter !== 'todos') {
-                    const isLogo = rTipo.includes('logo') || rTipo.includes('marca') || rTipo.includes('identidade');
-                    const isAnuncio = rTipo.includes('anunc') || rTipo.includes('anúnc') || rTipo.includes('ads') || rTipo.includes('tráfego') || rTipo.includes('social');
-                    const isSite = rTipo.includes('site') || rTipo.includes('web') || rTipo.includes('landing');
+                // Filtro de Tipo/Nicho - CORRIGIDO
+                const rTipo = (r.nicho || r.tipo || '').toLowerCase().trim();
+                if (tipoFilter !== 'todos' && rTipo) {
+                    // Verificações mais abrangentes para capturar todos os logotipos
+                    const isLogo = rTipo.includes('logo') || 
+                                   rTipo.includes('marca') || 
+                                   rTipo.includes('identidade') || 
+                                   rTipo.includes('brand') || 
+                                   rTipo.includes('branding') || 
+                                   rTipo.includes('logomarca') ||
+                                   rTipo.includes('logotipo');
+                                   
+                    const isAnuncio = rTipo.includes('anunc') || 
+                                      rTipo.includes('anúnc') || 
+                                      rTipo.includes('ads') || 
+                                      rTipo.includes('tráfego') || 
+                                      rTipo.includes('social') || 
+                                      rTipo.includes('mídia') || 
+                                      rTipo.includes('midia') ||
+                                      rTipo.includes('campanha');
+                                      
+                    const isSite = rTipo.includes('site') || 
+                                   rTipo.includes('web') || 
+                                   rTipo.includes('landing') || 
+                                   rTipo.includes('página') || 
+                                   rTipo.includes('pagina') ||
+                                   rTipo.includes('website');
                     
-                    if (tipoFilter === 'logotipo' && !isLogo) return false;
-                    if (tipoFilter === 'anuncio' && !isAnuncio) return false;
-                    if (tipoFilter === 'site' && !isSite) return false;
-                    if (tipoFilter === 'outros' && (isLogo || isAnuncio || isSite)) return false;
+                    // Lógica de filtro corrigida
+                    if (tipoFilter === 'logotipo') {
+                        // Quando seleciona logotipo, mostra APENAS os logotipos
+                        if (!isLogo) return false;
+                    } else if (tipoFilter === 'anuncio') {
+                        // Quando seleciona anúncio, mostra APENAS os anúncios
+                        if (!isAnuncio) return false;
+                    } else if (tipoFilter === 'site') {
+                        // Quando seleciona site, mostra APENAS os sites
+                        if (!isSite) return false;
+                    } else if (tipoFilter === 'outros') {
+                        // Quando seleciona outros, mostra itens que NÃO são logo, anúncio ou site
+                        if (isLogo || isAnuncio || isSite) return false;
+                    }
                 }
 
                 // Filtro de Prioridade
