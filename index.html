@@ -371,9 +371,12 @@
             </div>
         </div>
 
-        <div class="glass-card flex items-center justify-end p-4 rounded-xl mb-4">
+        <div class="glass-card flex flex-col md:flex-row items-center justify-between p-4 rounded-xl mb-4 gap-4">
+            <button id="btn-reset-order" onclick="organizarPorData()" class="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 hover:bg-blue-200 dark:hover:bg-blue-800/60 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center w-full md:w-auto justify-center">
+                <i class="fa-solid fa-arrow-down-1-9 mr-2"></i> Ordenar por Data (Fila)
+            </button>
             <div class="flex items-center gap-4">
-                <span class="text-xs text-gray-400 dark:text-gray-500 italic"><i class="fa-solid fa-hand-pointer mr-1"></i>Arraste os cards para reorganizar</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500 italic hidden sm:inline-block"><i class="fa-solid fa-hand-pointer mr-1"></i>Arraste os cards para reorganizar manualmente</span>
                 <button id="btn-bulk-delete" class="hidden opacity-0 text-red-600 bg-red-50/80 dark:bg-red-900/40 dark:text-red-400 hover:bg-red-100/90 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm border border-red-100 dark:border-red-800/50 flex items-center" onclick="confirmBulkDelete()">
                     <i class="fa-solid fa-trash-can mr-2"></i> Excluir (<span id="selected-count">0</span>)
                 </button>
@@ -557,7 +560,7 @@
 
         const MAX_IMAGES = 3;
         let selectedImages = [];
-        let isCompressingImages = false; // Trava de segurança para impedir envio precipitado
+        let isCompressingImages = false; 
         let currentUser = null;
         let isAdminLoggedIn = false;
         let allResponses = [];
@@ -574,7 +577,6 @@
         const ITEMS_PER_PAGE = 15;
         let currentPage = 1;
 
-        // Dark Mode Logic - Inicia sempre com ícone de sol (white mode ativo)
         window.toggleDarkMode = () => {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -584,23 +586,18 @@
             } else { 
                 icon.classList.replace('fa-moon', 'fa-sun'); 
             }
-            if(window.salesChartInstance) window.openOverviewModal(true); // Redesenhar gráfico
+            if(window.salesChartInstance) window.openOverviewModal(true); 
         };
 
-        // Formatação Dinheiro
         const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
 
-        // FORÇA A PERSISTÊNCIA DE SESSÃO LOCAL PARA NÃO PERDER O ADMIN NO F5
         setPersistence(auth, browserLocalPersistence)
             .then(() => {
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         currentUser = user;
-                        
                         isAdminLoggedIn = !user.isAnonymous; 
-                        
                         document.getElementById('initial-loader').classList.add('hidden');
-                        
                         if (isAdminLoggedIn) {
                             document.getElementById('client-view').classList.add('hidden');
                             document.getElementById('admin-view').classList.remove('hidden');
@@ -615,27 +612,21 @@
                     }
                 });
             })
-            .catch((error) => {
-                console.error("Erro ao configurar persistência do Firebase:", error);
-            });
+            .catch((error) => { console.error("Erro ao configurar persistência do Firebase:", error); });
 
-        // ============ LÓGICA DO DASHBOARD (VISÃO GERAL) ============
         window.openOverviewModal = async (isRefreshOnly = false) => {
             if(!isRefreshOnly) {
                 document.getElementById('overview-modal').classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             }
-            
             let expenses = { ads: 0, total: 0 };
             try {
                 const docRef = doc(db, 'settings', 'finance');
                 const snap = await getDoc(docRef);
                 if(snap.exists()) expenses = snap.data();
             } catch(e) {}
-
             document.getElementById('config-ads').value = expenses.ads || 0;
             document.getElementById('config-expenses').value = expenses.total || 0;
-
             renderOverviewCharts(expenses);
         };
 
@@ -656,7 +647,6 @@
                 await setDoc(doc(db, 'settings', 'finance'), { ads, total });
                 renderOverviewCharts({ ads, total });
             } catch(e) { alert("Erro ao salvar custos."); }
-            
             btn.innerHTML = ogText;
         };
 
@@ -664,10 +654,7 @@
             let count = 0, valor = 0;
             allResponses.forEach(r => {
                 let d = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000) : (r.data ? new Date(r.data + "T12:00:00") : null);
-                if (d && d >= start && d < end) {
-                    count++;
-                    if (r.valor) valor += parseFloat(r.valor);
-                }
+                if (d && d >= start && d < end) { count++; if (r.valor) valor += parseFloat(r.valor); }
             });
             return { count, valor };
         }
@@ -713,7 +700,6 @@
                 </div>
             `).join('');
 
-            // KPI Globais
             let faturamento = 0;
             allResponses.forEach(r => { if(r.valor) faturamento += parseFloat(r.valor); });
             const lucro = faturamento - (expenses.ads || 0) - (expenses.total || 0);
@@ -823,7 +809,6 @@
                 prioridade: document.getElementById('edit-prioridade').value
             };
 
-            // Atualiza a data e hora do registro se o campo não estiver vazio
             if (dataHoraRaw) {
                 const newDate = new Date(dataHoraRaw);
                 newData.createdAt = newDate;
@@ -853,7 +838,6 @@
             let dataISO = '';
             let dataOriginal = null;
 
-            // Converter propriedades de tempo do Firestore ou String em objeto Date nativo do Javascript
             if (resp.createdAt?.seconds) {
                 dataOriginal = new Date(resp.createdAt.seconds * 1000);
             } else if (resp.createdAt && typeof resp.createdAt.toDate === 'function') {
@@ -867,7 +851,6 @@
             if (dataOriginal && !isNaN(dataOriginal.valueOf())) {
                 dataFormatada = dataOriginal.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const pad = (n) => n.toString().padStart(2, '0');
-                // Formato ISO esperado pelo <input type="datetime-local">
                 dataISO = `${dataOriginal.getFullYear()}-${pad(dataOriginal.getMonth() + 1)}-${pad(dataOriginal.getDate())}T${pad(dataOriginal.getHours())}:${pad(dataOriginal.getMinutes())}`;
             } else if (resp.data) { 
                 dataFormatada = resp.data.split('-').reverse().join('/');
@@ -1143,13 +1126,55 @@
                     if (isAEntregue && !isBEntregue) return 1;
                     if (!isAEntregue && isBEntregue) return -1;
 
-                    return b.sortOrder - a.sortOrder;
+                    // ORDEM CRESCENTE: Clientes Antigos ficam no Topo. Clientes Novos (sortOrder maior) vão para o Fim da Fila.
+                    return a.sortOrder - b.sortOrder;
                 });
 
                 applyFilters();
                 loader.classList.add('hidden');
             });
         }
+
+        // ====== FUNÇÃO PARA O BOTÃO: REORGANIZAR CRONOLOGICAMENTE ======
+        window.organizarPorData = async () => {
+            const btn = document.getElementById('btn-reset-order');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Organizando...';
+            btn.disabled = true;
+
+            try {
+                const updates = [];
+                allResponses.forEach(r => {
+                    // Extrai a timestamp verdadeira da data
+                    const timestamp = r.createdAt?.seconds ? (r.createdAt.seconds * 1000) : (r.data ? new Date(r.data + "T12:00:00").getTime() : 0);
+                    
+                    if (r.sortOrder !== timestamp) {
+                        updates.push(window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'respostas', r.id), { sortOrder: timestamp }));
+                        r.sortOrder = timestamp; // Atualiza a UI imediatamente para nao piscar
+                    }
+                });
+                
+                if(updates.length > 0) {
+                    await Promise.all(updates);
+                }
+                
+                // Força reordenação visual baseada nas regras de cima
+                allResponses.sort((a, b) => {
+                    const statusA = (a.status || '').toLowerCase().trim();
+                    const statusB = (b.status || '').toLowerCase().trim();
+                    if (statusA === 'entregue' && statusB !== 'entregue') return 1;
+                    if (statusA !== 'entregue' && statusB === 'entregue') return -1;
+                    return a.sortOrder - b.sortOrder;
+                });
+                applyFilters();
+            } catch (err) {
+                alert("Erro ao reorganizar a fila.");
+                console.error(err);
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        };
 
         function renderAdminDashboard() {
             let totalProjetos = allResponses.length;
@@ -1183,7 +1208,6 @@
 
             grid.innerHTML = currentItems.map(resp => {
                 let dataHora = 'Data indisp.';
-                // Ajuste para exibir a data atualizada se o createdAt for um objeto Date nativo ou Timestamp
                 if (resp.createdAt?.seconds) {
                     dataHora = new Date(resp.createdAt.seconds * 1000).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
                 } else if (resp.createdAt && typeof resp.createdAt.toDate === 'function') {
@@ -1277,10 +1301,12 @@
                         newSortOrder = (prevOrder + nextOrder) / 2;
                     } else if (prevEl) {
                         const prevOrder = allResponses.find(r => r.id === prevEl.getAttribute('data-id')).sortOrder;
-                        newSortOrder = prevOrder - 100000;
+                        // Ajustado para ordem crescente: O que vai pro final fica com numero maior
+                        newSortOrder = prevOrder + 100000;
                     } else if (nextEl) {
                         const nextOrder = allResponses.find(r => r.id === nextEl.getAttribute('data-id')).sortOrder;
-                        newSortOrder = nextOrder + 100000;
+                        // Ajustado para ordem crescente: O que vai pro inicio fica com numero menor
+                        newSortOrder = nextOrder - 100000;
                     }
 
                     if(newSortOrder) {
@@ -1319,7 +1345,6 @@
         return;
     }
 
-    // Confirmação antes de exportar
     const confirmExport = confirm(
         `ATENÇÃO: Você está prestes a exportar TODOS os ${allResponses.length} clientes.\n\n` +
         `• Total na base: ${allResponses.length} clientes\n` +
@@ -1329,25 +1354,18 @@
 
     if (!confirmExport) return;
 
-    // Mostra progresso
     const btn = document.querySelector('button[onclick="exportJSON()"]');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div> Exportando...';
     btn.disabled = true;
 
     try {
-        // Prepara os dados para exportação (remove dados muito pesados se necessário)
         const clientesParaExportar = allResponses.map(cliente => {
             const clienteCopy = { ...cliente };
-            
-            // Se houver imagens em base64 muito grandes, você pode optar por removê-las
-            // ou comprimir ainda mais. Aqui mantemos tudo.
             if (clienteCopy.imagens && clienteCopy.imagens.length > 0) {
                 clienteCopy.totalImagens = clienteCopy.imagens.length;
-                // Mantém as imagens, mas adiciona um aviso
                 clienteCopy._aviso_imagens = "Imagens em base64 podem tornar o arquivo grande";
             }
-            
             return clienteCopy;
         });
 
@@ -1360,10 +1378,7 @@
             clientes: clientesParaExportar
         };
 
-        // Converte para JSON
         const jsonString = JSON.stringify(dataToExport, null, 2);
-        
-        // Verifica o tamanho do arquivo
         const tamanhoMB = (new Blob([jsonString]).size / (1024 * 1024)).toFixed(2);
         
         if (tamanhoMB > 50) {
@@ -1378,7 +1393,6 @@
             }
         }
 
-        // Cria e dispara o download
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const downloadNode = document.createElement('a');
@@ -1387,13 +1401,11 @@
         document.body.appendChild(downloadNode);
         downloadNode.click();
         
-        // Limpeza
         setTimeout(() => {
             document.body.removeChild(downloadNode);
             URL.revokeObjectURL(url);
         }, 100);
 
-        // Feedback de sucesso
         alert(`✅ Exportação concluída com sucesso!\n\n${allResponses.length} clientes exportados.\nTamanho do arquivo: ${tamanhoMB}MB`);
         
     } catch (error) {
@@ -1533,7 +1545,6 @@
         const imageCount = document.getElementById('image-count');
         const uploadIcon = document.getElementById('upload-icon');
 
-        // AJUSTE: Compressão protegida contra nome de arquivos nulos ou browsers antigos
         function compressImage(file) {
             return new Promise((resolve, reject) => {
                 if (!file) return reject(new Error("Arquivo inválido"));
@@ -1561,19 +1572,16 @@
                             }
                         }
 
-                        // Garante que é número inteiro
                         canvas.width = Math.floor(width);
                         canvas.height = Math.floor(height);
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
                         let dataUrl = canvas.toDataURL('image/webp', 0.6); 
-                        // Fallback de segurança para navegadores muito antigos que não suportam WebP
                         if(dataUrl.length < 100) {
                             dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                         }
                         
-                        // Garante que "name" nunca será undefined para não quebrar o Firebase
                         const safeName = file.name ? file.name : `imagem_${Date.now()}.jpg`;
                         const safeType = dataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
 
@@ -1707,7 +1715,6 @@
                 return;
             }
 
-            // Trava de segurança: impede o envio se as imagens ainda estiverem sendo processadas
             if (isCompressingImages) {
                 alert("Por favor, aguarde o carregamento das imagens terminar antes de enviar.");
                 return;
@@ -1728,7 +1735,6 @@
                     objetosChecked.push(`Personalizado: ${outroTexto.value.trim()}`);
                 }
 
-                // AJUSTE: Blindagem extra (Mapeamento seguro antes de mandar pro Firebase)
                 const imagensParaFirebase = selectedImages.map(img => {
                     return {
                         name: img.name ? String(img.name) : `imagem_${Date.now()}.jpg`,
