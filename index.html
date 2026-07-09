@@ -447,6 +447,10 @@
                     </div>
                 </div>
                 <div><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Métricas por Período</h3><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="overview-periods"></div></div>
+                
+                <!-- INVESTIMENTO EM ANÚNCIOS POR PERÍODO -->
+                <div><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Investimento em Anúncios</h3><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="overview-ads-periods"></div></div>
+                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700"><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Evolução de Vendas</h3><div class="h-64 relative w-full"><canvas id="salesChart"></canvas></div></div>
                     <div class="space-y-6">
@@ -482,7 +486,7 @@
                         <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> Registrar Novo Custo
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nome do Registro</label>
                                 <input type="text" id="cost-name" placeholder="Ex: Anúncio Google, Material..." 
@@ -491,6 +495,11 @@
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Valor (R$)</label>
                                 <input type="number" id="cost-value" step="0.01" placeholder="0,00" 
+                                       class="w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-2.5 dark:bg-zinc-700 dark:text-white text-sm outline-none focus:ring-2 focus:ring-red-400">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Data e Hora</label>
+                                <input type="datetime-local" id="cost-datetime" 
                                        class="w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-2.5 dark:bg-zinc-700 dark:text-white text-sm outline-none focus:ring-2 focus:ring-red-400">
                             </div>
                             <div class="flex items-end">
@@ -517,6 +526,33 @@
                         <i class="fa-solid fa-floppy-disk mr-2"></i> Salvar e Recalcular Lucro
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA EDITAR REGISTRO DE CUSTO -->
+    <div id="edit-cost-modal" class="hidden fixed inset-0 z-[75] flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border dark:border-zinc-700">
+            <div class="p-6 border-b dark:border-zinc-700 flex justify-between items-center bg-gray-50 dark:bg-zinc-800">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-white">Editar Registro</h2>
+                <button onclick="closeEditCostModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Nome do Registro</label>
+                    <input type="text" id="edit-cost-name" class="w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-3 dark:bg-zinc-700 dark:text-white outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Valor (R$)</label>
+                    <input type="number" id="edit-cost-value" step="0.01" class="w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-3 dark:bg-zinc-700 dark:text-white outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Data e Hora</label>
+                    <input type="datetime-local" id="edit-cost-datetime" class="w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-3 dark:bg-zinc-700 dark:text-white outline-none">
+                </div>
+                <button onclick="saveEditCost()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-check mr-2"></i> Salvar Alterações
+                </button>
             </div>
         </div>
     </div>
@@ -587,6 +623,7 @@
         let idsToDelete = [];
         let currentlyViewingId = null;
         let isEditMode = false;
+        let currentEditCostId = null;
 
         const ITEMS_PER_PAGE = 15;
         let currentPage = 1;
@@ -623,18 +660,33 @@
             });
         }).catch((error) => { console.error("Erro ao configurar persistência:", error); });
 
+        // Função para calcular investimento em anúncios por período
+        function getAdsByPeriod(start, end) {
+            let total = 0;
+            allResponses.forEach(r => {
+                let d = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000) : (r.data ? new Date(r.data + "T12:00:00") : null);
+                if (d && d >= start && d < end) {
+                    // Procura por registros de custo com nome "SALDO ANÚNCIOS"
+                    // Isso será tratado no histórico de custos
+                }
+            });
+            return total;
+        }
+
         // ============ FUNÇÕES DE CUSTOS CORRIGIDAS ============
         window.addCostRecord = async () => {
             const nameInput = document.getElementById('cost-name');
             const valueInput = document.getElementById('cost-value');
+            const datetimeInput = document.getElementById('cost-datetime');
             
-            if (!nameInput || !valueInput) {
+            if (!nameInput || !valueInput || !datetimeInput) {
                 console.error('Campos de custo não encontrados');
                 return;
             }
             
             const name = nameInput.value.trim();
             const value = parseFloat(valueInput.value);
+            const datetimeValue = datetimeInput.value;
             
             if (!name) {
                 alert('Por favor, insira um nome para o registro.');
@@ -648,6 +700,12 @@
                 return;
             }
             
+            if (!datetimeValue) {
+                alert('Por favor, selecione uma data e hora.');
+                datetimeInput.focus();
+                return;
+            }
+            
             const btn = document.getElementById('btn-add-cost');
             if (!btn) return;
             
@@ -655,17 +713,19 @@
             btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;border-top-color:white;"></div>';
             
             try {
+                const selectedDate = new Date(datetimeValue);
                 const costRecord = {
                     nome: name,
                     valor: value,
-                    data: new Date().toISOString(),
-                    timestamp: new Date().getTime()
+                    data: selectedDate.toISOString(),
+                    timestamp: selectedDate.getTime()
                 };
                 
                 await addDoc(collection(db, 'custos'), costRecord);
                 
                 nameInput.value = '';
                 valueInput.value = '';
+                datetimeInput.value = '';
                 
                 await loadCostHistory();
                 
@@ -709,21 +769,35 @@
                         minute: '2-digit'
                     });
                     
+                    // Destacar se for SALDO ANÚNCIOS
+                    const isSaldoAnuncios = cost.nome?.toUpperCase().includes('SALDO ANÚNCIOS');
+                    const bgColor = isSaldoAnuncios ? 'bg-green-50/60 dark:bg-green-900/30 border-green-200/50 dark:border-green-800/30' : 'bg-white/60 dark:bg-zinc-900/60 border-gray-200/50 dark:border-zinc-700/50';
+                    const iconBg = isSaldoAnuncios ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30';
+                    const iconColor = isSaldoAnuncios ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                    const iconClass = isSaldoAnuncios ? 'fa-bullhorn' : 'fa-receipt';
+                    
                     return `
-                        <div class="flex items-center justify-between bg-white/60 dark:bg-zinc-900/60 border border-gray-200/50 dark:border-zinc-700/50 rounded-lg p-3 hover:bg-white/80 dark:hover:bg-zinc-900/80 transition-colors group">
+                        <div class="flex items-center justify-between ${bgColor} border rounded-lg p-3 hover:bg-white/80 dark:hover:bg-zinc-900/80 transition-colors group">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid fa-receipt text-red-600 dark:text-red-400 text-sm"></i>
+                                <div class="w-8 h-8 ${iconBg} rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid ${iconClass} ${iconColor} text-sm"></i>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">${cost.nome}</p>
+                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                                        ${cost.nome}
+                                        ${isSaldoAnuncios ? '<span class="ml-2 text-[10px] bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-1.5 py-0.5 rounded font-bold">ANÚNCIO</span>' : ''}
+                                    </p>
                                     <p class="text-[10px] text-gray-500 dark:text-gray-400">${dataFormatada}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold text-red-600 dark:text-red-400">${formatMoney(cost.valor)}</span>
+                                <span class="text-sm font-bold ${isSaldoAnuncios ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatMoney(cost.valor)}</span>
+                                <button onclick="window.openEditCostModal('${cost.id}', '${cost.nome.replace(/'/g, "\\'")}', ${cost.valor}, ${cost.timestamp})" 
+                                        class="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Editar registro">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
                                 <button onclick="window.deleteCostRecord('${cost.id}')" 
-                                        class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                        class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20" title="Excluir registro">
                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
                             </div>
@@ -734,6 +808,60 @@
             } catch (error) {
                 console.error('Erro ao carregar histórico:', error);
                 historyDiv.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Erro ao carregar registros: ' + error.message + '</p>';
+            }
+        };
+
+        // Função para abrir modal de edição de custo
+        window.openEditCostModal = (id, nome, valor, timestamp) => {
+            currentEditCostId = id;
+            document.getElementById('edit-cost-name').value = nome;
+            document.getElementById('edit-cost-value').value = valor;
+            
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('edit-cost-datetime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('edit-cost-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeEditCostModal = () => {
+            document.getElementById('edit-cost-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            currentEditCostId = null;
+        };
+
+        window.saveEditCost = async () => {
+            if (!currentEditCostId) return;
+            
+            const nome = document.getElementById('edit-cost-name').value.trim();
+            const valor = parseFloat(document.getElementById('edit-cost-value').value);
+            const datetimeValue = document.getElementById('edit-cost-datetime').value;
+            
+            if (!nome || isNaN(valor) || valor <= 0 || !datetimeValue) {
+                alert('Preencha todos os campos corretamente.');
+                return;
+            }
+            
+            const selectedDate = new Date(datetimeValue);
+            
+            try {
+                await window.firebaseUpdateDoc(window.firebaseDoc(window.db, 'custos', currentEditCostId), {
+                    nome: nome,
+                    valor: valor,
+                    data: selectedDate.toISOString(),
+                    timestamp: selectedDate.getTime()
+                });
+                
+                closeEditCostModal();
+                await loadCostHistory();
+            } catch (error) {
+                console.error('Erro ao editar custo:', error);
+                alert('Erro ao salvar as alterações.');
             }
         };
 
@@ -793,7 +921,31 @@
             return { count, valor };
         }
 
-        function renderOverviewCharts(expenses) {
+        // Função para calcular investimento em anúncios por período (baseado no histórico)
+        async function getAdsPeriodData(start, end) {
+            let total = 0;
+            try {
+                const q = query(collection(db, 'custos'));
+                const snapshot = await getDocs(q);
+                snapshot.forEach(doc => {
+                    const cost = doc.data();
+                    // Considera apenas registros com "SALDO ANÚNCIOS" no nome
+                    if (cost.nome && cost.nome.toUpperCase().includes('SALDO ANÚNCIOS')) {
+                        if (cost.timestamp) {
+                            const costDate = new Date(cost.timestamp);
+                            if (costDate >= start && costDate < end) {
+                                total += cost.valor || 0;
+                            }
+                        }
+                    }
+                });
+            } catch(e) {
+                console.error('Erro ao calcular anúncios por período:', e);
+            }
+            return total;
+        }
+
+        async function renderOverviewCharts(expenses) {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
@@ -822,11 +974,32 @@
                 { label: 'Ano Passado', data: getPeriodData(startOfLastYear, startOfYear) }
             ];
 
+            // Calcular investimento em anúncios para cada período
+            const adsPeriods = [
+                { label: 'Invest. Anúncios Hoje', value: await getAdsPeriodData(today, tomorrow) },
+                { label: 'Invest. Anúncios Ontem', value: await getAdsPeriodData(yesterday, today) },
+                { label: 'Invest. Anúncios Antes de Ontem', value: await getAdsPeriodData(dby, yesterday) },
+                { label: 'Invest. Anúncios Essa Semana', value: await getAdsPeriodData(startOfWeek, tomorrow) },
+                { label: 'Invest. Anúncios Semana Passada', value: await getAdsPeriodData(startOfLastWeek, startOfWeek) },
+                { label: 'Invest. Anúncios Esse Mês', value: await getAdsPeriodData(startOfMonth, startOfNextMonth) },
+                { label: 'Invest. Anúncios Mês Passado', value: await getAdsPeriodData(startOfLastMonth, startOfMonth) },
+                { label: 'Invest. Anúncios Mês Antepassado', value: await getAdsPeriodData(startOfMBL, startOfLastMonth) },
+                { label: 'Invest. Anúncios Este Ano', value: await getAdsPeriodData(startOfYear, startOfNextYear) },
+                { label: 'Invest. Anúncios Ano Passado', value: await getAdsPeriodData(startOfLastYear, startOfYear) }
+            ];
+
             document.getElementById('overview-periods').innerHTML = periods.map(p => `
                 <div class="glass-card p-4 rounded-xl text-center flex flex-col justify-center">
                     <p class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 truncate">${p.label}</p>
                     <p class="text-xl font-black text-gray-800 dark:text-white">${p.data.count}</p>
                     <p class="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">${formatMoney(p.data.valor)}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('overview-ads-periods').innerHTML = adsPeriods.map(p => `
+                <div class="glass-card p-4 rounded-xl text-center flex flex-col justify-center border-green-200/50 dark:border-green-800/30">
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 truncate">${p.label}</p>
+                    <p class="text-xl font-black text-green-600 dark:text-green-400">${formatMoney(p.value)}</p>
                 </div>
             `).join('');
 
@@ -1205,7 +1378,7 @@
         window.viewImage = (event, base64) => { event.stopPropagation(); document.getElementById('image-viewer-img').src = base64; document.getElementById('image-viewer').classList.remove('hidden'); };
         window.closeImageViewer = () => document.getElementById('image-viewer').classList.add('hidden');
 
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeLoginModal(); closeImageViewer(); closeDeleteModal(); closeOverviewModal(); } });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeLoginModal(); closeImageViewer(); closeDeleteModal(); closeOverviewModal(); closeEditCostModal(); } });
 
         window.exportJSON = () => {
             if (!allResponses.length) { alert("Nenhum dado."); return; }
