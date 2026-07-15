@@ -1101,18 +1101,31 @@
             if (unsubscribeAdmin) unsubscribeAdmin();
             unsubscribeAdmin = onSnapshot(query(collection(db, 'respostas')), (snapshot) => {
                 allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
                 allResponses.forEach(r => {
                     if(r.sortOrder === undefined) {
                         r.sortOrder = r.createdAt?.seconds ? r.createdAt.seconds * 1000 : (r.data ? new Date(r.data + "T12:00:00").getTime() : 0);
                     }
                 });
+                
+                // LÓGICA DE ORDENAÇÃO AJUSTADA AQUI:
                 allResponses.sort((a, b) => {
                     const isAEntregue = (a.status || '').toLowerCase().trim() === 'entregue';
                     const isBEntregue = (b.status || '').toLowerCase().trim() === 'entregue';
+                    
+                    // Coloca todos os entregues no final da fila geral
                     if (isAEntregue && !isBEntregue) return 1;
                     if (!isAEntregue && isBEntregue) return -1;
+                    
+                    // Se ambos forem Entregues, os mais recentes vão pro topo
+                    if (isAEntregue && isBEntregue) {
+                        return b.sortOrder - a.sortOrder;
+                    }
+                    
+                    // Se nenhum for Entregue (Realizando/Pendente), mantêm a ordem de fila normal (mais antigo no topo)
                     return a.sortOrder - b.sortOrder;
                 });
+                
                 applyFilters();
                 document.getElementById('admin-loader').classList.add('hidden');
             });
@@ -1417,7 +1430,6 @@
 
         window.logoutAdmin = async () => { if (unsubscribeAdmin) { unsubscribeAdmin(); unsubscribeAdmin = null; } await signOut(auth); allResponses = []; isAdminLoggedIn = false; selectedIds.clear(); currentPage = 1; await signInAnonymously(auth); };
 
-        // ============ UPLOAD DE IMAGENS ============
         const uploadArea = document.getElementById('upload-area');
         const imageInput = document.getElementById('image-input');
         const previewGrid = document.getElementById('image-preview-grid');
