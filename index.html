@@ -448,9 +448,6 @@
                 </div>
                 <div><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Métricas por Período</h3><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="overview-periods"></div></div>
                 
-                <!-- INVESTIMENTO EM ANÚNCIOS POR PERÍODO -->
-                <div><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Investimento em Anúncios</h3><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="overview-ads-periods"></div></div>
-                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700"><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Evolução de Vendas</h3><div class="h-64 relative w-full"><canvas id="salesChart"></canvas></div></div>
                     <div class="space-y-6">
@@ -464,14 +461,7 @@
                     <h3 class="text-lg font-bold text-red-800 dark:text-red-400 mb-4 flex items-center">
                         <i class="fa-solid fa-calculator mr-2"></i> Gestão de Custos e Saldos
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Investimento em Anúncios</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-3 text-gray-500 font-bold">R$</span>
-                                <input type="number" id="config-ads" step="0.01" class="pl-10 w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-3 dark:bg-zinc-700 dark:text-white focus:ring-2 focus:ring-red-400 outline-none">
-                            </div>
-                        </div>
+                    <div class="mb-6">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Outras Despesas Totais</label>
                             <div class="relative">
@@ -489,7 +479,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nome do Registro</label>
-                                <input type="text" id="cost-name" placeholder="Ex: Anúncio Google, Material..." 
+                                <input type="text" id="cost-name" placeholder="Ex: Material, Despesa..." 
                                        class="w-full border border-gray-300 dark:border-zinc-600 rounded-lg p-2.5 dark:bg-zinc-700 dark:text-white text-sm outline-none focus:ring-2 focus:ring-red-400">
                             </div>
                             <div>
@@ -660,19 +650,6 @@
             });
         }).catch((error) => { console.error("Erro ao configurar persistência:", error); });
 
-        // Função para calcular investimento em anúncios por período
-        function getAdsByPeriod(start, end) {
-            let total = 0;
-            allResponses.forEach(r => {
-                let d = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000) : (r.data ? new Date(r.data + "T12:00:00") : null);
-                if (d && d >= start && d < end) {
-                    // Procura por registros de custo com nome "SALDO ANÚNCIOS"
-                    // Isso será tratado no histórico de custos
-                }
-            });
-            return total;
-        }
-
         // ============ FUNÇÕES DE CUSTOS CORRIGIDAS ============
         window.addCostRecord = async () => {
             const nameInput = document.getElementById('cost-name');
@@ -769,12 +746,10 @@
                         minute: '2-digit'
                     });
                     
-                    // Destacar se for SALDO ANÚNCIOS
-                    const isSaldoAnuncios = cost.nome?.toUpperCase().includes('SALDO ANÚNCIOS');
-                    const bgColor = isSaldoAnuncios ? 'bg-green-50/60 dark:bg-green-900/30 border-green-200/50 dark:border-green-800/30' : 'bg-white/60 dark:bg-zinc-900/60 border-gray-200/50 dark:border-zinc-700/50';
-                    const iconBg = isSaldoAnuncios ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30';
-                    const iconColor = isSaldoAnuncios ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-                    const iconClass = isSaldoAnuncios ? 'fa-bullhorn' : 'fa-receipt';
+                    const bgColor = 'bg-white/60 dark:bg-zinc-900/60 border-gray-200/50 dark:border-zinc-700/50';
+                    const iconBg = 'bg-red-100 dark:bg-red-900/30';
+                    const iconColor = 'text-red-600 dark:text-red-400';
+                    const iconClass = 'fa-receipt';
                     
                     return `
                         <div class="flex items-center justify-between ${bgColor} border rounded-lg p-3 hover:bg-white/80 dark:hover:bg-zinc-900/80 transition-colors group">
@@ -785,13 +760,12 @@
                                 <div class="min-w-0">
                                     <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
                                         ${cost.nome}
-                                        ${isSaldoAnuncios ? '<span class="ml-2 text-[10px] bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-1.5 py-0.5 rounded font-bold">ANÚNCIO</span>' : ''}
                                     </p>
                                     <p class="text-[10px] text-gray-500 dark:text-gray-400">${dataFormatada}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold ${isSaldoAnuncios ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatMoney(cost.valor)}</span>
+                                <span class="text-sm font-bold text-red-600 dark:text-red-400">${formatMoney(cost.valor)}</span>
                                 <button onclick="window.openEditCostModal('${cost.id}', '${cost.nome.replace(/'/g, "\\'")}', ${cost.valor}, ${cost.timestamp})" 
                                         class="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Editar registro">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>
@@ -883,12 +857,11 @@
                 document.getElementById('overview-modal').classList.remove('hidden'); 
                 document.body.style.overflow = 'hidden'; 
             }
-            let expenses = { ads: 0, total: 0 };
+            let expenses = { total: 0 };
             try { 
                 const snap = await getDoc(doc(db, 'settings', 'finance')); 
                 if(snap.exists()) expenses = snap.data(); 
             } catch(e) {}
-            document.getElementById('config-ads').value = expenses.ads || 0;
             document.getElementById('config-expenses').value = expenses.total || 0;
             renderOverviewCharts(expenses);
             await loadCostHistory();
@@ -902,11 +875,10 @@
         window.saveFinances = async () => {
             const btn = document.getElementById('btn-save-finance');
             btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;border-top-color:white;"></div> Salvando...';
-            const ads = parseFloat(document.getElementById('config-ads').value) || 0;
             const total = parseFloat(document.getElementById('config-expenses').value) || 0;
             try { 
-                await setDoc(doc(db, 'settings', 'finance'), { ads, total }); 
-                renderOverviewCharts({ ads, total }); 
+                await setDoc(doc(db, 'settings', 'finance'), { total }); 
+                renderOverviewCharts({ total }); 
             } 
             catch(e) { alert("Erro ao salvar custos."); }
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i> Salvar e Recalcular Lucro';
@@ -919,30 +891,6 @@
                 if (d && d >= start && d < end) { count++; if (r.valor) valor += parseFloat(r.valor); }
             });
             return { count, valor };
-        }
-
-        // Função para calcular investimento em anúncios por período (baseado no histórico)
-        async function getAdsPeriodData(start, end) {
-            let total = 0;
-            try {
-                const q = query(collection(db, 'custos'));
-                const snapshot = await getDocs(q);
-                snapshot.forEach(doc => {
-                    const cost = doc.data();
-                    // Considera apenas registros com "SALDO ANÚNCIOS" no nome
-                    if (cost.nome && cost.nome.toUpperCase().includes('SALDO ANÚNCIOS')) {
-                        if (cost.timestamp) {
-                            const costDate = new Date(cost.timestamp);
-                            if (costDate >= start && costDate < end) {
-                                total += cost.valor || 0;
-                            }
-                        }
-                    }
-                });
-            } catch(e) {
-                console.error('Erro ao calcular anúncios por período:', e);
-            }
-            return total;
         }
 
         async function renderOverviewCharts(expenses) {
@@ -974,20 +922,6 @@
                 { label: 'Ano Passado', data: getPeriodData(startOfLastYear, startOfYear) }
             ];
 
-            // Calcular investimento em anúncios para cada período
-            const adsPeriods = [
-                { label: 'Invest. Anúncios Hoje', value: await getAdsPeriodData(today, tomorrow) },
-                { label: 'Invest. Anúncios Ontem', value: await getAdsPeriodData(yesterday, today) },
-                { label: 'Invest. Anúncios Antes de Ontem', value: await getAdsPeriodData(dby, yesterday) },
-                { label: 'Invest. Anúncios Essa Semana', value: await getAdsPeriodData(startOfWeek, tomorrow) },
-                { label: 'Invest. Anúncios Semana Passada', value: await getAdsPeriodData(startOfLastWeek, startOfWeek) },
-                { label: 'Invest. Anúncios Esse Mês', value: await getAdsPeriodData(startOfMonth, startOfNextMonth) },
-                { label: 'Invest. Anúncios Mês Passado', value: await getAdsPeriodData(startOfLastMonth, startOfMonth) },
-                { label: 'Invest. Anúncios Mês Antepassado', value: await getAdsPeriodData(startOfMBL, startOfLastMonth) },
-                { label: 'Invest. Anúncios Este Ano', value: await getAdsPeriodData(startOfYear, startOfNextYear) },
-                { label: 'Invest. Anúncios Ano Passado', value: await getAdsPeriodData(startOfLastYear, startOfYear) }
-            ];
-
             document.getElementById('overview-periods').innerHTML = periods.map(p => `
                 <div class="glass-card p-4 rounded-xl text-center flex flex-col justify-center">
                     <p class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 truncate">${p.label}</p>
@@ -996,16 +930,9 @@
                 </div>
             `).join('');
 
-            document.getElementById('overview-ads-periods').innerHTML = adsPeriods.map(p => `
-                <div class="glass-card p-4 rounded-xl text-center flex flex-col justify-center border-green-200/50 dark:border-green-800/30">
-                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 truncate">${p.label}</p>
-                    <p class="text-xl font-black text-green-600 dark:text-green-400">${formatMoney(p.value)}</p>
-                </div>
-            `).join('');
-
             let faturamento = 0;
             allResponses.forEach(r => { if(r.valor) faturamento += parseFloat(r.valor); });
-            const lucro = faturamento - (expenses.ads || 0) - (expenses.total || 0);
+            const lucro = faturamento - (expenses.total || 0);
             const ticketMedio = allResponses.length ? faturamento / allResponses.length : 0;
 
             document.getElementById('ov-faturamento').innerText = formatMoney(faturamento);
@@ -1108,21 +1035,17 @@
                     }
                 });
                 
-                // LÓGICA DE ORDENAÇÃO AJUSTADA AQUI:
                 allResponses.sort((a, b) => {
                     const isAEntregue = (a.status || '').toLowerCase().trim() === 'entregue';
                     const isBEntregue = (b.status || '').toLowerCase().trim() === 'entregue';
                     
-                    // Coloca todos os entregues no final da fila geral
                     if (isAEntregue && !isBEntregue) return 1;
                     if (!isAEntregue && isBEntregue) return -1;
                     
-                    // Se ambos forem Entregues, os mais recentes vão pro topo
                     if (isAEntregue && isBEntregue) {
                         return b.sortOrder - a.sortOrder;
                     }
                     
-                    // Se nenhum for Entregue (Realizando/Pendente), mantêm a ordem de fila normal (mais antigo no topo)
                     return a.sortOrder - b.sortOrder;
                 });
                 
