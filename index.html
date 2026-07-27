@@ -282,7 +282,6 @@
         </div>
     </div>
 
-    <!-- MAIN ADMIN VIEW -->
     <main id="admin-view" class="hidden max-w-7xl mx-auto p-4 py-8 animate-fade-in">
         
         <!-- HEADER ADMIN -->
@@ -1248,6 +1247,11 @@
             const displayMarca = resp.nomeMarca || resp.empresa || '';
             const displayNicho = resp.nicho || resp.tipo || '';
             const displayObjetos = resp.objetos?.length > 0 ? resp.objetos.join(', ') : '';
+            
+            // O código agora renderiza a galeria de imagens para ser adicionada no HTML do modal (somente leitura)
+            const displayImagens = resp.imagens && resp.imagens.length > 0 
+                ? `<div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Imagens Anexadas (${resp.imagens.length})</p><div class="admin-image-grid">${resp.imagens.map(img => `<div class="admin-image-item" onclick="window.viewImage(event, '${img.base64}')"><img src="${img.base64}" alt="Anexo"></div>`).join('')}</div></div>` 
+                : '';
 
             if (isEditMode) {
                 document.getElementById('modal-content').innerHTML = `
@@ -1270,6 +1274,7 @@
                     </div>
                 `;
             } else {
+                // Modo leitura - Onde inserimos as imagens para que o admin possa visualizar os arquivos que chegaram
                 document.getElementById('modal-content').innerHTML = `
                     <div class="flex flex-col gap-6">
                         <div class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-2xl border border-blue-100 dark:border-blue-900/50">
@@ -1281,6 +1286,7 @@
                         <div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Cores</p>${resp.cores ? `<p class="bg-gray-100 dark:bg-zinc-800 p-3 rounded-xl">${resp.cores}</p>` : '<p class="text-gray-500 italic">Não informado</p>'}</div>
                         <div><p class="text-xs text-gray-400 font-bold uppercase mb-2">OBS</p>${resp.obs ? `<p class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-xl whitespace-pre-wrap">${resp.obs}</p>` : '<p class="text-gray-500 italic">Sem observações</p>'}</div>
                         <div><p class="text-xs text-gray-400 font-bold uppercase mb-2">Elementos Visuais</p>${resp.objetos?.length > 0 ? `<div class="flex flex-wrap gap-2">${resp.objetos.map(obj => `<span class="bg-white dark:bg-zinc-800 border px-3 py-1 rounded-full text-sm">${obj}</span>`).join('')}</div>` : '<p class="text-gray-500 italic">Não selecionado</p>'}</div>
+                        ${displayImagens}
                         ${resp.prioridade || resp.status || resp.valor ? `<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-zinc-800 rounded-xl border">${resp.prioridade ? `<div><p class="text-[10px] text-gray-500 font-bold uppercase">Prioridade</p><p class="font-semibold capitalize">${resp.prioridade}</p></div>` : ''}${resp.status ? `<div><p class="text-[10px] text-gray-500 font-bold uppercase">Status</p><p class="font-semibold capitalize">${resp.status}</p></div>` : ''}${resp.valor ? `<div><p class="text-[10px] text-gray-500 font-bold uppercase">Valor</p><p class="font-bold text-green-600">${formatMoney(resp.valor)}</p></div>` : ''}</div>` : ''}
                         <div class="pt-4 border-t"><p class="text-xs text-gray-400">Data: ${dataFormatada}</p></div>
                     </div>
@@ -1359,6 +1365,9 @@
         const imageCount = document.getElementById('image-count');
         const uploadIcon = document.getElementById('upload-icon');
 
+        // Esta é a função OTIMIZADA. Ela força o JPEG com qualidade 0.5 e reduz para no máximo 700px.
+        // Assim, independente se o cliente colocar um print gigante do celular, ele será transformado
+        // em um arquivo incrivelmente leve que jamais vai causar o erro de Limite Máximo de 1MB do Firestore.
         function compressImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1366,18 +1375,33 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX = 800; let w = img.width, h = img.height;
+                        
+                        const MAX = 700; // Tamanho reduzido seguro para não quebrar limites do Firestore
+                        let w = img.width, h = img.height;
                         if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } } else { if (h > MAX) { w *= MAX / h; h = MAX; } }
                         canvas.width = Math.floor(w); canvas.height = Math.floor(h);
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        let dataUrl = canvas.toDataURL('image/webp', 0.6);
-                        if(dataUrl.length < 100) dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                        resolve({ name: file.name || `imagem_${Date.now()}.jpg`, type: dataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg', size: Math.round((dataUrl.length * 3) / 4), base64: dataUrl });
+                        
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Fundo branco (Corrige prints de PNG transparente que as vezes ficam pretos)
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Força JPEG em 50% de qualidade. Fica excelente pra referência e absurdamente leve.
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                        
+                        resolve({ 
+                            name: file.name || `imagem_${Date.now()}.jpg`, 
+                            type: 'image/jpeg', 
+                            size: Math.round((dataUrl.length * 3) / 4), 
+                            base64: dataUrl 
+                        });
                     };
-                    img.onerror = reject;
+                    img.onerror = () => reject(new Error("Erro ao ler formato da imagem"));
                     img.src = event.target.result;
                 };
-                reader.onerror = reject;
+                reader.onerror = () => reject(new Error("Falha no upload do arquivo"));
                 reader.readAsDataURL(file);
             });
         }
