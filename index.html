@@ -500,6 +500,16 @@
                                     </p>
                                     <p class="text-xl font-black text-blue-700 dark:text-blue-300" id="ov-media-mensal">-</p>
                                 </div>
+                                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-200 dark:border-orange-800/30">
+                                    <p class="text-xs text-orange-600 dark:text-orange-400 font-bold uppercase">🔥 Melhor dia da semana</p>
+                                    <p class="text-xl font-black text-orange-700 dark:text-orange-300" id="ov-melhor-dia">-</p>
+                                    <p class="text-sm font-semibold text-orange-600 dark:text-orange-400 mt-1" id="ov-melhor-dia-vendas">Sem vendas registradas</p>
+                                </div>
+                                <div class="bg-cyan-50 dark:bg-cyan-900/20 rounded-xl p-4 border border-cyan-200 dark:border-cyan-800/30">
+                                    <p class="text-xs text-cyan-600 dark:text-cyan-400 font-bold uppercase flex items-center"><i class="fa-solid fa-repeat mr-1"></i>Clientes Recorrentes</p>
+                                    <p class="text-xl font-black text-cyan-700 dark:text-cyan-300" id="ov-clientes-recorrentes">0 clientes</p>
+                                    <p class="text-sm font-semibold text-cyan-600 dark:text-cyan-400 mt-1" id="ov-clientes-recorrentes-detalhes">Valor: R$ 0,00 • Quantidade de vendas: 0</p>
+                                </div>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
@@ -507,6 +517,13 @@
                                 <i class="fa-solid fa-star mr-2 text-purple-500"></i>Top Serviços
                             </h3>
                             <div id="ov-top-services" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></div>
+                        </div>
+                        <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
+                            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">
+                                <i class="fa-solid fa-ranking-star mr-2 text-amber-500"></i>Top 5 Clientes
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Clientes que mais investiram na empresa</p>
+                            <div id="ov-top-clientes" class="space-y-2 text-sm text-gray-700 dark:text-gray-300"></div>
                         </div>
                     </div>
                 </div>
@@ -990,9 +1007,61 @@
             const lucro = faturamento - (expenses.total || 0);
             const ticketMedio = allResponses.length ? faturamento / allResponses.length : 0;
 
+            const nomesDosDias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            const vendasPorDia = Array.from({ length: 7 }, () => ({ valor: 0, quantidade: 0 }));
+            allResponses.forEach(r => {
+                const dataVenda = r.createdAt?.seconds
+                    ? new Date(r.createdAt.seconds * 1000)
+                    : (r.data ? new Date(r.data + 'T12:00:00') : null);
+                const valor = parseFloat(r.valor) || 0;
+                if (dataVenda && !isNaN(dataVenda) && valor > 0) {
+                    const dia = vendasPorDia[dataVenda.getDay()];
+                    dia.valor += valor;
+                    dia.quantidade++;
+                }
+            });
+            const maiorValorPorDia = Math.max(...vendasPorDia.map(dia => dia.valor));
+            const melhorDiaIndex = vendasPorDia.findIndex(dia => dia.valor === maiorValorPorDia);
+
+            const clientesPorIdentificador = new Map();
+            allResponses.forEach((r, index) => {
+                const nome = String(r.nomeCliente || r.nome || r.nomeMarca || 'Cliente não identificado').trim();
+                const email = (r.email || '').trim().toLowerCase();
+                const telefone = (r.contato || r.telefone || '').replace(/\D/g, '');
+                const chave = email
+                    ? `email:${email}`
+                    : (telefone ? `telefone:${telefone}` : (nome !== 'Cliente não identificado' ? `nome:${nome.toLowerCase()}` : `registro:${r.id || index}`));
+                const cliente = clientesPorIdentificador.get(chave) || { nome, valor: 0, vendas: 0 };
+                cliente.valor += parseFloat(r.valor) || 0;
+                cliente.vendas++;
+                clientesPorIdentificador.set(chave, cliente);
+            });
+            const clientes = Array.from(clientesPorIdentificador.values());
+            const clientesRecorrentes = clientes.filter(cliente => cliente.vendas >= 2);
+            const valorClientesRecorrentes = clientesRecorrentes.reduce((total, cliente) => total + cliente.valor, 0);
+            const vendasClientesRecorrentes = clientesRecorrentes.reduce((total, cliente) => total + cliente.vendas, 0);
+            const topClientes = clientes.sort((a, b) => b.valor - a.valor || b.vendas - a.vendas).slice(0, 5);
+
             document.getElementById('ov-faturamento').innerText = formatMoney(faturamento);
             document.getElementById('ov-lucro').innerText = formatMoney(lucro);
             document.getElementById('ov-ticket').innerText = formatMoney(ticketMedio);
+            document.getElementById('ov-melhor-dia').innerText = maiorValorPorDia > 0 ? nomesDosDias[melhorDiaIndex] : '-';
+            document.getElementById('ov-melhor-dia-vendas').innerHTML = maiorValorPorDia > 0
+                ? `${formatMoney(maiorValorPorDia)} <span class="mx-1 opacity-50">•</span> ${vendasPorDia[melhorDiaIndex].quantidade} ${vendasPorDia[melhorDiaIndex].quantidade === 1 ? 'venda' : 'vendas'}`
+                : 'Sem vendas registradas';
+            document.getElementById('ov-clientes-recorrentes').innerText = `${clientesRecorrentes.length} ${clientesRecorrentes.length === 1 ? 'cliente' : 'clientes'}`;
+            document.getElementById('ov-clientes-recorrentes-detalhes').innerText = `Valor: ${formatMoney(valorClientesRecorrentes)} • Quantidade de vendas: ${vendasClientesRecorrentes}`;
+            const escapeHtml = (texto) => String(texto).replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[caractere]);
+            document.getElementById('ov-top-clientes').innerHTML = topClientes.length ? topClientes.map((cliente, index) => `
+                <div class="flex items-center gap-3 border-b dark:border-zinc-700 pb-2 last:border-0">
+                    <span class="w-6 h-6 shrink-0 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xs font-bold">#${index + 1}</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-medium truncate">${escapeHtml(cliente.nome)}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${cliente.vendas} ${cliente.vendas === 1 ? 'compra' : 'compras'}</p>
+                    </div>
+                    <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">${formatMoney(cliente.valor)}</span>
+                </div>
+            `).join('') : '<p class="text-gray-500 italic">Dados insuficientes</p>';
 
             const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
             const monthlySales = {};
@@ -1295,7 +1364,7 @@
                 const s = (r.status || '').toLowerCase().trim();
                 if (s === 'entregue') countEntregue++;
                 else if (s && s !== 'pendente') countRealizando++;
-                if (r.valor) totalValor += parseFloat(r.valor);
+                totalValor += parseFloat(r.valor) || 0;
             });
             document.getElementById('stat-total').innerText = allResponses.length;
             document.getElementById('stat-entregue').innerText = countEntregue;
