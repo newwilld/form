@@ -504,6 +504,10 @@
                                     <p class="text-xs text-orange-600 dark:text-orange-400 font-bold uppercase">🔥 Melhor dia da semana</p>
                                     <p class="text-xl font-black text-orange-700 dark:text-orange-300" id="ov-melhor-dia">-</p>
                                     <p class="text-sm font-semibold text-orange-600 dark:text-orange-400 mt-1" id="ov-melhor-dia-vendas">Sem vendas registradas</p>
+                                    <div class="mt-3 text-sm text-orange-700 dark:text-orange-300">
+                                        <p class="font-bold mb-1">Vendas totalizadas:</p>
+                                        <div id="ov-vendas-por-dia" class="space-y-1"></div>
+                                    </div>
                                 </div>
                                 <div class="bg-cyan-50 dark:bg-cyan-900/20 rounded-xl p-4 border border-cyan-200 dark:border-cyan-800/30">
                                     <p class="text-xs text-cyan-600 dark:text-cyan-400 font-bold uppercase flex items-center"><i class="fa-solid fa-repeat mr-1"></i>Clientes Recorrentes</p>
@@ -1049,6 +1053,9 @@
             document.getElementById('ov-melhor-dia-vendas').innerHTML = maiorValorPorDia > 0
                 ? `${formatMoney(maiorValorPorDia)} <span class="mx-1 opacity-50">•</span> ${vendasPorDia[melhorDiaIndex].quantidade} ${vendasPorDia[melhorDiaIndex].quantidade === 1 ? 'venda' : 'vendas'}`
                 : 'Sem vendas registradas';
+            document.getElementById('ov-vendas-por-dia').innerHTML = [6, 0, 1, 2, 3, 4, 5].map(dia =>
+                `<p>${nomesDosDias[dia].replace('-feira', '')}: <span class="font-semibold">${vendasPorDia[dia].quantidade}</span></p>`
+            ).join('');
             document.getElementById('ov-clientes-recorrentes').innerText = `${clientesRecorrentes.length} ${clientesRecorrentes.length === 1 ? 'cliente' : 'clientes'}`;
             document.getElementById('ov-clientes-recorrentes-detalhes').innerText = `Valor: ${formatMoney(valorClientesRecorrentes)} • Quantidade de vendas: ${vendasClientesRecorrentes}`;
             const escapeHtml = (texto) => String(texto).replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[caractere]);
