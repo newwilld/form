@@ -449,7 +449,7 @@
                         <p class="text-3xl font-black text-purple-600 dark:text-purple-400 mt-2 relative z-10" id="ov-ticket">R$ 0,00</p>
                     </div>
                 </div>
-                <div><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Métricas por Período</h3><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="overview-periods"></div></div>
+                <div><h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Métricas por Período</h3><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4" id="overview-periods"></div></div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
@@ -859,6 +859,7 @@
             const dby = new Date(yesterday); dby.setDate(dby.getDate() - 1);
             const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - today.getDay());
             const startOfLastWeek = new Date(startOfWeek); startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+            const startOfWeekBeforeLast = new Date(startOfLastWeek); startOfWeekBeforeLast.setDate(startOfWeekBeforeLast.getDate() - 7);
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
             const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -866,6 +867,7 @@
             const startOfYear = new Date(now.getFullYear(), 0, 1);
             const startOfNextYear = new Date(now.getFullYear() + 1, 0, 1);
             const startOfLastYear = new Date(now.getFullYear() - 1, 0, 1);
+            const startOfYearBeforeLast = new Date(now.getFullYear() - 2, 0, 1);
 
             const periods = [
                 { label: 'Hoje', data: getPeriodData(today, tomorrow) },
@@ -873,11 +875,13 @@
                 { label: 'Antes de Ontem', data: getPeriodData(dby, yesterday) },
                 { label: 'Essa Semana', data: getPeriodData(startOfWeek, tomorrow) },
                 { label: 'Semana Passada', data: getPeriodData(startOfLastWeek, startOfWeek) },
+                { label: 'Semana Antepassada', data: getPeriodData(startOfWeekBeforeLast, startOfLastWeek) },
                 { label: 'Mês Atual', data: getPeriodData(startOfMonth, startOfNextMonth) },
                 { label: 'Mês Passado', data: getPeriodData(startOfLastMonth, startOfMonth) },
                 { label: 'Mês Antepassado', data: getPeriodData(startOfMBL, startOfLastMonth) },
                 { label: 'Este Ano', data: getPeriodData(startOfYear, startOfNextYear) },
-                { label: 'Ano Passado', data: getPeriodData(startOfLastYear, startOfYear) }
+                { label: 'Ano Passado', data: getPeriodData(startOfLastYear, startOfYear) },
+                { label: 'Ano Antepassado', data: getPeriodData(startOfYearBeforeLast, startOfLastYear) }
             ];
 
             document.getElementById('overview-periods').innerHTML = periods.map(p => `
