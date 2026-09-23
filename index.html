@@ -493,6 +493,28 @@
                             <details id="ov-brasil-locais" class="text-xs mt-2" hidden><summary class="cursor-pointer font-semibold">Ver locais e vendas</summary><ul id="ov-brasil-lista" class="mt-2 space-y-2 max-h-48 overflow-y-auto"></ul></details>
                         </section>
                         <!-- Fim do bloco do mapa de vendas -->
+                        <!-- Início do bloco de ranking de vendas por país -->
+                        <section class="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-700 text-gray-700 dark:text-gray-300" aria-labelledby="ov-country-sales-title">
+                            <h3 id="ov-country-sales-title" class="text-lg font-bold text-gray-800 dark:text-white mb-2"><i class="fa-solid fa-ranking-star text-indigo-500 mr-2"></i>Ranking de vendas por país</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Quantidade de vendas por país, da maior para a menor. Considera vendas com valor maior que zero e identifica o país pelo telefone.</p>
+                            <p id="ov-country-sales-total" class="text-sm font-semibold mb-2" aria-live="polite"></p>
+                            <ol id="ov-country-sales-ranking" class="text-sm max-h-72 overflow-y-auto pr-1" aria-label="Países ordenados pela quantidade de vendas"></ol>
+                            <p id="ov-country-sales-status" class="text-xs text-gray-500 dark:text-gray-400 mt-3" aria-live="polite"></p>
+                        </section>
+                        <!-- Fim do bloco de ranking de vendas por país -->
+                        <!-- Início do bloco de ranking de vendas por estado -->
+                        <section class="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-700 text-gray-700 dark:text-gray-300" aria-labelledby="ov-state-sales-title">
+                            <h3 id="ov-state-sales-title" class="text-lg font-bold text-gray-800 dark:text-white mb-2"><i class="fa-solid fa-ranking-star text-emerald-500 mr-2"></i>Ranking de vendas por estado</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Brasil • quantidade de vendas por estado, incluindo o Distrito Federal. Prioriza o estado ou a cidade cadastrada; sem essa informação, estima pelo DDD. Considera vendas com valor maior que zero.</p>
+                            <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 p-3 mb-3">
+                                <p id="ov-state-sales-leader-title" class="text-xs font-semibold text-amber-700 dark:text-amber-300">Estado que mais vendeu</p>
+                                <p id="ov-state-sales-leader" class="text-sm font-bold text-amber-800 dark:text-amber-200 mt-1" aria-live="polite"></p>
+                            </div>
+                            <p id="ov-state-sales-total" class="text-sm font-semibold mb-2" aria-live="polite"></p>
+                            <ol id="ov-state-sales-ranking" class="text-sm max-h-72 overflow-y-auto pr-1" aria-label="Estados ordenados pela quantidade de vendas"></ol>
+                            <p id="ov-state-sales-status" class="text-xs text-gray-500 dark:text-gray-400 mt-3" aria-live="polite"></p>
+                        </section>
+                        <!-- Fim do bloco de ranking de vendas por estado -->
                         <section class="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-700 text-gray-700 dark:text-gray-300" aria-labelledby="ov-demografia-titulo">
                             <div class="flex items-center gap-3 mb-2">
                                 <span class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center"><i class="fa-solid fa-earth-americas"></i></span>
@@ -883,8 +905,97 @@ SOFTWARE. */
                 const city = matches[0];
                 return { key: 'city:' + city[1] + ':' + normalize(city[0]), label: city[0] + ' / ' + city[1], lat: city[2], lon: city[3], approximate: false };
             };
+            // Início do ranking por estado: reutiliza apenas os dados geográficos do mapa.
+            function renderOverviewStateSales(responses) {
+                const container = document.getElementById('ov-state-sales-ranking');
+                if (!container) return;
+                const counts = new Map(), knownContacts = new Map();
+                const contactKeys = (record, phone) => [phone.number, record.email ? 'email:' + String(record.email).trim().toLowerCase() : ''].filter(Boolean);
+                const explicitState = (place, phone) => {
+                    const uf = Object.keys(states).find(key => normalize(key) === normalize(place.state) || normalize(states[key]) === normalize(place.state));
+                    if (uf) return uf;
+                    if (!place.city) return null;
+                    const location = locate(place, phone);
+                    return location && !location.approximate ? location.key.split(':')[1] : null;
+                };
+                responses.forEach(record => {
+                    const phone = phoneInfo(record);
+                    if (phone.country === 'other') return;
+                    const uf = explicitState(registeredPlace(record), phone);
+                    if (!uf) return;
+                    contactKeys(record, phone).forEach(key => {
+                        if (!knownContacts.has(key)) knownContacts.set(key, new Set());
+                        knownContacts.get(key).add(uf);
+                    });
+                });
+                let brazil = 0, foreign = 0, unknownCountry = 0, unknownState = 0, ambiguousDDD = 0, estimated = 0;
+                responses.forEach(record => {
+                    if (!(parseFloat(record.valor) > 0)) return;
+                    const phone = phoneInfo(record);
+                    if (phone.country === 'other') { foreign++; return; }
+                    if (phone.country !== 'BR') { unknownCountry++; return; }
+                    brazil++;
+                    const place = registeredPlace(record);
+                    let uf = explicitState(place, phone);
+                    let inferred = false;
+                    if (!uf && !place.city && !place.state) {
+                        const known = new Set();
+                        contactKeys(record, phone).forEach(key => knownContacts.get(key)?.forEach(state => known.add(state)));
+                        if (known.size === 1) uf = [...known][0];
+                        // Não substitui informações conflitantes do contato por uma estimativa.
+                        if (!known.size) {
+                            const candidates = new Set((byDDD.get(phone.ddd) || []).map(city => city[1]));
+                            if (candidates.size === 1) { uf = [...candidates][0]; inferred = true; }
+                            else if (candidates.size > 1) ambiguousDDD++;
+                        }
+                    }
+                    if (!uf) { unknownState++; return; }
+                    if (inferred) estimated++;
+                    counts.set(uf, (counts.get(uf) || 0) + 1);
+                });
+                const ordered = [...counts].map(([uf, count]) => ({ uf, count, name: states[uf] }))
+                    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'pt-BR'));
+                const saleLabel = count => `${count.toLocaleString('pt-BR')} ${count === 1 ? 'venda' : 'vendas'}`;
+                document.getElementById('ov-state-sales-total').textContent = `${saleLabel(brazil)} no Brasil • ${saleLabel(brazil - unknownState)} com estado identificado • ${counts.size} ${counts.size === 1 ? 'UF' : 'UFs'}`;
+                const leader = document.getElementById('ov-state-sales-leader');
+                const leaderTitle = document.getElementById('ov-state-sales-leader-title');
+                if (ordered.length) {
+                    const leaders = ordered.filter(entry => entry.count === ordered[0].count);
+                    leaderTitle.textContent = leaders.length > 1 ? 'Estados que mais venderam (empate)' : 'Estado que mais vendeu';
+                    leader.textContent = `${leaders.map(entry => `${entry.name} (${entry.uf})`).join(' • ')} — ${saleLabel(ordered[0].count)}${leaders.length > 1 ? ' por estado' : ''}`;
+                } else {
+                    leaderTitle.textContent = 'Estado que mais vendeu';
+                    leader.textContent = 'Nenhum estado com vendas identificadas.';
+                }
+                container.replaceChildren();
+                ordered.forEach((entry, index) => {
+                    const row = document.createElement('li');
+                    row.className = 'flex items-center justify-between gap-3 border-b border-gray-100 dark:border-zinc-700 py-3 last:border-0';
+                    row.dataset.state = entry.uf;
+                    const label = document.createElement('span');
+                    label.className = 'min-w-0 font-medium';
+                    label.textContent = `${index + 1}. ${entry.name} (${entry.uf})`;
+                    const counter = document.createElement('span');
+                    counter.className = 'shrink-0 text-right';
+                    const count = document.createElement('strong');
+                    count.className = 'block text-emerald-600 dark:text-emerald-300';
+                    count.textContent = saleLabel(entry.count);
+                    const share = document.createElement('span');
+                    share.className = 'block text-xs text-gray-500 dark:text-gray-400';
+                    share.textContent = `${(entry.count / brazil * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do Brasil`;
+                    counter.append(count, share);
+                    row.append(label, counter);
+                    container.appendChild(row);
+                });
+                const status = document.getElementById('ov-state-sales-status');
+                status.textContent = `${saleLabel(estimated)} com estado estimado pelo DDD • ${saleLabel(unknownState)} do Brasil sem estado identificado • ${saleLabel(foreign)} de outros países fora do ranking • ${saleLabel(unknownCountry)} sem país identificado.`;
+                if (ambiguousDDD) status.textContent += ` DDD compartilhado entre UFs: ${saleLabel(ambiguousDDD)} sem estado definido (como 61: DF/GO).`;
+                if (!brazil && !foreign && !unknownCountry) status.textContent = 'Sem vendas registradas.';
+            }
+            // Fim do ranking por estado.
             const project = (lat, lon) => [52.51642504118669 + (lon - (-73.9833)) * 12.632965036717831, 24 + (5.279254194571423 - Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) * 180 / Math.PI) * 12.632965036717831];
             return responses => {
+                renderOverviewStateSales(responses);
                 const points = document.getElementById('ov-brasil-pontos');
                 if (!points) return;
                 const groups = new Map(), contactPlaces = new Map();
@@ -960,6 +1071,71 @@ SOFTWARE. */
             };
         })();
         // Fim do mapa de vendas.
+
+        // Início do ranking de vendas por país (somente leitura dos registros existentes).
+        function renderOverviewCountrySales(responses) {
+            const container = document.getElementById('ov-country-sales-ranking');
+            if (!container) return;
+            const counts = new Map();
+            const names = new Intl.DisplayNames(['pt-BR'], { type: 'region' });
+            let total = 0, unknown = 0;
+            const countryOf = record => {
+                let raw = String(record.contato || record.telefone || '').trim();
+                const link = raw.match(/(?:wa\.me\/|api\.whatsapp\.com\/send\?phone=)(\+?\d+)/i);
+                if (link) raw = '+' + link[1].replace(/^\+/, '');
+                else raw = raw.replace(/^(?:tel(?:efone)?|cel(?:ular)?|whatsapp|whats|contato)\s*:?\s*/i, '').split(/[;\n/]|\s+[|]\s+/)[0].trim();
+                if (!/^[+\d\s().-]+$/.test(raw)) return null;
+                let digits = raw.replace(/\D/g, '');
+                let international = raw.startsWith('+');
+                if (!international && digits.startsWith('00')) { digits = digits.slice(2); international = true; }
+                if (!international && /^55\d{10,11}$/.test(digits)) international = true;
+                // Mantém a regra do mapa: nacional de 11 dígitos é brasileiro.
+                if (!international && digits.length === 11) return 'BR';
+                if (international && /^55\d{10,11}$/.test(digits)) return 'BR';
+                if (!international) return null;
+                try {
+                    const phone = window.libphonenumber?.parsePhoneNumberFromString('+' + digits);
+                    // DDI compartilhado sem país conclusivo permanece sem identificação.
+                    return phone?.isPossible() && phone.country ? phone.country : null;
+                } catch (_) { return null; }
+            };
+            responses.forEach(record => {
+                if (!(parseFloat(record.valor) > 0)) return;
+                total++;
+                const country = countryOf(record);
+                if (!country) { unknown++; return; }
+                counts.set(country, (counts.get(country) || 0) + 1);
+            });
+            const ordered = [...counts].map(([country, count]) => ({ country, count, name: names.of(country) }))
+                .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'pt-BR'));
+            const saleLabel = count => `${count.toLocaleString('pt-BR')} ${count === 1 ? 'venda' : 'vendas'}`;
+            document.getElementById('ov-country-sales-total').textContent = `${saleLabel(total)} no total • ${counts.size} ${counts.size === 1 ? 'país identificado' : 'países identificados'}`;
+            container.replaceChildren();
+            ordered.forEach((entry, index) => {
+                const row = document.createElement('li');
+                row.className = 'flex items-center justify-between gap-3 border-b border-gray-100 dark:border-zinc-700 py-3 last:border-0';
+                row.dataset.country = entry.country;
+                const label = document.createElement('span');
+                label.className = 'min-w-0 font-medium';
+                label.textContent = `${index + 1}. ${entry.name}`;
+                const counter = document.createElement('span');
+                counter.className = 'shrink-0 text-right';
+                const count = document.createElement('strong');
+                count.className = 'block text-indigo-600 dark:text-indigo-300';
+                count.textContent = saleLabel(entry.count);
+                const share = document.createElement('span');
+                share.className = 'block text-xs text-gray-500 dark:text-gray-400';
+                share.textContent = `${(entry.count / total * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% do total`;
+                counter.append(count, share);
+                row.append(label, counter);
+                container.appendChild(row);
+            });
+            const status = document.getElementById('ov-country-sales-status');
+            status.textContent = !total ? 'Sem vendas registradas.' :
+                (unknown ? `${saleLabel(unknown)} sem país identificado, fora do ranking.` : 'Todas as vendas têm país identificado.');
+            if (total && !window.libphonenumber) status.textContent += ' Identificação internacional indisponível; recarregue a página para tentar novamente.';
+        }
+        // Fim do ranking de vendas por país.
 
         function renderOverviewDemographics(responses) {
             const data = buildOverviewDemographics(responses);
@@ -1124,6 +1300,7 @@ SOFTWARE. */
             ).join('');
             renderOverviewDemographics(allResponses);
             renderOverviewBrazilMap(allResponses);
+            renderOverviewCountrySales(allResponses);
             document.getElementById('ov-clientes-recorrentes').innerText = `${clientesRecorrentes.length} ${clientesRecorrentes.length === 1 ? 'cliente' : 'clientes'}`;
             document.getElementById('ov-clientes-recorrentes-detalhes').innerText = `Valor: ${formatMoney(valorClientesRecorrentes)} • Quantidade de vendas: ${vendasClientesRecorrentes}`;
             const escapeHtml = (texto) => String(texto).replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[caractere]);
