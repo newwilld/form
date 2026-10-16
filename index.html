@@ -470,12 +470,12 @@ h2 .ic svg{width:1.45em;height:1.45em}.r1>.c>h2 .ic svg{width:1.6em;height:1.6em
 .pf .box{flex:1;display:grid;grid-template-columns:1fr auto;gap:0 8px;align-items:center}
 .pf small{grid-column:1/-1;display:flex;gap:5px;align-items:center;color:var(--b2);font-size:14px}.pf b{font-size:21px;font-weight:700}.pf .box>span:last-child{font-size:15px;color:#d6e8ff}
 .pf .box.w small{color:#6fd0ff}.pf .box.x small{color:var(--r)}.x .ic svg{stroke:#ff4545;filter:drop-shadow(0 0 3px #ff2a2a)}.pf .box:first-child .ic svg{stroke:#2dff7a;filter:drop-shadow(0 0 3px #2dff7a)}
-.bar5{display:flex;gap:2px;align-items:flex-end;height:34px;grid-row:2/4;grid-column:2}.bar5 i{width:7px;background:linear-gradient(#7fd8ff,#1e7bff);border-radius:1.5px;box-shadow:0 0 6px var(--b)}
+.bar5{display:flex;gap:2px;align-items:flex-end;height:34px;grid-row:2/4;grid-column:2}.bar5 i{width:7px;background:linear-gradient(#69F5F9,#057BF9);border-radius:1.5px;box-shadow:0 0 6px var(--b)}
 .x .bar5 i{background:linear-gradient(#ff7a7a,#d81b1b);box-shadow:0 0 6px var(--r)}.pf .box:first-child .bar5 i{background:linear-gradient(#9dffc0,#12b24f);box-shadow:0 0 6px #2dff7a}
 .bdh{display:flex;gap:14px;align-items:center}.bdh>.ic{font-size:46px}.dw{font-size:28px;font-weight:700;margin:2px 0}.dsub{color:var(--b2);font-size:17px}
 .bl{flex:1;display:flex;flex-direction:column;justify-content:space-between}.bl .r{display:grid;grid-template-columns:var(--lc,108px 1fr);gap:10px;align-items:center;flex:1;min-height:0}.bl.pr .r .bv{text-align:right}.bl.pr{--lc:118px 1fr 36px;font-size:13.5px}
 .bb{height:11px;background:rgba(30,144,255,.15);border-radius:3px;overflow:hidden}
-.bb i{display:block;height:100%;background:linear-gradient(90deg,#1565d8,#4fc3ff);box-shadow:0 0 8px var(--b);transition:width .3s}
+.bb i{display:block;height:100%;background:linear-gradient(90deg,#69F5F9,#057BF9);box-shadow:0 0 8px var(--b);transition:width .3s;position:relative;border-radius:3px}.bb i::after{content:&quot;&quot;;position:absolute;right:0;top:0;bottom:0;width:5px;border-radius:3px;background:#fff;box-shadow:0 0 6px #69F5F9,0 0 10px #057BF9}
 .k4{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:8px}
 .k{padding:8px;display:flex;flex-direction:column;justify-content:center}.k small{display:flex;gap:6px;align-items:center;font-size:12px}
 .k b{display:block;font-size:17px;margin:4px 0;white-space:nowrap;letter-spacing:-.02em}.dl{font-size:18px;font-weight:700;color:var(--g);text-shadow:0 0 8px currentColor}
@@ -485,7 +485,7 @@ h2 .ic svg{width:1.45em;height:1.45em}.r1>.c>h2 .ic svg{width:1.6em;height:1.6em
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;box-shadow:0 0 6px var(--b2)}
 .lgd{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:13px;width:100%;margin-top:6px}.dot{width:11px;height:11px;vertical-align:-1px}
 .trio{display:grid;flex:none;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
-.trio .box{padding:5px 8px}.trio .ic svg{stroke:#fff;filter:drop-shadow(0 0 3px rgba(255,255,255,.8))}.trio small{display:flex;gap:5px;align-items:center;font-size:13px}.trio b{display:block;font-size:22px;line-height:1.05}.spk{display:flex;gap:1.5px;align-items:flex-end;height:14px;margin-top:2px}.spk i{flex:1;background:linear-gradient(#7fd8ff,#1e7bff);border-radius:1px;box-shadow:0 0 3px var(--b)}
+.trio .box{padding:5px 8px}.trio .ic svg{stroke:#fff;filter:drop-shadow(0 0 3px rgba(255,255,255,.8))}.trio small{display:flex;gap:5px;align-items:center;font-size:13px}.trio b{display:block;font-size:22px;line-height:1.05}.spk{display:flex;gap:1.5px;align-items:flex-end;height:14px;margin-top:2px}.spk i{flex:1;background:linear-gradient(#69F5F9,#057BF9);border-radius:1px;box-shadow:0 0 3px var(--b)}
 .gg{flex:1;min-height:0;grid-auto-rows:minmax(0,1fr);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .gc{position:relative;padding:4px 6px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;min-height:0}.gc small{align-self:stretch;text-align:left;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gc b{position:absolute;left:0;right:0;bottom:5px;font-size:15.5px;font-weight:700}
@@ -502,7 +502,7 @@ h2 .ic svg{width:1.45em;height:1.45em}.r1>.c>h2 .ic svg{width:1.6em;height:1.6em
 .pen:hover{background:rgba(79,195,255,.2)}
 .ch{flex:1;min-height:170px;position:relative}.ch svg{position:absolute;inset:0;width:100%;height:100%}svg text{fill:#cfe6ff;font-size:12px;font-family:'Barlow Semi Condensed',Arial}
 .fn{min-height:230px}.fn .r{font-size:12.5px;flex:1;display:grid;grid-template-columns:100px 1fr 80px;align-items:center;gap:8px;margin:1px 0}
-.fn .r i{display:block;margin:0 auto;height:100%;background:linear-gradient(#4fc3ff,#1565d8);box-shadow:0 0 8px var(--b);}
+.fn .r i{display:block;margin:0 auto;height:100%;background:linear-gradient(90deg,#057BF9,#69F5F9 50%,#057BF9);box-shadow:0 0 8px var(--b);}
 .fn .r b{font-weight:500;text-align:left}
 .foot{max-width:1720px;margin:10px auto 0;display:flex;justify-content:space-between;color:#7fb2ee;font-size:12px}
 .foot button{background:none;border:1px solid #1a67d6;color:var(--b2);border-radius:6px;padding:3px 10px;cursor:pointer}
@@ -518,13 +518,13 @@ body.fit{overflow:hidden;padding:0;height:100vh}
 <body>
 <svg width=&quot;0&quot; height=&quot;0&quot; style=&quot;position:absolute&quot;><defs>
 <pattern id=&quot;dots&quot; width=&quot;4&quot; height=&quot;4&quot; patternUnits=&quot;userSpaceOnUse&quot;><circle cx=&quot;2&quot; cy=&quot;2&quot; r=&quot;.9&quot; fill=&quot;#2f9bff&quot;/></pattern>
-<linearGradient id=&quot;gb&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#6fd0ff&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#0b4fd0&quot;/></linearGradient>
-<linearGradient id=&quot;gd&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#2a7bff&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#0a2e86&quot;/></linearGradient>
+<linearGradient id=&quot;gb&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#69F5F9&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#057BF9&quot;/></linearGradient>
+<linearGradient id=&quot;gd&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#057BF9&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#033a8a&quot;/></linearGradient><linearGradient id=&quot;gl&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;0&quot;><stop offset=&quot;0&quot; stop-color=&quot;#69F5F9&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#057BF9&quot;/></linearGradient>
 <linearGradient id=&quot;ig&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#9be3ff&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#1e8bff&quot;/></linearGradient>
 <linearGradient id=&quot;gg2&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;0&quot;><stop offset=&quot;0&quot; stop-color=&quot;#69F5F9&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#057BF9&quot;/></linearGradient>
 <radialGradient id=&quot;mg&quot; cx=&quot;.5&quot; cy=&quot;.5&quot; r=&quot;.6&quot;><stop offset=&quot;0&quot; stop-color=&quot;#2a8bff&quot; stop-opacity=&quot;.35&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#2a8bff&quot; stop-opacity=&quot;0&quot;/></radialGradient>
 <filter id=&quot;glow&quot; x=&quot;-50%&quot; y=&quot;-50%&quot; width=&quot;200%&quot; height=&quot;200%&quot;><feGaussianBlur stdDeviation=&quot;1.6&quot; result=&quot;b&quot;/><feMerge><feMergeNode in=&quot;b&quot;/><feMergeNode in=&quot;b&quot;/><feMergeNode in=&quot;SourceGraphic&quot;/></feMerge></filter>
-<linearGradient id=&quot;ga&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#1e90ff&quot; stop-opacity=&quot;.5&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#1e90ff&quot; stop-opacity=&quot;0&quot;/></linearGradient>
+<linearGradient id=&quot;ga&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#69F5F9&quot; stop-opacity=&quot;.45&quot;/><stop offset=&quot;.5&quot; stop-color=&quot;#057BF9&quot; stop-opacity=&quot;.22&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#057BF9&quot; stop-opacity=&quot;0&quot;/></linearGradient>
 </defs></svg>
 <main class=&quot;grid&quot; id=&quot;app&quot;></main>
 <div class=&quot;foot&quot;><span>Clique em qualquer número ou texto para editar · ✎ edita os dados dos gráficos · salvo automaticamente neste navegador</span><div><button id=&quot;fs&quot;>Tela cheia (F)</button><button id=&quot;reset&quot;>Restaurar padrão</button></div></div>
@@ -583,8 +583,8 @@ function chart(o){
  if(o.line){const P=o.line.slice(0,n).map((v,i)=>[pl+st*(i+.5),pt+ih-Math.min(1,v/(o.lmax||o.max))*ih]);
   const f=v=>v.toFixed(1);let d='M'+f(P[0][0])+' '+f(P[0][1]);for(let i=0;i<P.length-1;i++){const a=P[i-1]||P[i],b=P[i],c=P[i+1],e=P[i+2]||c;d+=`C${f(b[0]+(c[0]-a[0])/6)} ${f(b[1]+(c[1]-a[1])/6)} ${f(c[0]-(e[0]-b[0])/6)} ${f(c[1]-(e[1]-b[1])/6)} ${f(c[0])} ${f(c[1])}`}
   if(o.area)s+=`<path d=&quot;${d}L${P[n-1][0]} ${pt+ih}L${P[0][0]} ${pt+ih}Z&quot; fill=&quot;url(#ga)&quot;/>`;
-  s+=`<path d=&quot;${d}&quot; fill=&quot;none&quot; stroke=&quot;${o.lc||'#4fc3ff'}&quot; stroke-width=&quot;2&quot; style=&quot;filter:drop-shadow(0 0 5px #1e90ff)&quot;/>`;
-  P.forEach(p=>s+=`<circle cx=&quot;${p[0]}&quot; cy=&quot;${p[1]}&quot; r=&quot;5&quot; fill=&quot;#4fc3ff&quot; opacity=&quot;.22&quot;/><circle cx=&quot;${p[0]}&quot; cy=&quot;${p[1]}&quot; r=&quot;2.6&quot; fill=&quot;${o.lc||'#4fc3ff'}&quot; style=&quot;filter:drop-shadow(0 0 3px #4fc3ff)&quot;/>`);
+  s+=`<path d=&quot;${d}&quot; fill=&quot;none&quot; stroke=&quot;${o.lc||'url(#gl)'}&quot; stroke-width=&quot;2&quot; style=&quot;filter:drop-shadow(0 0 5px #1e90ff)&quot;/>`;
+  P.forEach(p=>s+=`<circle cx=&quot;${p[0]}&quot; cy=&quot;${p[1]}&quot; r=&quot;5&quot; fill=&quot;#4fc3ff&quot; opacity=&quot;.22&quot;/><circle cx=&quot;${p[0]}&quot; cy=&quot;${p[1]}&quot; r=&quot;2.6&quot; fill=&quot;${o.lc||'#4fc3ff'}&quot; style=&quot;filter:drop-shadow(0 0 3px #4fc3ff)&quot;/>`);{const z=P[P.length-1];s+=`<circle class=&quot;gtiph&quot; cx=&quot;${z[0]}&quot; cy=&quot;${z[1]}&quot; r=&quot;7&quot;/><circle class=&quot;gtip&quot; cx=&quot;${z[0]}&quot; cy=&quot;${z[1]}&quot; r=&quot;3.4&quot;/>`}
   if(o.tag){const q=P[n-1];s+=`<rect x=&quot;${q[0]-96}&quot; y=&quot;${Math.max(2,q[1]-24)}&quot; width=&quot;100&quot; height=&quot;18&quot; rx=&quot;5&quot; fill=&quot;#1e90ff&quot; style=&quot;filter:drop-shadow(0 0 6px #1e90ff)&quot;/><text x=&quot;${q[0]-46}&quot; y=&quot;${Math.max(2,q[1]-24)+11.5}&quot; text-anchor=&quot;middle&quot; style=&quot;fill:#fff;font-size:12px;font-weight:700&quot;>${o.tag}</text>`}}
  o.xl.forEach((t,i)=>s+=`<text x=&quot;${pl+st*(i+.5)}&quot; y=&quot;${H-5}&quot; text-anchor=&quot;middle&quot;>${t}</text>`);
  return s+'</svg>';
