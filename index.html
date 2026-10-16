@@ -658,7 +658,7 @@ ${cc('fat','Faturamento','⚷')}
 ${cc('rd','Receita Diária','◷',`<span class=&quot;lg&quot;><span><i class=&quot;dot&quot; style=&quot;background:#4fc3ff&quot;></i>${E('rl1','Receita')}</span><span><i class=&quot;dot&quot; style=&quot;background:#fff&quot;></i>${E('rl2','Conversões')}</span></span>`)}</div><div class=&quot;row r4&quot;>
 ${cc('ev','Evolução de Vendas e Conversões','⚙',`<span class=&quot;lg&quot;><span><i class=&quot;dot&quot; style=&quot;background:#4fc3ff&quot;></i>${E('el1','Vendas')}</span><span><i class=&quot;dot&quot; style=&quot;background:#fff&quot;></i>${E('el2','Conversões')}</span></span>`)}
 <section class=&quot;c s8 fn&quot;><h2>${I('⛉')}${E('hf','Funil de Vendas')}</h2>${FU.map((f,i)=>`<div class=&quot;r&quot;><span>${E('fl'+i,f[0])}</span><i style=&quot;width:${f[2]}%;clip-path:polygon(0 0,100% 0,${100-(1-(FU[i+1]?FU[i+1][2]/f[2]:.6))*50}% 100%,${(1-(FU[i+1]?FU[i+1][2]/f[2]:.6))*50}% 100%)&quot;></i><b>${E('fv'+i,f[1])}</b></div>`).join('')}</section>
-<section class=&quot;c s8&quot;><h2>${I('bag')}${E('hp','Produtos Mais Vendidos')}</h2>${BL('p',PR,1)}</section></div>`;
+<section class=&quot;c s8&quot;><h2>${I('bag')}${E('hp','Produtos Mais Vendidos')}</h2>${BL('pr',PR,1)}</section></div>`;
 
 /* ---------- atualização de elementos derivados ---------- */
 function refresh(){
