@@ -480,7 +480,7 @@ h2 .ic svg{width:1.45em;height:1.45em}.r1>.c>h2 .ic svg{width:1.6em;height:1.6em
 .k{padding:8px;display:flex;flex-direction:column;justify-content:center}.k small{display:flex;gap:6px;align-items:center;font-size:12px}
 .k b{display:block;font-size:17px;margin:4px 0;white-space:nowrap;letter-spacing:-.02em}.dl{font-size:18px;font-weight:700;color:var(--g);text-shadow:0 0 8px currentColor}
 .dn{display:flex;align-items:center;gap:14px}
-.dn{flex:1;min-height:0;justify-content:center}.dn svg{width:auto;height:100%;max-height:118px;max-width:118px;flex:none}.ring{fill:none;stroke:var(--b);stroke-width:10;stroke-linecap:round;filter:drop-shadow(0 0 6px var(--b))}
+.dn{flex:1;min-height:0;justify-content:center}.dn svg{width:auto;height:100%;max-height:118px;max-width:118px;flex:none}.ring{fill:none;stroke:url(#gg2);stroke-width:10;stroke-linecap:round;filter:drop-shadow(0 0 6px var(--b))}
 .trk{fill:none;stroke:rgba(30,144,255,.18);stroke-width:10}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;box-shadow:0 0 6px var(--b2)}
 .lgd{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:13px;width:100%;margin-top:6px}.dot{width:11px;height:11px;vertical-align:-1px}
@@ -645,7 +645,7 @@ $('#app').innerHTML=`
 </div><div class=&quot;row r2&quot;>
 <section class=&quot;c s8&quot;><div class=&quot;k4&quot;>${[0,1,2,3].map(kp).join('')}</div><div class=&quot;k4&quot; style=&quot;margin:0&quot;>${[4,5,6,7].map(kp).join('')}</div></section>
 <section class=&quot;c s4&quot;><h2 style=&quot;font-size:14px&quot;>${I('◈')}${E('og1','Origem das Vendas')}</h2>
- <div class=&quot;dn&quot;><svg viewBox=&quot;0 0 100 100&quot; style=&quot;margin:auto&quot;><circle class=&quot;trk&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/><circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;32&quot; fill=&quot;url(#mg)&quot;/><circle class=&quot;ring&quot; id=&quot;ring&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; transform=&quot;rotate(-90 50 50)&quot;/><foreignObject x=&quot;14&quot; y=&quot;35&quot; width=&quot;72&quot; height=&quot;30&quot;><div xmlns=&quot;http://www.w3.org/1999/xhtml&quot; style=&quot;text-align:center;font:700 24px 'Barlow Semi Condensed',Arial;color:#fff;text-shadow:0 0 8px #1e90ff&quot;>${E('og','72%')}</div></foreignObject></svg></div>
+ <div class=&quot;dn&quot;><svg viewBox=&quot;0 0 100 100&quot; style=&quot;margin:auto&quot;><circle class=&quot;trk&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/><circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;32&quot; fill=&quot;url(#mg)&quot;/><circle class=&quot;ring&quot; id=&quot;ring&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; transform=&quot;rotate(-90 50 50)&quot;/><circle class=&quot;gtiph&quot; id=&quot;ringh&quot; r=&quot;7&quot; cx=&quot;50&quot; cy=&quot;10&quot;/><circle class=&quot;gtip&quot; id=&quot;ringt&quot; r=&quot;3.4&quot; cx=&quot;50&quot; cy=&quot;10&quot;/><foreignObject x=&quot;14&quot; y=&quot;35&quot; width=&quot;72&quot; height=&quot;30&quot;><div xmlns=&quot;http://www.w3.org/1999/xhtml&quot; style=&quot;text-align:center;font:700 24px 'Barlow Semi Condensed',Arial;color:#fff;text-shadow:0 0 8px #1e90ff&quot;>${E('og','72%')}</div></foreignObject></svg></div>
  <div class=&quot;lgd&quot;>${OR.map((o,i)=>`<span><i class=&quot;dot&quot; style=&quot;background:${o[2]}&quot;></i>${E('on'+i,o[0])}</span><span>${E('op'+i,o[1])}</span>`).join('')}</div></section>
 <section class=&quot;c s5&quot;><div class=&quot;trio&quot;>${[['👁','Vistas','132.480'],['userplus','Leads','5.842'],['usercheck','Clientes','958']].map((x,i)=>`<div class=&quot;box&quot;><small>${I(x[0])}${E('tl'+i,x[1])}</small><b>${E('tv'+i,x[2])}</b><div class=&quot;spk&quot;>${Array.from({length:18},(_,j)=>`<i style=&quot;height:${18+j*4.5+((j*7+i*3)%4)*6}%&quot;></i>`).join('')}</div></div>`).join('')}</div>
  <div class=&quot;gg&quot;>${GA.map((_,i)=>gauge(i)).join('')}</div></section>
@@ -662,7 +662,7 @@ ${cc('ev','Evolução de Vendas e Conversões','⚙',`<span class=&quot;lg&quot;
 /* ---------- atualização de elementos derivados ---------- */
 function refresh(){
  document.querySelectorAll('.bl').forEach(l=>{const v=[...l.querySelectorAll('.bv')].map(x=>num(x.textContent)),m=Math.max(...v,1);l.querySelectorAll('.bb i').forEach((b,i)=>b.style.width=(v[i]/m*100)+'%')});
- const p=Math.max(0,Math.min(100,num($('[data-k=&quot;og&quot;]').textContent)));$('#ring').style.strokeDasharray=`${251.3*p/100} 251.3`;
+ const p=Math.max(0,Math.min(100,num($('[data-k=&quot;og&quot;]').textContent)));$('#ring').style.strokeDasharray=`${251.3*p/100} 251.3`;{const a=2*Math.PI*p/100,x=(50+40*Math.sin(a)).toFixed(2),y=(50-40*Math.cos(a)).toFixed(2);['#ringh','#ringt'].forEach(s=>{$(s).setAttribute('cx',x);$(s).setAttribute('cy',y)})}
  drawMap('mbr','B','br',t=>{t=t.trim().toUpperCase();return MAP.B[t]?t:null},'SP');drawMap('mla','L','la',t=>LAN[nrm(t)]||null,'MX');
  document.querySelectorAll('.dl').forEach(x=>x.style.color=/[↓-]/.test(x.textContent)?'var(--r)':'var(--g)');
 }
