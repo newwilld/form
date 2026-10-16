@@ -499,7 +499,7 @@ h2 .ic svg{width:1.45em;height:1.45em}.r1>.c>h2 .ic svg{width:1.6em;height:1.6em
 @keyframes flow{to{stroke-dashoffset:-10}}@media(prefers-reduced-motion:reduce){.lk path{animation:none}}
 .big{font-size:34px;font-weight:700;line-height:1;text-shadow:0 0 10px rgba(79,195,255,.6)}
 .pen{margin-left:6px;background:none;border:1px solid #1a67d6;color:var(--b2);border-radius:6px;cursor:pointer;font-size:12px;padding:1px 6px}
-.pen:hover{background:rgba(79,195,255,.2)}
+.pen:hover{background:rgba(79,195,255,.2)}.pen{display:none!important}.ch{cursor:pointer}
 .ch{flex:1;min-height:170px;position:relative}.ch svg{position:absolute;inset:0;width:100%;height:100%}svg text{fill:#cfe6ff;font-size:12px;font-family:'Barlow Semi Condensed',Arial}
 .fn{min-height:230px}.fn .r{font-size:12.5px;flex:1;display:grid;grid-template-columns:100px 1fr 80px;align-items:center;gap:8px;margin:1px 0}
 .fn .r i{display:block;margin:0 auto;height:100%;background:linear-gradient(90deg,#057BF9,#69F5F9 50%,#057BF9);box-shadow:0 0 8px var(--b);}
@@ -527,7 +527,7 @@ body.fit{overflow:hidden;padding:0;height:100vh}
 <linearGradient id=&quot;ga&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#69F5F9&quot; stop-opacity=&quot;.45&quot;/><stop offset=&quot;.5&quot; stop-color=&quot;#057BF9&quot; stop-opacity=&quot;.22&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#057BF9&quot; stop-opacity=&quot;0&quot;/></linearGradient>
 </defs></svg>
 <main class=&quot;grid&quot; id=&quot;app&quot;></main>
-<div class=&quot;foot&quot;><span>Clique em qualquer número ou texto para editar · ✎ edita os dados dos gráficos · salvo automaticamente neste navegador</span><div><button id=&quot;fs&quot;>Tela cheia (F)</button><button id=&quot;reset&quot;>Restaurar padrão</button></div></div>
+<div class=&quot;foot&quot;><span>Clique em qualquer número ou texto para editar · clique no gráfico para editar os dados · salvo automaticamente neste navegador</span><div><button id=&quot;fs&quot;>Tela cheia (F)</button><button id=&quot;reset&quot;>Restaurar padrão</button></div></div>
 <script>
 const KEY='metatech.dash.v1';let S={};
 try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
@@ -671,7 +671,7 @@ document.addEventListener('input',e=>{const k=e.target.dataset&amp;&amp;e.target
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&amp;&amp;e.target.dataset&amp;&amp;e.target.dataset.k){e.preventDefault();e.target.blur()}});
 document.addEventListener('paste',e=>{if(e.target.dataset&amp;&amp;e.target.dataset.k){e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text').replace(/\n/g,' '))}});
 document.addEventListener('click',e=>{
- const pb=e.target.closest('.pen');
+ const chc=e.target.closest('.ch');const pb=e.target.closest('.pen')||(chc&amp;&amp;{dataset:{ed:chc.id.slice(2)}});
  if(pb){const k=pb.dataset.ed,cur=D(k).map(a=>a.slice()),out=[];
   for(let i=0;i<cur.length;i++){const r=prompt(CN[k][i]+'\nSepare por vírgula (use ponto para decimais):',cur[i].join(', '));
    if(r===null)return;const a=r.split(',').map(x=>parseFloat(x.trim())).filter(x=>!isNaN(x));out.push(a.length?a:cur[i])}
