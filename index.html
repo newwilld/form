@@ -510,7 +510,7 @@ body.fit{overflow:hidden;padding:0;height:100vh}
 .fit .row{min-height:0}.fit .r1{flex:316 1 0}.fit .r2{flex:272 1 0}.fit .r3{flex:147 1 0}.fit .r4{flex:158 1 0}.fit .c{min-height:0;overflow:hidden}.fit .ch,.fit .fn{min-height:0}
 .fit .grid{width:1720px;max-width:none;position:absolute;left:0;top:0;transform-origin:0 0;padding:16px 25px}
 .fit .foot{position:fixed;right:10px;bottom:6px;margin:0;opacity:.25;transition:opacity .2s}.fit .foot:hover{opacity:1}.fit .foot span{display:none}
-.foot{gap:10px}.foot div{display:none}
+.foot{gap:10px}.foot div{display:flex;gap:8px}.foot #fs{display:none}.foot #reset{font-size:10px;padding:1px 7px;border-radius:5px;line-height:1.3}.fit .foot{right:6px;bottom:1px}body:not(.fit) .foot{margin-top:22px}
 @media(max-width:1000px){.row{grid-template-columns:1fr!important}}
 @media(max-width:720px){.pg{grid-template-columns:repeat(3,1fr)}.k4{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -699,6 +699,28 @@ addEventListener('resize',fit);fit();
 </body>
 </html>
 "></iframe></div>
+        <div style="display:flex;justify-content:flex-end;margin:-18px 0 10px">
+            <button type="button" id="design-reset" title="Apagar as edições do dashboard e voltar ao padrão">WaComercial</button>
+        </div>
+        <style>
+            #design-reset{font-size:11px;line-height:1.3;padding:2px 9px;border-radius:6px;border:1px solid #3b82f6;color:#2563eb;background:transparent;cursor:pointer;opacity:.75;transition:opacity .2s,background .2s}
+            #design-reset:hover{opacity:1;background:rgba(59,130,246,.12)}
+            .dark #design-reset{border-color:#1a67d6;color:#4fc3ff}
+            .dark #design-reset:hover{background:rgba(79,195,255,.18)}
+            .theme-red #design-reset{border-color:#ff3b3b;color:#ff5a5a}
+            .theme-red #design-reset:hover{background:rgba(255,60,60,.18)}
+        </style>
+        <script>
+            (function () {
+                var fr = document.querySelector('#design-dashboard iframe'), btn = document.getElementById('design-reset');
+                if (!fr || !btn) return;
+                function hideInner() { try { var f = fr.contentDocument.querySelector('.foot'); if (f) f.style.display = 'none'; } catch (e) {} }
+                fr.addEventListener('load', hideInner); hideInner();
+                btn.addEventListener('click', function () {
+                    try { fr.contentDocument.getElementById('reset').click(); } catch (e) {}
+                });
+            })();
+        </script>
 
         <!-- FILTROS ESPECÍFICOS ACIMA DOS CARDS -->
         <div class="glass-card flex flex-col lg:flex-row lg:items-center justify-between p-4 rounded-xl mb-4 gap-4">
