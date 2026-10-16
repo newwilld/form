@@ -577,7 +577,8 @@ function chart(o){
  const W=o.W||560,H=o.H||150,pl=o.pl||44,pr=o.r?30:8,pt=10,pb=22,iw=W-pl-pr,ih=H-pt-pb,n=o.xl.length,st=iw/n;
  let s=`<svg viewBox=&quot;0 0 ${W} ${H}&quot;>`;
  o.yl.forEach((t,i)=>{const y=pt+ih*i/(o.yl.length-1);s+=`<line x1=&quot;${pl}&quot; x2=&quot;${W-pr}&quot; y1=&quot;${y}&quot; y2=&quot;${y}&quot; stroke=&quot;rgba(79,195,255,.13)&quot;/><text x=&quot;${pl-5}&quot; y=&quot;${y+3}&quot; text-anchor=&quot;end&quot;>${t}</text>`});
- if(o.r)o.r.forEach((t,i)=>{const y=pt+ih*i/(o.r.length-1);s+=`<text x=&quot;${W-pr+5}&quot; y=&quot;${y+3}&quot;>${t}</text>`});
+ if(o.vgrid)for(let i=0;i<=n;i++){const x=(pl+st*i).toFixed(1);s+=`<line x1=&quot;${x}&quot; x2=&quot;${x}&quot; y1=&quot;${pt}&quot; y2=&quot;${pt+ih}&quot; stroke=&quot;rgba(79,195,255,.13)&quot;/>`}
+  if(o.r)o.r.forEach((t,i)=>{const y=pt+ih*i/(o.r.length-1);s+=`<text x=&quot;${W-pr+5}&quot; y=&quot;${y+3}&quot;>${t}</text>`});
  (o.bars||[]).forEach((a,si)=>{const bw=st*.74/o.bars.length;a.slice(0,n).forEach((v,i)=>{const h=Math.max(0,Math.min(1,v/o.max))*ih,x=pl+st*i+st*.13+bw*si;
   s+=`<rect x=&quot;${x}&quot; y=&quot;${pt+ih-h}&quot; width=&quot;${bw*.88}&quot; height=&quot;${h}&quot; rx=&quot;${Math.min(3,bw*.3)}&quot; fill=&quot;url(#${si||o.bars.length==1?'gb':'gd'})&quot; style=&quot;filter:drop-shadow(0 0 3px #1e90ff)&quot;/>`})});
  if(o.line){const P=o.line.slice(0,n).map((v,i)=>[pl+st*(i+.5),pt+ih-Math.min(1,v/(o.lmax||o.max))*ih]);
@@ -592,11 +593,11 @@ function chart(o){
 function render(){
  const wh=id=>{const e=$(id);return{W:e.clientWidth||560,H:e.clientHeight||170}};
  const vm=D('vm'),fat=D('fat'),rd=D('rd'),ev=D('ev');
- $('#c_vm').innerHTML=chart({...wh('#c_vm'),bars:vm,max:100,yl:[100,80,60,40,20,0],xl:MES});
- $('#c_fat').innerHTML=chart({...wh('#c_fat'),line:fat[0],max:50000,area:1,pl:50,yl:['R$ 50K','R$ 40K','R$ 30K','R$ 20K','R$ 10K','R$ 0'],xl:MES,tag:brl(fat[0][fat[0].length-1])});
+ $('#c_vm').innerHTML=chart({...wh('#c_vm'),bars:vm,vgrid:1,max:100,yl:[100,80,60,40,20,0],xl:MES});
+ $('#c_fat').innerHTML=chart({...wh('#c_fat'),line:fat[0],max:50000,area:1,vgrid:1,pl:50,yl:['R$ 50K','R$ 40K','R$ 30K','R$ 20K','R$ 10K','R$ 0'],xl:MES,tag:brl(fat[0][fat[0].length-1])});
  const dl=Array.from({length:30},(_,i)=>[0,4,9,14,19,24,29].includes(i)?String(i+1).padStart(2,'0')+'/10':'');
- $('#c_rd').innerHTML=chart({...wh('#c_rd'),bars:[rd[0]],line:rd[1],max:400,yl:['R$ 400','R$ 300','R$ 200','R$ 100','R$ 0'],xl:dl,pl:46,lc:'#fff'});
- $('#c_ev').innerHTML=chart({...wh('#c_ev'),bars:[ev[0]],max:2000,line:ev[1],lmax:4,lc:'#fff',pl:46,yl:['R$ 2K','R$ 1,5K','R$ 1K','R$ 500','R$ 0'],r:['4x','3x','2x','1x','0x'],xl:MES});
+ $('#c_rd').innerHTML=chart({...wh('#c_rd'),bars:[rd[0]],vgrid:1,line:rd[1],max:400,yl:['R$ 400','R$ 300','R$ 200','R$ 100','R$ 0'],xl:dl,pl:46,lc:'#fff'});
+ $('#c_ev').innerHTML=chart({...wh('#c_ev'),bars:[ev[0]],vgrid:1,max:2000,line:ev[1],lmax:4,lc:'#fff',pl:46,yl:['R$ 2K','R$ 1,5K','R$ 1K','R$ 500','R$ 0'],r:['4x','3x','2x','1x','0x'],xl:MES});
 }
 
 /* ---------- componentes ---------- */
