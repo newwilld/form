@@ -699,25 +699,43 @@ addEventListener('resize',fit);fit();
 </body>
 </html>
 "></iframe></div>
-        <div style="display:flex;justify-content:flex-end;margin:-18px 0 10px">
-            <button type="button" id="design-reset" title="Apagar as edições do dashboard e voltar ao padrão">WaComercial</button>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin:-18px 0 10px">
+            <button type="button" id="design-clock" title="Voltar o dashboard para o padrão gravado no botão WaComercial"></button>
+            <button type="button" id="design-reset" title="Gravar o estado atual do dashboard como novo padrão">WaComercial</button>
         </div>
         <style>
-            #design-reset{font-size:11px;line-height:1.3;padding:2px 9px;border-radius:6px;border:1px solid #3b82f6;color:#2563eb;background:transparent;cursor:pointer;opacity:.75;transition:opacity .2s,background .2s}
-            #design-reset:hover{opacity:1;background:rgba(59,130,246,.12)}
-            .dark #design-reset{border-color:#1a67d6;color:#4fc3ff}
-            .dark #design-reset:hover{background:rgba(79,195,255,.18)}
-            .theme-red #design-reset{border-color:#ff3b3b;color:#ff5a5a}
-            .theme-red #design-reset:hover{background:rgba(255,60,60,.18)}
+            #design-reset,#design-clock{font-size:11px;line-height:1.3;padding:2px 9px;border-radius:6px;border:1px solid #3b82f6;color:#2563eb;background:transparent;cursor:pointer;opacity:.75;transition:opacity .2s,background .2s;font-variant-numeric:tabular-nums}
+            #design-reset:hover,#design-clock:hover{opacity:1;background:rgba(59,130,246,.12)}
+            .dark #design-reset,.dark #design-clock{border-color:#1a67d6;color:#4fc3ff}
+            .dark #design-reset:hover,.dark #design-clock:hover{background:rgba(79,195,255,.18)}
+            .theme-red #design-reset,.theme-red #design-clock{border-color:#ff3b3b;color:#ff5a5a}
+            .theme-red #design-reset:hover,.theme-red #design-clock:hover{background:rgba(255,60,60,.18)}
         </style>
         <script>
             (function () {
-                var fr = document.querySelector('#design-dashboard iframe'), btn = document.getElementById('design-reset');
-                if (!fr || !btn) return;
+                var fr = document.querySelector('#design-dashboard iframe');
+                var saveBtn = document.getElementById('design-reset'), clockBtn = document.getElementById('design-clock');
+                if (!fr || !saveBtn || !clockBtn) return;
                 function hideInner() { try { var f = fr.contentDocument.querySelector('.foot'); if (f) f.style.display = 'none'; } catch (e) {} }
                 fr.addEventListener('load', hideInner); hideInner();
-                btn.addEventListener('click', function () {
-                    try { fr.contentDocument.getElementById('reset').click(); } catch (e) {}
+                function pad(n) { return (n < 10 ? '0' : '') + n; }
+                function tick() {
+                    var d = new Date();
+                    clockBtn.textContent = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                }
+                tick(); setInterval(tick, 1000);
+                var saveLabel = saveBtn.textContent;
+                saveBtn.addEventListener('click', async function () {
+                    if (!window.__dashSaveDefault) return;
+                    if (!confirm('Gravar o estado atual do dashboard como o novo padrão?')) return;
+                    try { await window.__dashSaveDefault(); saveBtn.textContent = 'Padrão gravado ✓'; }
+                    catch (e) { console.error(e); saveBtn.textContent = 'Erro ao gravar'; }
+                    setTimeout(function () { saveBtn.textContent = saveLabel; }, 1800);
+                });
+                clockBtn.addEventListener('click', function () {
+                    if (!window.__dashRestoreDefault) return;
+                    if (!confirm('Voltar o dashboard para o padrão gravado?')) return;
+                    window.__dashRestoreDefault();
                 });
             })();
         </script>
@@ -1082,7 +1100,9 @@ addEventListener('resize',fit);fit();
         // Guarda os dados editados do dashboard (antes só no localStorage). Não altera nenhuma coleção existente.
         const DASH_KEY = 'metatech.dash.v1';
         const dashRef = () => doc(db, 'settings', 'dashboardDesign');
-        let dashUnsub = null, dashTimer = null, dashLast = null;
+        const DASH_DEF_KEY = 'metatech.dash.default.v1';
+        let dashUnsub = null, dashTimer = null, dashLast = null, dashDefault = null;
+        try { dashDefault = localStorage.getItem(DASH_DEF_KEY); } catch (e) {}
         const dashLocal = () => { try { return localStorage.getItem(DASH_KEY); } catch (e) { return null; } };
         window.__dashSave = (json) => {
             if (!isAdminLoggedIn) return;
@@ -1090,7 +1110,7 @@ addEventListener('resize',fit);fit();
             dashTimer = setTimeout(async () => {
                 if (json === dashLast) return;
                 dashLast = json;
-                try { await setDoc(dashRef(), { data: json, updatedAt: serverTimestamp() }); }
+                try { await setDoc(dashRef(), { data: json, updatedAt: serverTimestamp() }, { merge: true }); }
                 catch (e) { console.error('Dashboard: erro ao salvar no Firebase (dados continuam no localStorage):', e); }
             }, 700);
         };
@@ -1103,11 +1123,28 @@ addEventListener('resize',fit);fit();
                 fr.contentWindow.location.reload();
             } catch (e) { fr.srcdoc = fr.srcdoc; }
         };
+        window.__dashSaveDefault = async () => {
+            const cur = dashLocal() || '{}';
+            dashDefault = cur;
+            try { localStorage.setItem(DASH_DEF_KEY, cur); } catch (e) {}
+            if (isAdminLoggedIn) await setDoc(dashRef(), { defaults: cur, updatedAt: serverTimestamp() }, { merge: true });
+        };
+        window.__dashRestoreDefault = () => {
+            const def = dashDefault || '{}';
+            try { if (def === '{}') localStorage.removeItem(DASH_KEY); else localStorage.setItem(DASH_KEY, def); } catch (e) {}
+            dashLast = null;
+            window.__dashSave(def);
+            dashReload();
+        };
         const startDashSync = () => {
             if (dashUnsub) return;
             dashUnsub = onSnapshot(dashRef(), (snap) => {
                 if (snap.metadata.hasPendingWrites) return;
                 const local = dashLocal();
+                if (snap.exists() && typeof snap.data().defaults === 'string') {
+                    dashDefault = snap.data().defaults;
+                    try { localStorage.setItem(DASH_DEF_KEY, dashDefault); } catch (e) {}
+                }
                 if (!snap.exists()) {
                     if (local && local !== '{}' && local !== 'null') window.__dashSave(local);
                     return;
