@@ -531,7 +531,7 @@ body.fit{overflow:hidden;padding:0;height:100vh}
 <script>
 const KEY='metatech.dash.v1';let S={};
 try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
-const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{if(parent!==window&amp;&amp;parent.__dashSave)parent.__dashSave(JSON.stringify(S))}catch(e){}};
 const $=s=>document.querySelector(s);
 const E=(k,d,c='')=>`<span class=&quot;e ${c}&quot; contenteditable=&quot;true&quot; spellcheck=&quot;false&quot; data-k=&quot;${k}&quot;>${S[k]??d}</span>`;
 const num=s=>parseFloat(String(s).replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3})/g,'').replace(',','.'))||0;
@@ -681,7 +681,7 @@ document.addEventListener('click',e=>{
  if(g){const i=g.dataset.g,r=prompt('Preenchimento do medidor (0 a 100):',S['g'+i]??GA[i][2]);
   if(r!==null&amp;&amp;!isNaN(parseFloat(r))){S['g'+i]=Math.max(0,Math.min(100,parseFloat(r)));sv();g.querySelector('.gf').style.strokeDasharray=`${94.2*S['g'+i]/100} 94.2`;const q=tip(S['g'+i]);g.querySelectorAll('.gtip,.gtiph').forEach(c=>{c.setAttribute('cx',q[0]);c.setAttribute('cy',q[1])})}}
 });
-$('#reset').onclick=()=>{if(confirm('Apagar todas as edições e voltar ao padrão?')){localStorage.removeItem(KEY);location.reload()}};
+$('#reset').onclick=()=>{if(confirm('Apagar todas as edições e voltar ao padrão?')){localStorage.removeItem(KEY);try{if(parent!==window&amp;&amp;parent.__dashSave)parent.__dashSave('{}')}catch(e){}location.reload()}};
 render();refresh();
 /* ---------- ajuste automático para TV / tela cheia ---------- */
 function fit(){
@@ -1078,6 +1078,49 @@ addEventListener('resize',fit);fit();
 
         const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
 
+        // ============ DASHBOARD DESIGN: sincronização em tempo real (Firestore: settings/dashboardDesign) ============
+        // Guarda os dados editados do dashboard (antes só no localStorage). Não altera nenhuma coleção existente.
+        const DASH_KEY = 'metatech.dash.v1';
+        const dashRef = () => doc(db, 'settings', 'dashboardDesign');
+        let dashUnsub = null, dashTimer = null, dashLast = null;
+        const dashLocal = () => { try { return localStorage.getItem(DASH_KEY); } catch (e) { return null; } };
+        window.__dashSave = (json) => {
+            if (!isAdminLoggedIn) return;
+            clearTimeout(dashTimer);
+            dashTimer = setTimeout(async () => {
+                if (json === dashLast) return;
+                dashLast = json;
+                try { await setDoc(dashRef(), { data: json, updatedAt: serverTimestamp() }); }
+                catch (e) { console.error('Dashboard: erro ao salvar no Firebase (dados continuam no localStorage):', e); }
+            }, 700);
+        };
+        const dashReload = (tries = 0) => {
+            const fr = document.querySelector('#design-dashboard iframe');
+            if (!fr) return;
+            try {
+                const a = fr.contentDocument.activeElement;
+                if (a && a.isContentEditable && tries < 10) { setTimeout(() => dashReload(tries + 1), 2000); return; }
+                fr.contentWindow.location.reload();
+            } catch (e) { fr.srcdoc = fr.srcdoc; }
+        };
+        const startDashSync = () => {
+            if (dashUnsub) return;
+            dashUnsub = onSnapshot(dashRef(), (snap) => {
+                if (snap.metadata.hasPendingWrites) return;
+                const local = dashLocal();
+                if (!snap.exists()) {
+                    if (local && local !== '{}' && local !== 'null') window.__dashSave(local);
+                    return;
+                }
+                const remote = snap.data().data;
+                if (typeof remote !== 'string') return;
+                if (remote === local || remote === dashLast) { dashLast = remote; return; }
+                dashLast = remote;
+                try { if (remote === '{}') localStorage.removeItem(DASH_KEY); else localStorage.setItem(DASH_KEY, remote); } catch (e) {}
+                dashReload();
+            }, (err) => console.error('Dashboard: erro ao sincronizar com o Firebase:', err));
+        };
+        const stopDashSync = () => { if (dashUnsub) { dashUnsub(); dashUnsub = null; } clearTimeout(dashTimer); };
         setPersistence(auth, browserLocalPersistence).then(() => {
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -1089,8 +1132,10 @@ addEventListener('resize',fit);fit();
                         document.getElementById('admin-view').classList.remove('hidden');
                         document.getElementById('admin-email-display').textContent = user.email || 'Administrador';
                         loadAdminData();
+                        startDashSync();
                     } else {
                         document.getElementById('client-view').classList.remove('hidden');
+                        stopDashSync();
                         document.getElementById('admin-view').classList.add('hidden');
                     }
                 } else {
