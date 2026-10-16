@@ -490,7 +490,7 @@ h2 .ic svg{width:1.45em;height:1.45em}.r1>.c>h2 .ic svg{width:1.6em;height:1.6em
 .gc{position:relative;padding:4px 6px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;min-height:0}.gc small{align-self:stretch;text-align:left;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gc b{position:absolute;left:0;right:0;bottom:5px;font-size:15.5px;font-weight:700}
 .gz{flex:1;min-height:0;width:100%;cursor:pointer}.gt,.gf{fill:none;stroke-width:8;stroke-linecap:round}.gt{stroke:rgba(30,144,255,.2)}
-.gf{stroke:url(#gg2);filter:drop-shadow(0 0 4px var(--b))}
+.gf{stroke:url(#gg2);filter:drop-shadow(0 0 4px var(--b))}.gtiph{fill:#69F5F9;opacity:.45;filter:blur(1.6px)}.gtip{fill:#fff;filter:drop-shadow(0 0 2px #69F5F9) drop-shadow(0 0 5px #057BF9)}
 .gh{display:flex;flex-direction:column}.geo{flex:1;display:flex;gap:4px;align-items:stretch;min-height:0}.geo .li{flex:0 0 36%;display:flex;flex-direction:column;justify-content:space-between;font-size:12.5px}
 .geo .li div{display:flex;justify-content:space-between;margin:2px 0}.geo .mp{flex:1;min-width:0;position:relative;margin-top:-58px}.geo .mp svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .st path{fill:#0a2c6e;stroke:#5ab8ff;stroke-width:.55;filter:drop-shadow(0 0 1.5px #1e90ff);stroke-linejoin:round;transition:fill .4s}
@@ -521,7 +521,7 @@ body.fit{overflow:hidden;padding:0;height:100vh}
 <linearGradient id=&quot;gb&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#6fd0ff&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#0b4fd0&quot;/></linearGradient>
 <linearGradient id=&quot;gd&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#2a7bff&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#0a2e86&quot;/></linearGradient>
 <linearGradient id=&quot;ig&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#9be3ff&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#1e8bff&quot;/></linearGradient>
-<linearGradient id=&quot;gg2&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;0&quot;><stop offset=&quot;0&quot; stop-color=&quot;#1565d8&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#7fe0ff&quot;/></linearGradient>
+<linearGradient id=&quot;gg2&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;0&quot;><stop offset=&quot;0&quot; stop-color=&quot;#69F5F9&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#057BF9&quot;/></linearGradient>
 <radialGradient id=&quot;mg&quot; cx=&quot;.5&quot; cy=&quot;.5&quot; r=&quot;.6&quot;><stop offset=&quot;0&quot; stop-color=&quot;#2a8bff&quot; stop-opacity=&quot;.35&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#2a8bff&quot; stop-opacity=&quot;0&quot;/></radialGradient>
 <filter id=&quot;glow&quot; x=&quot;-50%&quot; y=&quot;-50%&quot; width=&quot;200%&quot; height=&quot;200%&quot;><feGaussianBlur stdDeviation=&quot;1.6&quot; result=&quot;b&quot;/><feMerge><feMergeNode in=&quot;b&quot;/><feMergeNode in=&quot;b&quot;/><feMergeNode in=&quot;SourceGraphic&quot;/></feMerge></filter>
 <linearGradient id=&quot;ga&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;><stop offset=&quot;0&quot; stop-color=&quot;#1e90ff&quot; stop-opacity=&quot;.5&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#1e90ff&quot; stop-opacity=&quot;0&quot;/></linearGradient>
@@ -608,7 +608,8 @@ const BL=(p,items,pr)=>`<div class=&quot;bl${pr?' pr':''}&quot;>${items.map((x,i
 const KP=[['Vendas','958','↑ 12%','🛒'],['Receita','R$ 118.705,68','↑ 18%','$'],['Investido','R$ 41.761,30','↑ 7%','≋'],['Lucro Líquido','R$ 30.412,40','↑ 24%','▥'],['Ticket Médio','R$ 123,85','↑ 11%','bag'],['CAC Médio','R$ 43,60','↑ 18%','$'],['ROI','2,84x','↑ 22%','◭'],['Conversão','3,6%','↑ 0,8%','◪']];
 const kp=i=>{const p=KP[i];return `<div class=&quot;box k&quot;><small>${I(p[3])}${E('kl'+i,p[0])}</small><b>${E('kv'+i,p[1])}</b><span class=&quot;dl&quot;>${E('kd'+i,p[2])}</span></div>`};
 const GA=[['CTR','4,8%',60],['CPC Médio','R$ 0,62',45],['CPM Médio','R$ 18,90',55],['Conversão','3,6%',40],['Custo por Venda','R$ 43,60',50],['LTV','R$ 284,20',70]];
-const gauge=i=>{const g=GA[i],p=S['g'+i]??g[2];return `<div class=&quot;box gc&quot;><small>${E('gl'+i,g[0])}</small><svg class=&quot;gz&quot; data-g=&quot;${i}&quot; viewBox=&quot;2 2 76 50&quot;><path class=&quot;gt&quot; d=&quot;M10 40A30 30 0 0 1 70 40&quot;/><path class=&quot;gf&quot; d=&quot;M10 40A30 30 0 0 1 70 40&quot; style=&quot;stroke-dasharray:${94.2*p/100} 94.2&quot;/></svg><b>${E('gv'+i,g[1])}</b></div>`};
+const tip=p=>{const a=Math.PI*Math.max(0,Math.min(100,p))/100;return [(40-30*Math.cos(a)).toFixed(2),(40-30*Math.sin(a)).toFixed(2)]};
+const gauge=i=>{const g=GA[i],p=S['g'+i]??g[2];return `<div class=&quot;box gc&quot;><small>${E('gl'+i,g[0])}</small><svg class=&quot;gz&quot; data-g=&quot;${i}&quot; viewBox=&quot;2 2 76 50&quot;><path class=&quot;gt&quot; d=&quot;M10 40A30 30 0 0 1 70 40&quot;/><path class=&quot;gf&quot; d=&quot;M10 40A30 30 0 0 1 70 40&quot; style=&quot;stroke-dasharray:${94.2*p/100} 94.2&quot;/><circle class=&quot;gtiph&quot; r=&quot;5.5&quot; cx=&quot;${tip(p)[0]}&quot; cy=&quot;${tip(p)[1]}&quot;/><circle class=&quot;gtip&quot; r=&quot;2.6&quot; cx=&quot;${tip(p)[0]}&quot; cy=&quot;${tip(p)[1]}&quot;/></svg><b>${E('gv'+i,g[1])}</b></div>`};
 const OR=[['Instagram','42%','#1e90ff'],['Google','28%','#2aa5ff'],['Indicação','15%','#4fc3ff'],['Orgânico','10%','#cfeaff'],['Outros','5%','#fff']];
 const UF=[['SP',189],['RJ',102],['MG',87],['BA',52],['PR',41],['RS',28],['SC',26],['Outros',129]];
 const LA=[['México',48],['Colômbia',38],['Argentina',32],['Chile',28],['Peru',22],['Equador',18],['Uruguai',12],['Outros',20]];
@@ -677,7 +678,7 @@ document.addEventListener('click',e=>{
   S['d:'+k]=out;sv();render();return}
  const g=e.target.closest('.gz');
  if(g){const i=g.dataset.g,r=prompt('Preenchimento do medidor (0 a 100):',S['g'+i]??GA[i][2]);
-  if(r!==null&amp;&amp;!isNaN(parseFloat(r))){S['g'+i]=Math.max(0,Math.min(100,parseFloat(r)));sv();g.querySelector('.gf').style.strokeDasharray=`${94.2*S['g'+i]/100} 94.2`}}
+  if(r!==null&amp;&amp;!isNaN(parseFloat(r))){S['g'+i]=Math.max(0,Math.min(100,parseFloat(r)));sv();g.querySelector('.gf').style.strokeDasharray=`${94.2*S['g'+i]/100} 94.2`;const q=tip(S['g'+i]);g.querySelectorAll('.gtip,.gtiph').forEach(c=>{c.setAttribute('cx',q[0]);c.setAttribute('cy',q[1])})}}
 });
 $('#reset').onclick=()=>{if(confirm('Apagar todas as edições e voltar ao padrão?')){localStorage.removeItem(KEY);location.reload()}};
 render();refresh();
