@@ -1683,6 +1683,79 @@ SOFTWARE. */
             return { count, valor };
         }
 
+        // Métricas por Período da tela inicial (iframe do dashboard): usa exatamente os mesmos cálculos do modal Visão Geral
+        function getDashboardPeriods() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+            const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+            const dby = new Date(yesterday); dby.setDate(dby.getDate() - 1);
+            const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - today.getDay());
+            const startOfLastWeek = new Date(startOfWeek); startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+            const startOfWeekBeforeLast = new Date(startOfLastWeek); startOfWeekBeforeLast.setDate(startOfWeekBeforeLast.getDate() - 7);
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const startOfMBL = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const startOfNextYear = new Date(now.getFullYear() + 1, 0, 1);
+            const startOfLastYear = new Date(now.getFullYear() - 1, 0, 1);
+            const startOfYearBeforeLast = new Date(now.getFullYear() - 2, 0, 1);
+            return [
+                getPeriodData(today, tomorrow),
+                getPeriodData(yesterday, today),
+                getPeriodData(dby, yesterday),
+                getPeriodData(startOfWeek, tomorrow),
+                getPeriodData(startOfLastWeek, startOfWeek),
+                getPeriodData(startOfWeekBeforeLast, startOfLastWeek),
+                getPeriodData(startOfMonth, startOfNextMonth),
+                getPeriodData(startOfLastMonth, startOfMonth),
+                getPeriodData(startOfMBL, startOfLastMonth),
+                getPeriodData(startOfYear, startOfNextYear),
+                getPeriodData(startOfLastYear, startOfYear),
+                getPeriodData(startOfYearBeforeLast, startOfLastYear)
+            ];
+        }
+
+        let dashPeriodsReady = false;
+        function syncDashboardPeriods() {
+            if (!isAdminLoggedIn) return;
+            const fr = document.querySelector('#design-dashboard iframe');
+            if (!fr) return;
+            if (!fr.__periodsHooked) { fr.__periodsHooked = true; fr.addEventListener('load', () => syncDashboardPeriods()); }
+            if (!dashPeriodsReady) return;
+            let d;
+            try { d = fr.contentDocument; } catch (e) { return; }
+            if (!d) return;
+            getDashboardPeriods().forEach((p, i) => {
+                const n = d.querySelector(`[data-k="pn${i}"]`), v = d.querySelector(`[data-k="pv${i}"]`);
+                if (n) { n.textContent = String(p.count); n.contentEditable = 'false'; }
+                if (v) { v.textContent = formatMoney(p.valor); v.contentEditable = 'false'; }
+            });
+            // Vendas totalizadas: mesmas quantidades por dia do card "Melhor dia da semana" do modal
+            const vendasPorDia = Array.from({ length: 7 }, () => ({ valor: 0, quantidade: 0 }));
+            allResponses.forEach(r => {
+                const dataVenda = r.createdAt?.seconds
+                    ? new Date(r.createdAt.seconds * 1000)
+                    : (r.data ? new Date(r.data + 'T12:00:00') : null);
+                const valor = parseFloat(r.valor) || 0;
+                if (dataVenda && !isNaN(dataVenda) && valor > 0) {
+                    const dia = vendasPorDia[dataVenda.getDay()];
+                    dia.valor += valor;
+                    dia.quantidade++;
+                }
+            });
+            const nomesDash = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            [1, 2, 3, 4, 5, 6, 0].forEach((dia, i) => {
+                const n = d.querySelector(`[data-k="dn${i}"]`), v = d.querySelector(`[data-k="dv${i}"]`);
+                if (n) { n.textContent = nomesDash[dia]; n.contentEditable = 'false'; }
+                if (v) { v.textContent = String(vendasPorDia[dia].quantidade); v.contentEditable = 'false'; }
+            });
+            try { if (fr.contentWindow && typeof fr.contentWindow.refresh === 'function') fr.contentWindow.refresh(); } catch (e) {}
+        }
+        // Atualiza também na virada do dia (Hoje/Ontem/etc. mudam sem nova venda)
+        setInterval(syncDashboardPeriods, 60000);
+
         async function renderOverviewCharts(expenses) {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -2040,6 +2113,8 @@ SOFTWARE. */
             if (unsubscribeAdmin) unsubscribeAdmin();
             unsubscribeAdmin = onSnapshot(query(collection(db, 'respostas')), (snapshot) => {
                 allResponses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                dashPeriodsReady = true;
+                syncDashboardPeriods();
                 
                 allResponses.forEach(r => {
                     if(r.sortOrder === undefined) {
