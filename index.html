@@ -2010,11 +2010,8 @@ SOFTWARE. */
                             <h4 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mt-1">Entrou mais ou menos dinheiro?</h4>
                             <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Compare o mesmo mês em ${anoAnterior} e ${anoAtual}.</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span class="text-emerald-600 dark:text-emerald-400 font-semibold">VERDE</span> = entrou mais &nbsp;|&nbsp; <span class="text-red-600 dark:text-red-400 font-semibold">VERMELHO</span> = entrou menos</p>
-                            <div class="hidden sm:grid grid-cols-[1fr_1fr_1fr_1.4fr] gap-3 px-4 mt-5 mb-2 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
-                                <span>Mês</span><span>${anoAnterior}</span><span>${anoAtual}</span><span>Resultado em ${anoAtual}</span>
-                            </div>
-                            <div class="sm:hidden grid grid-cols-3 gap-3 px-4 mt-5 mb-2 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
-                                <span>Mês</span><span>${anoAnterior}</span><span>${anoAtual}</span>
+                            <div class="gap-x-3 px-4 mt-5 mb-2 text-xs font-bold uppercase tracking-wide text-gray-800 dark:text-gray-200" style="display:grid !important;visibility:visible !important;grid-template-columns:${window.innerWidth >= 640 ? '1fr 1fr 1fr 1.4fr' : '1fr 1fr 1fr'};">
+                                <span>Mês</span><span>${anoAnterior}</span><span>${anoAtual}</span>${window.innerWidth >= 640 ? `<span>Resultado em ${anoAtual}</span>` : ''}
                             </div>
                             <div class="space-y-2">${linhas}</div>
                             ${resumo}
