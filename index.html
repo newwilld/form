@@ -844,7 +844,7 @@ addEventListener('resize',fit);fit();
                         </div>
                         
                         <!-- Legenda interativa -->
-                        <div class="mt-4 flex flex-wrap gap-3 justify-center" id="monthly-legend">
+                        <div class="mt-6" id="monthly-legend">
                             <!-- Será preenchido dinamicamente -->
                         </div>
                         <!-- Início do bloco do mapa de vendas -->
@@ -1937,21 +1937,92 @@ SOFTWARE. */
                 }).join('');
             }
 
-            // Legenda interativa
+            // Legenda interativa — comparação do mesmo mês entre anos
             const legendDiv = document.getElementById('monthly-legend');
             if(legendDiv) {
-                legendDiv.innerHTML = sortedMonths.map(m => {
-                    const count = monthlySales[m].count;
-                    const valor = monthlySales[m].valor;
-                    return `
-                        <div class="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-zinc-700/50 px-2 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-600/50 transition-colors cursor-default">
-                            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                            <span class="font-bold">${m}:</span>
-                            <span>${count} vendas</span>
-                            <span class="text-purple-600 dark:text-purple-400 font-bold">${formatMoney(valor)}</span>
-                        </div>
-                    `;
-                }).join('');
+                const nomesMesCompletos = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                const porAno = {};
+                sortedMonths.forEach(m => {
+                    const dObj = monthlySales[m].dateObj;
+                    const ano = dObj.getFullYear();
+                    if(!porAno[ano]) porAno[ano] = {};
+                    porAno[ano][dObj.getMonth()] = { count: monthlySales[m].count, valor: monthlySales[m].valor };
+                });
+                const anos = Object.keys(porAno).map(Number).sort((a, b) => b - a);
+                const hoje = new Date();
+                const celulaAno = (info, destaque) => info
+                    ? `<p class="text-sm sm:text-base ${destaque ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'} whitespace-nowrap">${formatMoney(info.valor)}</p>
+                       <p class="text-[11px] text-gray-400 dark:text-gray-500">${info.count} vendas</p>`
+                    : `<p class="text-sm text-gray-400 dark:text-gray-500">—</p>`;
+
+                const blocos = [];
+                for(let i = 0; i < anos.length; i++) {
+                    const anoAtual = anos[i];
+                    const anoAnterior = anoAtual - 1;
+                    const dadosAtual = porAno[anoAtual] || {};
+                    const dadosAnterior = porAno[anoAnterior];
+                    // Ano mais antigo já exibido como "ano anterior" no bloco de cima
+                    if(!dadosAnterior && i > 0 && anos[i - 1] === anoAtual + 1) continue;
+                    const anterior = dadosAnterior || {};
+                    const mesesIdx = [...new Set([...Object.keys(dadosAtual), ...Object.keys(anterior)].map(Number))].sort((a, b) => a - b);
+                    let melhores = 0, piores = 0, totalAnt = 0, totalAtu = 0, comparados = 0;
+
+                    const linhas = mesesIdx.map(idx => {
+                        const a = anterior[idx];
+                        const b = dadosAtual[idx];
+                        const parcial = anoAtual === hoje.getFullYear() && idx === hoje.getMonth();
+                        let badge;
+                        if(a && b) {
+                            comparados++;
+                            totalAnt += a.valor; totalAtu += b.valor;
+                            const dif = b.valor - a.valor;
+                            if(dif > 0) {
+                                melhores++;
+                                badge = `<div class="rounded-lg px-3 py-2 bg-emerald-50 dark:bg-emerald-900/30"><p class="text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">Mais dinheiro</p><p class="text-xs text-emerald-700 dark:text-emerald-400">${formatMoney(dif)} a mais</p></div>`;
+                            } else if(dif < 0) {
+                                piores++;
+                                badge = `<div class="rounded-lg px-3 py-2 bg-red-50 dark:bg-red-900/30"><p class="text-xs font-bold uppercase tracking-wide text-red-600 dark:text-red-400">Menos dinheiro</p><p class="text-xs text-red-600 dark:text-red-400">${formatMoney(Math.abs(dif))} a menos</p></div>`;
+                            } else {
+                                badge = `<div class="rounded-lg px-3 py-2 bg-gray-100 dark:bg-zinc-700/50"><p class="text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">Igual</p><p class="text-xs text-gray-500 dark:text-gray-400">Mesmo valor</p></div>`;
+                            }
+                        } else {
+                            badge = `<div class="rounded-lg px-3 py-2 bg-gray-100 dark:bg-zinc-700/50"><p class="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">Sem comparação</p><p class="text-xs text-gray-400 dark:text-gray-500">Só há dados de ${a ? anoAnterior : anoAtual}</p></div>`;
+                        }
+                        return `
+                            <div class="grid grid-cols-[1fr_1fr_1fr] sm:grid-cols-[1fr_1fr_1fr_1.4fr] gap-x-3 gap-y-2 items-center bg-white dark:bg-zinc-800 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow cursor-default">
+                                <p class="font-bold text-gray-900 dark:text-white">${nomesMesCompletos[idx]}${parcial ? '*' : ''}</p>
+                                <div>${celulaAno(a, false)}</div>
+                                <div>${celulaAno(b, true)}</div>
+                                <div class="col-span-3 sm:col-span-1">${badge}</div>
+                            </div>`;
+                    }).join('');
+
+                    const resumo = comparados > 0 ? `
+                        <div class="mt-4 rounded-xl bg-slate-900 dark:bg-zinc-950 text-white px-5 py-4">
+                            <p class="text-lg font-bold">${anoAtual} foi melhor em ${melhores} ${melhores === 1 ? 'mês' : 'meses'} e pior em ${piores}.</p>
+                            <p class="text-sm text-slate-300 mt-2">Total dos meses comparados:</p>
+                            <p class="text-base sm:text-lg font-bold">${anoAnterior}: ${formatMoney(totalAnt)} &nbsp;→&nbsp; ${anoAtual}: ${formatMoney(totalAtu)}</p>
+                        </div>` : '';
+
+                    blocos.push(`
+                        <div class="rounded-2xl bg-slate-50 dark:bg-zinc-900/60 p-4 sm:p-6 text-left">
+                            <p class="text-xs font-bold uppercase tracking-wide text-purple-600 dark:text-purple-400">${dadosAnterior ? `${anoAnterior} x ${anoAtual}` : anoAtual}</p>
+                            <h4 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mt-1">Entrou mais ou menos dinheiro?</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Compare o mesmo mês em ${anoAnterior} e ${anoAtual}.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span class="text-emerald-600 dark:text-emerald-400 font-semibold">VERDE</span> = entrou mais &nbsp;|&nbsp; <span class="text-red-600 dark:text-red-400 font-semibold">VERMELHO</span> = entrou menos</p>
+                            <div class="hidden sm:grid grid-cols-[1fr_1fr_1fr_1.4fr] gap-3 px-4 mt-5 mb-2 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
+                                <span>Mês</span><span>${anoAnterior}</span><span>${anoAtual}</span><span>Resultado em ${anoAtual}</span>
+                            </div>
+                            <div class="sm:hidden grid grid-cols-3 gap-3 px-4 mt-5 mb-2 text-xs font-bold uppercase text-gray-700 dark:text-gray-300">
+                                <span>Mês</span><span>${anoAnterior}</span><span>${anoAtual}</span>
+                            </div>
+                            <div class="space-y-2">${linhas}</div>
+                            ${resumo}
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Comparação de faturamento (dinheiro das vendas), não de lucro.</p>
+                            ${anoAtual === hoje.getFullYear() ? '<p class="text-xs text-gray-500 dark:text-gray-400">*Mês atual pode estar parcial. O total soma só os meses informados nos dois anos.</p>' : ''}
+                        </div>`);
+                }
+                legendDiv.innerHTML = blocos.join('<div class="h-4"></div>');
             }
 
             const serviceCounts = {};
